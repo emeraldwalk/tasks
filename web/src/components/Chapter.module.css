@@ -3,10 +3,15 @@
   align-items: center;
   grid-template-columns: 1fr var(--button-height);
   row-gap: 0.5rem;
+  column-gap: 0.5rem;
 
   .label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     font-size: 1.2rem;
     text-decoration: underline;
+    height: var(--item-height);
   }
 
   button {
@@ -15,7 +20,7 @@
   }
 
   .dateList {
-    display: grid;
+    display: none;
     grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
     gap: 8px;
     grid-column: span 2;
@@ -34,6 +39,12 @@
     &:after {
       content: 'X';
       display: block;
+    }
+  }
+
+  &.isExpanded {
+    .dateList {
+      display: grid;
     }
   }
 }

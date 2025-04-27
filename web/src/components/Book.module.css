@@ -10,13 +10,18 @@
     height: 36px;
   }
   .chapterList {
+    display: none;
     flex-direction: column;
     gap: 0.5rem;
     overflow: hidden;
   }
   &.isExpanded {
+    display: flex;
     .label {
       font-weight: bold;
+    }
+    .chapterList {
+      display: flex;
     }
   }
 }
