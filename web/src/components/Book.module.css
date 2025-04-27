@@ -1,0 +1,36 @@
+.Book {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  .label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.4rem;
+    height: 36px;
+  }
+  ion-icon {
+    transition: transform 0.2s ease;
+  }
+  .chapterList {
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    transform: translateY(-100%);
+    transition: 0.2s ease-in-out;
+    overflow: hidden;
+  }
+  &.isExpanded {
+    .label {
+      font-weight: bold;
+    }
+    ion-icon {
+      transform: rotate(-180deg);
+    }
+    .chapterList {
+      display: flex;
+      /* max-height: 10000px; */
+      transform: translateY(0);
+    }
+  }
+}

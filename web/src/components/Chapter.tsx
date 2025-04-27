@@ -16,20 +16,20 @@ export function Chapter(props: ChapterProps) {
       </span>
       <button>+</button>
       <div class={styles.dateList}>
-        <span class={styles.date}>04/26</span>
-        <span class={styles.date}>04/24</span>
-        <span class={styles.date}>04/26</span>
-        <span class={styles.date}>04/24</span>
-        <span class={styles.date}>04/26</span>
-        <span class={styles.date}>04/24</span>
-        <span class={styles.date}>04/26</span>
-        <span class={styles.date}>04/24</span>
-        <span class={styles.date}>04/26</span>
-        <span class={styles.date}>04/24</span>
-        <span class={styles.date}>04/26</span>
-        <span class={styles.date}>04/24</span>
-        <span class={styles.date}>04/26</span>
-        <span class={styles.date}>04/24</span>
+        <button class={styles.date}>04/26</button>
+        <button class={styles.date}>04/24</button>
+        <button class={styles.date}>04/26</button>
+        <button class={styles.date}>04/24</button>
+        <button class={styles.date}>04/26</button>
+        <button class={styles.date}>04/24</button>
+        <button class={styles.date}>04/26</button>
+        <button class={styles.date}>04/24</button>
+        <button class={styles.date}>04/26</button>
+        <button class={styles.date}>04/24</button>
+        <button class={styles.date}>04/26</button>
+        <button class={styles.date}>04/24</button>
+        <button class={styles.date}>04/26</button>
+        <button class={styles.date}>04/24</button>
       </div>
     </div>
   )

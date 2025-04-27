@@ -1,7 +1,7 @@
 .Chapter {
   display: grid;
   align-items: center;
-  grid-template-columns: 1fr 40px;
+  grid-template-columns: 1fr var(--button-height);
   row-gap: 0.5rem;
 
   .label {
@@ -10,12 +10,13 @@
   }
 
   button {
-    height: 40px;
+    font-size: 1.6rem;
+    height: var(--button-height);
   }
 
   .dateList {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
     gap: 8px;
     grid-column: span 2;
   }
@@ -23,15 +24,16 @@
   .date {
     display: flex;
     gap: 4px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     padding: 4px 8px;
+    height: var(--button-height);
     font-size: 0.8rem;
+    align-items: center;
     justify-content: space-between;
     &:after {
       content: 'X';
       display: block;
-      border: 1px solid #ccc;
     }
   }
 }

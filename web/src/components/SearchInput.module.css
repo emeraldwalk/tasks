@@ -1,5 +1,7 @@
 .SearchInput {
-  height: 40px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  height: 36px;
   flex-shrink: 0;
   padding: 0 1rem;
 }

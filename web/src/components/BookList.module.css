@@ -7,18 +7,13 @@
   }
   .scroll {
     overflow-y: auto;
+    border-top: 1px solid #ccc;
+    padding-top: 1rem;
   }
   ul {
     padding: 0 1rem;
-  }
-  .label {
-    font-size: 1.4rem;
-    font-weight: bold;
-  }
-  ol {
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
-    gap: 0.5rem;
+    > li {
+      min-height: 36px;
+    }
   }
 }

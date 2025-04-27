@@ -19,3 +19,9 @@ ol {
   margin: 0;
   padding: 0;
 }
+
+:root {
+  --border-color: #ccc;
+  --button-height: 36px;
+  --item-height: 36px;
+}

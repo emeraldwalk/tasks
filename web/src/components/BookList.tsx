@@ -1,9 +1,8 @@
 import { createSignal, For } from 'solid-js'
 import { getBibleBookMeta } from '../data/api'
-import { range } from '../utils/rangeUtils'
-import { Chapter } from './Chapter'
 import styles from './BookList.module.css'
 import { SearchInput } from './SearchInput'
+import { Book } from './Book'
 
 export function BookList() {
   const [searchText, setSearchText] = createSignal('')
@@ -30,21 +29,11 @@ export function BookList() {
           <For each={filteredBookList()}>
             {(book) => (
               <li>
-                <span class={styles.label}>{book.name}</span>
-                <ol>
-                  <For each={[...range(1, book.chapterCount)]}>
-                    {(i) => (
-                      <li>
-                        <Chapter
-                          bookName={book.name}
-                          number={i}
-                          initialValue={0}
-                          onChange={onChange}
-                        />
-                      </li>
-                    )}
-                  </For>
-                </ol>
+                <Book
+                  name={book.name}
+                  chapterCount={book.chapterCount}
+                  onChange={onChange}
+                />
               </li>
             )}
           </For>
