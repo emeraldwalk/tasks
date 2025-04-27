@@ -1,0 +1,5 @@
+.SearchInput {
+  height: 40px;
+  flex-shrink: 0;
+  padding: 0 1rem;
+}
