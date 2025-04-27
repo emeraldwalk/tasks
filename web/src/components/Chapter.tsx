@@ -9,34 +9,28 @@ export interface ChapterProps {
 }
 
 export function Chapter(props: ChapterProps) {
-  const [value, setValue] = createSignal(props.initialValue)
-
-  let isInitial = true
-  createEffect(() => {
-    const v = value()
-    if (isInitial) {
-      isInitial = false
-      return
-    }
-    props.onChange(v)
-  })
-
-  function onIncrement() {
-    setValue((prev) => prev + 1)
-  }
-
-  function onDecrement() {
-    setValue((prev) => prev - 1)
-  }
-
   return (
     <div class={styles.Chapter}>
-      <span>
+      <span class={styles.label}>
         {props.bookName} {props.number}
       </span>
-      <button onClick={onDecrement}>-</button>
-      <input type="number" value={value()} />
-      <button onClick={onIncrement}>+</button>
+      <button>+</button>
+      <div class={styles.dateList}>
+        <span class={styles.date}>04/26</span>
+        <span class={styles.date}>04/24</span>
+        <span class={styles.date}>04/26</span>
+        <span class={styles.date}>04/24</span>
+        <span class={styles.date}>04/26</span>
+        <span class={styles.date}>04/24</span>
+        <span class={styles.date}>04/26</span>
+        <span class={styles.date}>04/24</span>
+        <span class={styles.date}>04/26</span>
+        <span class={styles.date}>04/24</span>
+        <span class={styles.date}>04/26</span>
+        <span class={styles.date}>04/24</span>
+        <span class={styles.date}>04/26</span>
+        <span class={styles.date}>04/24</span>
+      </div>
     </div>
   )
 }

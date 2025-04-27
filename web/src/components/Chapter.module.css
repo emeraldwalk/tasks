@@ -1,7 +1,37 @@
 .Chapter {
-  display: contents;
-  input {
-    text-align: right;
-    padding: 0 0.5rem;
+  display: grid;
+  align-items: center;
+  grid-template-columns: 1fr 40px;
+  row-gap: 0.5rem;
+
+  .label {
+    font-size: 1.2rem;
+    text-decoration: underline;
+  }
+
+  button {
+    height: 40px;
+  }
+
+  .dateList {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    grid-column: span 2;
+  }
+
+  .date {
+    display: flex;
+    gap: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    justify-content: space-between;
+    &:after {
+      content: 'X';
+      display: block;
+      border: 1px solid #ccc;
+    }
   }
 }

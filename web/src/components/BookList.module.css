@@ -11,19 +11,14 @@
   ul {
     padding: 0 1rem;
   }
+  .label {
+    font-size: 1.4rem;
+    font-weight: bold;
+  }
   ol {
-    display: grid;
-    align-items: center;
-    grid-template-columns: auto 40px 40px 40px;
-    row-gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
     padding: 1rem;
-
-    li {
-      display: contents;
-      button,
-      input {
-        height: 40px;
-      }
-    }
+    gap: 0.5rem;
   }
 }

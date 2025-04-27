@@ -30,7 +30,7 @@ export function BookList() {
           <For each={filteredBookList()}>
             {(book) => (
               <li>
-                {book.name}
+                <span class={styles.label}>{book.name}</span>
                 <ol>
                   <For each={[...range(1, book.chapterCount)]}>
                     {(i) => (
