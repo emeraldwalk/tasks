@@ -1,0 +1,19 @@
+.icon {
+  transition: transform 0.2s ease;
+}
+.content {
+  display: none;
+  transform: translateY(-100%);
+  transition: 0.2s ease-in-out;
+}
+
+.isExpanded {
+  .icon {
+    transform: rotate(-180deg);
+  }
+  .content {
+    display: flex;
+    /* max-height: 10000px; */
+    transform: translateY(0);
+  }
+}

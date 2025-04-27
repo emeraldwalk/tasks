@@ -2,6 +2,8 @@ import { createSignal, For } from 'solid-js'
 import { range } from '../utils/rangeUtils'
 import { Chapter } from './Chapter'
 import styles from './Book.module.css'
+import accordionStyles from './Accordion.module.css'
+import { className } from '../utils/cssUtils'
 
 export interface BookProps {
   name: string
@@ -13,17 +15,24 @@ export function Book(props: BookProps) {
   const [isExpanded, setIsExpanded] = createSignal(false)
 
   return (
-    <div classList={{ [styles.Book]: true, [styles.isExpanded]: isExpanded() }}>
+    <div
+      classList={{
+        [styles.Book]: true,
+        [styles.isExpanded]: isExpanded(),
+        [accordionStyles.isExpanded]: isExpanded(),
+      }}>
       <span
         class={styles.label}
         onClick={() => {
           setIsExpanded((prev) => !prev)
         }}>
         {props.name}
-        <ion-icon name="chevron-down-sharp"></ion-icon>
+        <ion-icon
+          class={className(styles.chevron, accordionStyles.icon)}
+          name="chevron-down-sharp"></ion-icon>
       </span>
 
-      <ol class={styles.chapterList}>
+      <ol class={className(styles.chapterList, accordionStyles.content)}>
         <For each={[...range(1, props.chapterCount)]}>
           {(i) => (
             <li>

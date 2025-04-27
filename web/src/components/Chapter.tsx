@@ -13,6 +13,7 @@ export function Chapter(props: ChapterProps) {
     <div class={styles.Chapter}>
       <span class={styles.label}>
         {props.bookName} {props.number}
+        <ion-icon name="chevron-down-sharp"></ion-icon>
       </span>
       <button>+</button>
       <div class={styles.dateList}>
