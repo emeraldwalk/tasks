@@ -1,4 +1,4 @@
-import { createSignal, For } from 'solid-js'
+import { createSignal, For, Show } from 'solid-js'
 import { range } from '../utils/rangeUtils'
 import { Chapter } from './Chapter'
 import styles from './Book.module.css'
@@ -6,9 +6,7 @@ import accordionStyles from './Accordion.module.css'
 import { className } from '../utils/cssUtils'
 import type { BibleBookMeta, ChapterID } from '../data/model'
 
-export interface BookProps extends BibleBookMeta {
-  onChange: (value: number) => void
-}
+export interface BookProps extends BibleBookMeta {}
 
 export function Book(props: BookProps) {
   const [isExpanded, setIsExpanded] = createSignal(false)
@@ -32,19 +30,20 @@ export function Book(props: BookProps) {
       </span>
 
       <ol class={className(styles.chapterList, accordionStyles.content)}>
-        <For each={[...range(1, props.chapterCount)]}>
-          {(i) => (
-            <li>
-              <Chapter
-                bookName={props.name}
-                abbrev={props.abbrev}
-                number={i as ChapterID}
-                initialValue={0}
-                onChange={props.onChange}
-              />
-            </li>
-          )}
-        </For>
+        <Show when={isExpanded()}>
+          <For each={[...range(1, props.chapterCount)]}>
+            {(i) => (
+              <li>
+                <Chapter
+                  bookName={props.name}
+                  abbrev={props.abbrev}
+                  number={i as ChapterID}
+                  initialValue={0}
+                />
+              </li>
+            )}
+          </For>
+        </Show>
       </ol>
     </div>
   )

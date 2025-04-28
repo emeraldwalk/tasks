@@ -6,6 +6,7 @@ export type Brand<TID, TBaseType = string> = TBaseType & {
 export type BookID = Brand<'BookID'>
 export type ChapterID = Brand<'ChapterID', number>
 export type ISODateTimeString = Brand<'ISODateTimeString'>
+export type MMDD = `${number}/${number}`
 
 export interface BibleBookMeta {
   name: string

@@ -4,6 +4,7 @@ declare module 'solid-js' {
       'ion-icon': {
         name: string
         class?: string
+        size?: 'small' | 'large'
       }
     }
   }

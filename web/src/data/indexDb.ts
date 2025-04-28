@@ -5,14 +5,22 @@ import type {
   TimeStampData,
 } from './model'
 
-type Key = `${BookID}_${ChapterID}_${ISODateTimeString}`
+type Key = `${ISODateTimeString}_${BookID}_${ChapterID}`
 
 interface TimestampRecord {
   id: Key
 }
 
-function parseKey(key: Key): [BookID, ChapterID, ISODateTimeString] {
-  return key.split('_') as [BookID, ChapterID, ISODateTimeString]
+function createKey(
+  date: ISODateTimeString,
+  book: BookID,
+  chapter: ChapterID,
+): Key {
+  return `${date}_${book}_${chapter}`
+}
+
+function parseKey(key: Key): [ISODateTimeString, BookID, ChapterID] {
+  return key.split('_') as [ISODateTimeString, BookID, ChapterID]
 }
 
 export async function initDb(): Promise<IDBDatabase> {
@@ -51,7 +59,7 @@ export async function addTimestamp(
   const store = transaction.objectStore('timestamps')
 
   const entry: TimestampRecord = {
-    id: `${book}_${chapter}_${date}`,
+    id: createKey(date, book, chapter),
   }
 
   const request = store.put(entry)
@@ -62,6 +70,32 @@ export async function addTimestamp(
   transaction.oncomplete = () => {
     // Transaction completed successfully
   }
+  transaction.onerror = () => reject(transaction.error)
+
+  return promise
+}
+
+export async function deleteTimeStamp(
+  db: IDBDatabase,
+  book: BookID,
+  chapter: ChapterID,
+  date: ISODateTimeString,
+): Promise<void> {
+  const { promise, resolve, reject } = Promise.withResolvers<void>()
+
+  const transaction = db.transaction(['timestamps'], 'readwrite')
+  const store = transaction.objectStore('timestamps')
+
+  // Generate the key for the entry to delete
+  const key = createKey(date, book, chapter)
+
+  // Delete the entry with the specified key
+  const request = store.delete(key)
+
+  request.onsuccess = () => resolve()
+  request.onerror = () => reject(request.error)
+
+  transaction.oncomplete = () => {}
   transaction.onerror = () => reject(transaction.error)
 
   return promise
@@ -82,7 +116,7 @@ export async function getTimeStampData(
   request.onsuccess = (event) => {
     const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result
     if (cursor) {
-      const [book, chapter, date] = parseKey(cursor.value.id)
+      const [date, book, chapter] = parseKey(cursor.value.id)
 
       result[book] = result[book] || {}
       result[book][chapter] = result[book][chapter] || {}

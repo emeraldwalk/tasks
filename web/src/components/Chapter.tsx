@@ -1,9 +1,8 @@
-import { createResource, createSignal, For } from 'solid-js'
+import { createSignal, For, Show } from 'solid-js'
 import styles from './Chapter.module.css'
 import { className } from '../utils/cssUtils'
 import accordionStyles from './Accordion.module.css'
-import { Api } from '../data/api'
-import { now } from '../utils/dateUtils'
+import { mmDD, now } from '../utils/dateUtils'
 import type { BookID, ChapterID } from '../data/model'
 import { useApi } from './ApiContext'
 
@@ -12,21 +11,20 @@ export interface ChapterProps {
   abbrev: BookID
   number: ChapterID
   initialValue: number
-  onChange: (value: number) => void
 }
 
 export function Chapter(props: ChapterProps) {
   const api = useApi()
   const [isExpanded, setIsExpanded] = createSignal(false)
 
-  const dates = () => {
-    return Object.keys(api.getData()[props.abbrev]?.[props.number] ?? {}).map(
-      (date) => date.substring(5, 10),
-    )
-  }
+  const [dates, setDates] = createSignal(
+    api.getChapterDates(props.abbrev, props.number),
+  )
 
   async function onAdd() {
-    await api.markChapterAsRead(props.abbrev, props.number, now())
+    const date = now()
+    setDates((prev) => [...prev, date])
+    await api.markAsRead(props.abbrev, props.number, date)
   }
 
   return (
@@ -35,36 +33,36 @@ export function Chapter(props: ChapterProps) {
         styles.Chapter,
         isExpanded() && styles.isExpanded,
         isExpanded() && accordionStyles.isExpanded,
+        dates().length > 0 && styles.hasDates,
       )}>
-      <span class={styles.label} onClick={() => setIsExpanded((prev) => !prev)}>
-        {props.bookName} {props.number}
-        <ion-icon
-          class={accordionStyles.icon}
-          name="chevron-down-sharp"></ion-icon>
+      <ion-icon
+        name={dates().length ? 'checkmark-circle' : 'ellipse-outline'}
+        size="large"></ion-icon>
+      <span
+        class={styles.header}
+        onClick={() => setIsExpanded((prev) => !prev)}>
+        <span class={styles.label}>
+          {props.bookName} {props.number}
+        </span>
+        <span class={styles.count}>({dates().length})</span>
+        <ion-icon name="chevron-down-sharp"></ion-icon>
       </span>
       <button onClick={onAdd}>+</button>
       <div class={className(styles.dateList, accordionStyles.content)}>
-        <For each={dates()}>
-          {(date) => (
-            <button class={styles.date} onClick={() => props.onChange(0)}>
-              {date}
-            </button>
-          )}
-        </For>
-        {/* <button class={styles.date}>04/26</button>
-            <button class={styles.date}>04/24</button>
-            <button class={styles.date}>04/26</button>
-            <button class={styles.date}>04/24</button>
-            <button class={styles.date}>04/26</button>
-            <button class={styles.date}>04/24</button>
-            <button class={styles.date}>04/26</button>
-            <button class={styles.date}>04/24</button>
-            <button class={styles.date}>04/26</button>
-            <button class={styles.date}>04/24</button>
-            <button class={styles.date}>04/26</button>
-            <button class={styles.date}>04/24</button>
-            <button class={styles.date}>04/26</button>
-            <button class={styles.date}>04/24</button> */}
+        <Show when={isExpanded()}>
+          <For each={dates()}>
+            {(date) => (
+              <button
+                class={styles.date}
+                onClick={() => {
+                  setDates((prev) => prev.filter((d) => d !== date))
+                  api.markAsUnread(props.abbrev, props.number, date)
+                }}>
+                {mmDD(date)}
+              </button>
+            )}
+          </For>
+        </Show>
       </div>
     </div>
   )

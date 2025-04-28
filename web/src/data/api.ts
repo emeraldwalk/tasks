@@ -3,10 +3,17 @@ import type {
   BookID,
   ChapterID,
   ISODateTimeString,
+  MMDD,
   TimeStampData,
 } from './model'
 import rawBibleBookMeta from './chapters.txt?raw'
-import { addTimestamp, getTimeStampData, initDb } from './indexDb'
+import {
+  addTimestamp,
+  deleteTimeStamp,
+  getTimeStampData,
+  initDb,
+} from './indexDb'
+import { mmDD } from '../utils/dateUtils'
 
 export class Api {
   static create = async (): Promise<Api> => {
@@ -23,22 +30,37 @@ export class Api {
   private readonly _db: IDBDatabase
   private readonly _data: TimeStampData
 
+  getChapterDates = (
+    bookId: BookID,
+    chapterId: ChapterID,
+  ): ISODateTimeString[] => {
+    return Object.keys(
+      this.getData()[bookId]?.[chapterId] ?? {},
+    ) as ISODateTimeString[]
+  }
+
   getData = (): TimeStampData => {
     return this._data
   }
 
-  markChapterAsRead = async (
+  markAsRead = async (
     book: BookID,
     chapter: ChapterID,
     date: ISODateTimeString,
   ) => {
-    const data = await this._data
-
-    data[book] = data[book] || {}
-    data[book][chapter] = data[book][chapter] || {}
-    data[book][chapter][date] = true
+    this._data[book] = this._data[book] || {}
+    this._data[book][chapter] = this._data[book][chapter] || {}
+    this._data[book][chapter][date] = true
 
     await addTimestamp(await this._db, book, chapter, date)
+  }
+
+  markAsUnread = async (
+    book: BookID,
+    chapter: ChapterID,
+    date: ISODateTimeString,
+  ) => {
+    deleteTimeStamp(this._db, book, chapter, date)
   }
 }
 

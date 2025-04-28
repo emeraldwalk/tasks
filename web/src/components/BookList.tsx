@@ -17,10 +17,6 @@ export function BookList() {
           book.name.toLowerCase().includes(searchTextLc()),
         )
 
-  function onChange(value: number) {
-    console.log(value)
-  }
-
   return (
     <div class={styles.BookList}>
       <SearchInput class={styles.search} onSearch={setSearchText} />
@@ -33,7 +29,6 @@ export function BookList() {
                   name={book.name}
                   abbrev={book.abbrev}
                   chapterCount={book.chapterCount}
-                  onChange={onChange}
                 />
               </li>
             )}

@@ -1,17 +1,34 @@
 .Chapter {
   display: grid;
   align-items: center;
-  grid-template-columns: 1fr var(--button-height);
+  grid-template-columns: auto 1fr var(--button-height);
   row-gap: 0.5rem;
   column-gap: 0.5rem;
 
-  .label {
+  .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     font-size: 1.2rem;
-    text-decoration: underline;
     height: var(--item-height);
+    gap: 0.5rem;
+  }
+
+  ion-icon[name='checkmark-circle'] {
+    color: green;
+  }
+
+  .label {
+    flex-grow: 1;
+    text-decoration: underline;
+  }
+
+  .count {
+    display: none;
+  }
+
+  ion-icon[name='chevron-down-sharp'] {
+    display: none;
   }
 
   button {
@@ -21,13 +38,12 @@
 
   .dateList {
     display: none;
-    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
     gap: 8px;
-    grid-column: span 2;
+    grid-column: span 3;
   }
 
   .date {
-    max-width: 64px;
     display: flex;
     gap: 4px;
     border: 1px solid var(--border-color);
@@ -40,6 +56,15 @@
     white-space: nowrap;
     &:after {
       content: 'X';
+      display: block;
+    }
+  }
+
+  &.hasDates {
+    .count {
+      display: block;
+    }
+    ion-icon[name='chevron-down-sharp'] {
       display: block;
     }
   }
