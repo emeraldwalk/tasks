@@ -31,6 +31,7 @@ export function BookList() {
               <li>
                 <Book
                   name={book.name}
+                  abbrev={book.abbrev}
                   chapterCount={book.chapterCount}
                   onChange={onChange}
                 />

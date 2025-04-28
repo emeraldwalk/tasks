@@ -4,10 +4,9 @@ import { Chapter } from './Chapter'
 import styles from './Book.module.css'
 import accordionStyles from './Accordion.module.css'
 import { className } from '../utils/cssUtils'
+import type { BibleBookMeta, ChapterID } from '../data/model'
 
-export interface BookProps {
-  name: string
-  chapterCount: number
+export interface BookProps extends BibleBookMeta {
   onChange: (value: number) => void
 }
 
@@ -38,7 +37,8 @@ export function Book(props: BookProps) {
             <li>
               <Chapter
                 bookName={props.name}
-                number={i}
+                abbrev={props.abbrev}
+                number={i as ChapterID}
                 initialValue={0}
                 onChange={props.onChange}
               />

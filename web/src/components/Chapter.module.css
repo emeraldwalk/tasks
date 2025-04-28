@@ -27,6 +27,7 @@
   }
 
   .date {
+    max-width: 64px;
     display: flex;
     gap: 4px;
     border: 1px solid var(--border-color);
@@ -36,6 +37,7 @@
     font-size: 0.8rem;
     align-items: center;
     justify-content: space-between;
+    white-space: nowrap;
     &:after {
       content: 'X';
       display: block;
