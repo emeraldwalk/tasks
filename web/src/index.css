@@ -3,6 +3,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -11,6 +12,12 @@ body {
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+input,
+textarea,
+select {
+  font-size: 1rem; /* Prevent iOS zoom by setting to at least 16px */
 }
 
 ul,
