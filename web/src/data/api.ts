@@ -60,6 +60,9 @@ export class Api {
     chapter: ChapterID,
     date: ISODateTimeString,
   ) => {
+    if (this._data[book][chapter][date]) {
+      delete this._data[book][chapter][date]
+    }
     deleteTimeStamp(this._db, book, chapter, date)
   }
 }

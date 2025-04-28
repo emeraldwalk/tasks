@@ -1,4 +1,4 @@
-import { createSignal, For, Show } from 'solid-js'
+import { createEffect, createSignal, For, Show } from 'solid-js'
 import styles from './Chapter.module.css'
 import { className } from '../utils/cssUtils'
 import accordionStyles from './Accordion.module.css'
@@ -27,6 +27,19 @@ export function Chapter(props: ChapterProps) {
     await api.markAsRead(props.abbrev, props.number, date)
   }
 
+  function onHeaderClick() {
+    if (dates().length === 0) {
+      return
+    }
+    setIsExpanded((prev) => !prev)
+  }
+
+  createEffect(() => {
+    if (dates().length === 0) {
+      setIsExpanded(false)
+    }
+  })
+
   return (
     <div
       class={className(
@@ -38,9 +51,7 @@ export function Chapter(props: ChapterProps) {
       <ion-icon
         name={dates().length ? 'checkmark-circle' : 'ellipse-outline'}
         size="large"></ion-icon>
-      <span
-        class={styles.header}
-        onClick={() => setIsExpanded((prev) => !prev)}>
+      <span class={styles.header} onClick={onHeaderClick}>
         <span class={styles.label}>
           {props.bookName} {props.number}
         </span>
