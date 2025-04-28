@@ -1,11 +1,12 @@
 .Chapter {
   display: grid;
   align-items: center;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 1fr auto;
   row-gap: 0.5rem;
   column-gap: 0.5rem;
 
-  .header {
+  .header,
+  .expander {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -40,7 +41,7 @@
     display: none;
     grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
     gap: 8px;
-    grid-column: span 3;
+    grid-column: span 2;
   }
 
   .date {

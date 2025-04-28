@@ -48,14 +48,15 @@ export function Chapter(props: ChapterProps) {
         isExpanded() && accordionStyles.isExpanded,
         dates().length > 0 && styles.hasDates,
       )}>
-      <ion-icon
-        name={dates().length ? 'checkmark-circle' : 'ellipse-outline'}
-        size="large"
-        onClick={onAdd}></ion-icon>
-      <span class={styles.header} onClick={onExpanderClick}>
+      <span class={styles.header} onClick={onAdd}>
+        <ion-icon
+          name={dates().length ? 'checkmark-circle' : 'ellipse-outline'}
+          size="large"></ion-icon>
         <span class={styles.label}>
           {props.bookName} {props.number}
         </span>
+      </span>
+      <span class={styles.expander} onClick={onExpanderClick}>
         <span class={styles.count}>({dates().length})</span>
         <ion-icon name="chevron-down-sharp"></ion-icon>
       </span>
