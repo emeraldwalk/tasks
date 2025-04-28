@@ -1,7 +1,7 @@
 .Chapter {
   display: grid;
   align-items: center;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto 1fr;
   row-gap: 0.5rem;
   column-gap: 0.5rem;
 
@@ -9,10 +9,12 @@
   .expander {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     font-size: 1.2rem;
     height: var(--item-height);
     gap: 0.5rem;
+  }
+  .expander {
+    justify-content: end;
   }
 
   ion-icon[name='checkmark-circle'] {
