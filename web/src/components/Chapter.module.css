@@ -1,7 +1,7 @@
 .Chapter {
   display: grid;
   align-items: center;
-  grid-template-columns: auto 1fr var(--button-height);
+  grid-template-columns: auto 1fr;
   row-gap: 0.5rem;
   column-gap: 0.5rem;
 

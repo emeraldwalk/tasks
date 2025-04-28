@@ -5,6 +5,7 @@ declare module 'solid-js' {
         name: string
         class?: string
         size?: 'small' | 'large'
+        onClick?: (e: MouseEvent) => void
       }
     }
   }

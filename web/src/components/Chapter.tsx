@@ -27,7 +27,7 @@ export function Chapter(props: ChapterProps) {
     await api.markAsRead(props.abbrev, props.number, date)
   }
 
-  function onHeaderClick() {
+  function onExpanderClick() {
     if (dates().length === 0) {
       return
     }
@@ -50,15 +50,15 @@ export function Chapter(props: ChapterProps) {
       )}>
       <ion-icon
         name={dates().length ? 'checkmark-circle' : 'ellipse-outline'}
-        size="large"></ion-icon>
-      <span class={styles.header} onClick={onHeaderClick}>
+        size="large"
+        onClick={onAdd}></ion-icon>
+      <span class={styles.header} onClick={onExpanderClick}>
         <span class={styles.label}>
           {props.bookName} {props.number}
         </span>
         <span class={styles.count}>({dates().length})</span>
         <ion-icon name="chevron-down-sharp"></ion-icon>
       </span>
-      <button onClick={onAdd}>+</button>
       <div class={className(styles.dateList, accordionStyles.content)}>
         <Show when={isExpanded()}>
           <For each={dates()}>
