@@ -1,7 +1,7 @@
 import { createResource, Show, type Component } from 'solid-js'
 
 import styles from './App.module.css'
-import { BookList } from './BookList'
+import { ChapterGroupList } from './ChapterGroupList'
 import { Api } from '../data/api'
 import { ApiProvider } from './ApiContext'
 
@@ -12,7 +12,7 @@ export const App: Component = () => {
     <div class={styles.App}>
       <Show when={api()}>
         <ApiProvider value={api()}>
-          <BookList />
+          <ChapterGroupList />
         </ApiProvider>
       </Show>
     </div>

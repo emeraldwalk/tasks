@@ -1,40 +1,40 @@
 import { createSignal, For } from 'solid-js'
-import styles from './BookList.module.css'
 import { SearchInput } from './SearchInput'
 import { ChapterGroup } from './ChapterGroup'
 import { useApi } from './ApiContext'
 import { groupByBook } from '../utils/groupUtils'
+import styles from './ChapterGroupList.module.css'
 
-export function BookList() {
+export function ChapterGroupList() {
   const api = useApi()
 
   const [searchText, setSearchText] = createSignal('')
   const searchTextUc = () => searchText().toUpperCase()
 
   const chapters = api.getChapterData()
-  const bookGroups = groupByBook(chapters)
-  const bookNames = Object.keys(bookGroups)
+  const chapterGroupsRecord = groupByBook(chapters)
+  const groupNames = Object.keys(chapterGroupsRecord)
 
-  const filteredBookNames = () =>
+  const filteredGroupNames = () =>
     searchText() === ''
-      ? bookNames
-      : bookNames.filter((bookName) =>
+      ? groupNames
+      : groupNames.filter((bookName) =>
           bookName.toUpperCase().includes(searchTextUc()),
         )
 
   return (
-    <div class={styles.BookList}>
+    <div class={styles.ChapterGroupList}>
       <SearchInput class={styles.search} onSearch={setSearchText} />
       <div class={styles.scroll}>
         <ul>
-          <For each={filteredBookNames()}>
-            {(bookName) => {
-              const chapters = bookGroups[bookName]
+          <For each={filteredGroupNames()}>
+            {(groupName) => {
+              const chapters = chapterGroupsRecord[groupName]
               return (
                 <li>
                   <ChapterGroup
                     data={{
-                      name: bookName,
+                      name: groupName,
                       chapters,
                     }}
                   />
