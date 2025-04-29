@@ -1,4 +1,4 @@
-import type { BookAbbrev, ChapterData } from '../data/model'
+import type { ChapterData } from '../data/model'
 
 export function groupByBook(
   data: ChapterData[],

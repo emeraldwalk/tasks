@@ -8,6 +8,7 @@ export type BookAbbrev = Brand<'BookAbbrev'>
 export type ChapterID = Brand<'ChapterID', number>
 export type ISODateTimeString = Brand<'ISODateTimeString'>
 export type MMDD = `${number}/${number}`
+export type Tag = Brand<'Tag'>
 
 export interface BookData {
   name: BookName

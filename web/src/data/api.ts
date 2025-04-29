@@ -1,14 +1,11 @@
 import type {
-  BookData,
   BookAbbrev,
   ChapterID,
   ISODateTimeString,
-  MMDD,
   TimeStampData,
-  BookName,
   ChapterData,
+  Tag,
 } from './model'
-import rawBibleBookMeta from './chapters.txt?raw'
 import {
   addTimestamp,
   deleteTimeStamp,
@@ -16,18 +13,27 @@ import {
   initDb,
 } from './indexDb'
 import { createSignal, type Accessor, type Setter } from 'solid-js'
+import { getChapterData, getTagsData } from '../utils/dataUtils'
 
 export class Api {
   static create = async (): Promise<Api> => {
     const db = await initDb()
     const data = await getTimeStampData(db)
-    return new Api(db, data)
+    const chapterData = getChapterData()
+    const tagsData = getTagsData()
+    return new Api(db, data, chapterData)
   }
 
-  constructor(db: IDBDatabase, timeStampData: TimeStampData) {
+  constructor(
+    db: IDBDatabase,
+    timeStampData: TimeStampData,
+    chapterData: ChapterData[],
+    tagsData: Record<Tag, BookAbbrev> = {},
+  ) {
     this._db = db
     this._timeStampData = timeStampData
-    this._chapterData = getChapterData()
+    this._chapterData = chapterData
+    this._tagsData = tagsData
 
     const [showCompleted, setShowCompleted] = createSignal(true)
     this.showCompleted = showCompleted
@@ -36,6 +42,7 @@ export class Api {
 
   private readonly _db: IDBDatabase
   private readonly _chapterData: ChapterData[]
+  private readonly _tagsData: Record<Tag, BookAbbrev>
   private readonly _timeStampData: TimeStampData
 
   readonly showCompleted: Accessor<boolean>
@@ -52,6 +59,10 @@ export class Api {
     return Object.keys(
       this.getTimeStampData()[abbrev]?.[number] ?? {},
     ) as ISODateTimeString[]
+  }
+
+  getTags = (): Record<Tag, BookAbbrev> => {
+    return this._tagsData
   }
 
   getTimeStampData = (): TimeStampData => {
@@ -88,28 +99,4 @@ export class Api {
     }
     deleteTimeStamp(this._db, book, chapter, date)
   }
-}
-
-export function getChapterData(): ChapterData[] {
-  const lines = rawBibleBookMeta.split('\n')
-  const chapters: ChapterData[] = []
-
-  for (const line of lines) {
-    const [abbrev, name, chapterCount] = line.split(',') as [
-      BookAbbrev,
-      BookName,
-      string,
-    ]
-
-    if (name && abbrev && chapterCount) {
-      for (let i = 1; i <= parseInt(chapterCount); i++) {
-        chapters.push({
-          name,
-          abbrev,
-          number: i as ChapterID,
-        })
-      }
-    }
-  }
-  return chapters
 }
