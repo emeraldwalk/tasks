@@ -33,14 +33,9 @@ export function ChapterGroup(props: ChapterGroupProps) {
       <ol class={className(styles.chapterList, accordionStyles.content)}>
         <Show when={isExpanded()}>
           <For each={props.data.chapters}>
-            {({ name, abbrev, number }) => (
+            {(chapter) => (
               <li>
-                <Chapter
-                  bookName={name}
-                  abbrev={abbrev}
-                  number={number}
-                  initialValue={0}
-                />
+                <Chapter data={chapter} />
               </li>
             )}
           </For>

@@ -3,14 +3,11 @@ import styles from './Chapter.module.css'
 import { className } from '../utils/cssUtils'
 import accordionStyles from './Accordion.module.css'
 import { mmDD, now } from '../utils/dateUtils'
-import type { BookAbbrev, ChapterID } from '../data/model'
+import type { BookAbbrev, ChapterData, ChapterID } from '../data/model'
 import { useApi } from './ApiContext'
 
 export interface ChapterProps {
-  bookName: string
-  abbrev: BookAbbrev
-  number: ChapterID
-  initialValue: number
+  data: ChapterData
 }
 
 export function Chapter(props: ChapterProps) {
@@ -18,13 +15,13 @@ export function Chapter(props: ChapterProps) {
   const [isExpanded, setIsExpanded] = createSignal(false)
 
   const [dates, setDates] = createSignal(
-    api.getChapterDates(props.abbrev, props.number),
+    api.getChapterDates(props.data.abbrev, props.data.number),
   )
 
   async function onAdd() {
     const date = now()
     setDates((prev) => [...prev, date])
-    await api.markAsRead(props.abbrev, props.number, date)
+    await api.markAsRead(props.data.abbrev, props.data.number, date)
   }
 
   function onExpanderClick() {
@@ -53,7 +50,7 @@ export function Chapter(props: ChapterProps) {
           name={dates().length ? 'checkmark-circle' : 'ellipse-outline'}
           size="large"></ion-icon>
         <span class={styles.label}>
-          {props.bookName} {props.number}
+          {props.data.name} {props.data.number}
         </span>
       </span>
       <span class={styles.expander} onClick={onExpanderClick}>
@@ -68,7 +65,7 @@ export function Chapter(props: ChapterProps) {
                 class={styles.date}
                 onClick={() => {
                   setDates((prev) => prev.filter((d) => d !== date))
-                  api.markAsUnread(props.abbrev, props.number, date)
+                  api.markAsUnread(props.data.abbrev, props.data.number, date)
                 }}>
                 {mmDD(date)}
               </button>
