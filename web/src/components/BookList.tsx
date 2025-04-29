@@ -1,20 +1,25 @@
 import { createSignal, For } from 'solid-js'
-import { getBibleBookMeta } from '../data/api'
 import styles from './BookList.module.css'
 import { SearchInput } from './SearchInput'
-import { Book } from './Book'
+import { ChapterGroup } from './ChapterGroup'
+import { useApi } from './ApiContext'
+import { groupByBook } from '../utils/groupUtils'
 
 export function BookList() {
+  const api = useApi()
+
   const [searchText, setSearchText] = createSignal('')
-  const bookMetaList = getBibleBookMeta()
+  const searchTextUc = () => searchText().toUpperCase()
 
-  const searchTextLc = () => searchText().toLowerCase()
+  const chapters = api.getChapterData()
+  const bookGroups = groupByBook(chapters)
+  const bookNames = Object.keys(bookGroups)
 
-  const filteredBookList = () =>
+  const filteredBookNames = () =>
     searchText() === ''
-      ? bookMetaList
-      : bookMetaList.filter((book) =>
-          book.name.toLowerCase().includes(searchTextLc()),
+      ? bookNames
+      : bookNames.filter((bookName) =>
+          bookName.toUpperCase().includes(searchTextUc()),
         )
 
   return (
@@ -22,16 +27,20 @@ export function BookList() {
       <SearchInput class={styles.search} onSearch={setSearchText} />
       <div class={styles.scroll}>
         <ul>
-          <For each={filteredBookList()}>
-            {(book) => (
-              <li>
-                <Book
-                  name={book.name}
-                  abbrev={book.abbrev}
-                  chapterCount={book.chapterCount}
-                />
-              </li>
-            )}
+          <For each={filteredBookNames()}>
+            {(bookName) => {
+              const chapters = bookGroups[bookName]
+              return (
+                <li>
+                  <ChapterGroup
+                    data={{
+                      name: bookName,
+                      chapters,
+                    }}
+                  />
+                </li>
+              )
+            }}
           </For>
         </ul>
       </div>

@@ -3,12 +3,12 @@ import styles from './Chapter.module.css'
 import { className } from '../utils/cssUtils'
 import accordionStyles from './Accordion.module.css'
 import { mmDD, now } from '../utils/dateUtils'
-import type { BookID, ChapterID } from '../data/model'
+import type { BookAbbrev, ChapterID } from '../data/model'
 import { useApi } from './ApiContext'
 
 export interface ChapterProps {
   bookName: string
-  abbrev: BookID
+  abbrev: BookAbbrev
   number: ChapterID
   initialValue: number
 }

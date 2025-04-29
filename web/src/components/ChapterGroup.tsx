@@ -1,20 +1,21 @@
 import { createSignal, For, Show } from 'solid-js'
-import { range } from '../utils/rangeUtils'
-import { Chapter } from './Chapter'
-import styles from './Book.module.css'
+import type { ChapterGroupData } from '../data/model'
+import styles from './ChapterGroup.module.css'
 import accordionStyles from './Accordion.module.css'
 import { className } from '../utils/cssUtils'
-import type { BibleBookMeta, ChapterID } from '../data/model'
+import { Chapter } from './Chapter'
 
-export interface BookProps extends BibleBookMeta {}
+export interface ChapterGroupProps {
+  data: ChapterGroupData
+}
 
-export function Book(props: BookProps) {
+export function ChapterGroup(props: ChapterGroupProps) {
   const [isExpanded, setIsExpanded] = createSignal(false)
 
   return (
     <div
       classList={{
-        [styles.Book]: true,
+        [styles.ChapterGroup]: true,
         [styles.isExpanded]: isExpanded(),
         [accordionStyles.isExpanded]: isExpanded(),
       }}>
@@ -23,21 +24,21 @@ export function Book(props: BookProps) {
         onClick={() => {
           setIsExpanded((prev) => !prev)
         }}>
-        {props.name}
+        {props.data.name}
         <ion-icon
-          class={className(styles.chevron, accordionStyles.icon)}
+          class={accordionStyles.icon}
           name="chevron-down-sharp"></ion-icon>
       </span>
 
       <ol class={className(styles.chapterList, accordionStyles.content)}>
         <Show when={isExpanded()}>
-          <For each={[...range(1, props.chapterCount)]}>
-            {(i) => (
+          <For each={props.data.chapters}>
+            {({ name, abbrev, number }) => (
               <li>
                 <Chapter
-                  bookName={props.name}
-                  abbrev={props.abbrev}
-                  number={i as ChapterID}
+                  bookName={name}
+                  abbrev={abbrev}
+                  number={number}
                   initialValue={0}
                 />
               </li>

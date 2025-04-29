@@ -1,10 +1,12 @@
 import type {
-  BibleBookMeta,
-  BookID,
+  BookData,
+  BookAbbrev,
   ChapterID,
   ISODateTimeString,
   MMDD,
   TimeStampData,
+  BookName,
+  ChapterData,
 } from './model'
 import rawBibleBookMeta from './chapters.txt?raw'
 import {
@@ -22,67 +24,78 @@ export class Api {
     return new Api(db, data)
   }
 
-  constructor(db: IDBDatabase, data: TimeStampData) {
+  constructor(db: IDBDatabase, timeStampData: TimeStampData) {
     this._db = db
-    this._data = data
+    this._timeStampData = timeStampData
+    this._chapterData = getChapterData()
   }
 
   private readonly _db: IDBDatabase
-  private readonly _data: TimeStampData
+  private readonly _chapterData: ChapterData[]
+  private readonly _timeStampData: TimeStampData
+
+  getChapterData = (): ChapterData[] => {
+    return this._chapterData
+  }
 
   getChapterDates = (
-    bookId: BookID,
+    bookId: BookAbbrev,
     chapterId: ChapterID,
   ): ISODateTimeString[] => {
     return Object.keys(
-      this.getData()[bookId]?.[chapterId] ?? {},
+      this.getTimeStampData()[bookId]?.[chapterId] ?? {},
     ) as ISODateTimeString[]
   }
 
-  getData = (): TimeStampData => {
-    return this._data
+  getTimeStampData = (): TimeStampData => {
+    return this._timeStampData
   }
 
   markAsRead = async (
-    book: BookID,
+    book: BookAbbrev,
     chapter: ChapterID,
     date: ISODateTimeString,
   ) => {
-    this._data[book] = this._data[book] || {}
-    this._data[book][chapter] = this._data[book][chapter] || {}
-    this._data[book][chapter][date] = true
+    this._timeStampData[book] = this._timeStampData[book] || {}
+    this._timeStampData[book][chapter] =
+      this._timeStampData[book][chapter] || {}
+    this._timeStampData[book][chapter][date] = true
 
     await addTimestamp(await this._db, book, chapter, date)
   }
 
   markAsUnread = async (
-    book: BookID,
+    book: BookAbbrev,
     chapter: ChapterID,
     date: ISODateTimeString,
   ) => {
-    if (this._data[book][chapter][date]) {
-      delete this._data[book][chapter][date]
+    if (this._timeStampData[book][chapter][date]) {
+      delete this._timeStampData[book][chapter][date]
     }
     deleteTimeStamp(this._db, book, chapter, date)
   }
 }
 
-export function getBibleBookMeta(): BibleBookMeta[] {
+export function getChapterData(): ChapterData[] {
   const lines = rawBibleBookMeta.split('\n')
-  const books: BibleBookMeta[] = []
+  const chapters: ChapterData[] = []
+
   for (const line of lines) {
     const [abbrev, name, chapterCount] = line.split(',') as [
-      BookID,
-      string,
+      BookAbbrev,
+      BookName,
       string,
     ]
+
     if (name && abbrev && chapterCount) {
-      books.push({
-        name,
-        abbrev,
-        chapterCount: parseInt(chapterCount),
-      })
+      for (let i = 1; i <= parseInt(chapterCount); i++) {
+        chapters.push({
+          name,
+          abbrev,
+          number: i as ChapterID,
+        })
+      }
     }
   }
-  return books
+  return chapters
 }

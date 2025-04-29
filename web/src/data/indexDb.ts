@@ -1,11 +1,11 @@
 import type {
-  BookID,
+  BookAbbrev,
   ChapterID,
   ISODateTimeString,
   TimeStampData,
 } from './model'
 
-type Key = `${ISODateTimeString}_${BookID}_${ChapterID}`
+type Key = `${ISODateTimeString}_${BookAbbrev}_${ChapterID}`
 
 interface TimestampRecord {
   id: Key
@@ -13,14 +13,14 @@ interface TimestampRecord {
 
 function createKey(
   date: ISODateTimeString,
-  book: BookID,
+  book: BookAbbrev,
   chapter: ChapterID,
 ): Key {
   return `${date}_${book}_${chapter}`
 }
 
-function parseKey(key: Key): [ISODateTimeString, BookID, ChapterID] {
-  return key.split('_') as [ISODateTimeString, BookID, ChapterID]
+function parseKey(key: Key): [ISODateTimeString, BookAbbrev, ChapterID] {
+  return key.split('_') as [ISODateTimeString, BookAbbrev, ChapterID]
 }
 
 export async function initDb(): Promise<IDBDatabase> {
@@ -49,7 +49,7 @@ export async function initDb(): Promise<IDBDatabase> {
 
 export async function addTimestamp(
   db: IDBDatabase,
-  book: BookID,
+  book: BookAbbrev,
   chapter: ChapterID,
   date: ISODateTimeString,
 ): Promise<void> {
@@ -77,7 +77,7 @@ export async function addTimestamp(
 
 export async function deleteTimeStamp(
   db: IDBDatabase,
-  book: BookID,
+  book: BookAbbrev,
   chapter: ChapterID,
   date: ISODateTimeString,
 ): Promise<void> {
