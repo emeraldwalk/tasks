@@ -5,6 +5,11 @@
   .search {
     margin: 1rem;
   }
+  .showCompleted {
+    display: flex;
+    justify-content: end;
+    margin: 0 1rem 0.5rem;
+  }
   .scroll {
     overflow-y: auto;
     border-top: 1px solid #ccc;

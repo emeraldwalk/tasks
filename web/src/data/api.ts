@@ -15,7 +15,7 @@ import {
   getTimeStampData,
   initDb,
 } from './indexDb'
-import { mmDD } from '../utils/dateUtils'
+import { createSignal, type Accessor, type Setter } from 'solid-js'
 
 export class Api {
   static create = async (): Promise<Api> => {
@@ -28,34 +28,41 @@ export class Api {
     this._db = db
     this._timeStampData = timeStampData
     this._chapterData = getChapterData()
+
+    const [showCompleted, setShowCompleted] = createSignal(true)
+    this.showCompleted = showCompleted
+    this.setShowCompleted = setShowCompleted
   }
 
   private readonly _db: IDBDatabase
   private readonly _chapterData: ChapterData[]
   private readonly _timeStampData: TimeStampData
 
+  readonly showCompleted: Accessor<boolean>
+  readonly setShowCompleted: Setter<boolean>
+
   getChapterData = (): ChapterData[] => {
     return this._chapterData
   }
 
-  getChapterDates = (
-    bookId: BookAbbrev,
-    chapterId: ChapterID,
-  ): ISODateTimeString[] => {
+  getChapterDates = ({
+    abbrev,
+    number,
+  }: Pick<ChapterData, 'abbrev' | 'number'>): ISODateTimeString[] => {
     return Object.keys(
-      this.getTimeStampData()[bookId]?.[chapterId] ?? {},
+      this.getTimeStampData()[abbrev]?.[number] ?? {},
     ) as ISODateTimeString[]
-  }
-
-  getCompletedChapterCount = (chapters: ChapterData[]): number => {
-    return chapters.reduce((acc, chapter) => {
-      const dates = this.getChapterDates(chapter.abbrev, chapter.number)
-      return acc + (dates.length > 0 ? 1 : 0)
-    }, 0)
   }
 
   getTimeStampData = (): TimeStampData => {
     return this._timeStampData
+  }
+
+  hasChapterDates = ({
+    abbrev,
+    number,
+  }: Pick<ChapterData, 'abbrev' | 'number'>) => {
+    return this.getChapterDates({ abbrev, number }).length > 0
   }
 
   markAsRead = async (

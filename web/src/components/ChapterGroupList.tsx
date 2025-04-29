@@ -25,6 +25,14 @@ export function ChapterGroupList() {
   return (
     <div class={styles.ChapterGroupList}>
       <SearchInput class={styles.search} onSearch={setSearchText} />
+      <label class={styles.showCompleted}>
+        <input
+          type="checkbox"
+          checked={api.showCompleted()}
+          onChange={() => api.setShowCompleted((v) => !v)}
+        />
+        Show Completed
+      </label>
       <div class={styles.scroll}>
         <ul>
           <For each={filteredGroupNames()}>

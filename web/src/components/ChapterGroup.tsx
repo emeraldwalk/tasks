@@ -1,4 +1,4 @@
-import { createSignal, For, Show } from 'solid-js'
+import { createEffect, createSignal, For, Show } from 'solid-js'
 import type { ChapterGroupData } from '../data/model'
 import styles from './ChapterGroup.module.css'
 import accordionStyles from './Accordion.module.css'
@@ -14,18 +14,19 @@ export function ChapterGroup(props: ChapterGroupProps) {
   const api = useApi()
   const [isExpanded, setIsExpanded] = createSignal(false)
 
-  const [completedCount, setCompletedCount] = createSignal(
-    api.getCompletedChapterCount(props.data.chapters),
-  )
+  const filteredChapters = () =>
+    api.showCompleted()
+      ? props.data.chapters
+      : props.data.chapters.filter((chapter) => !api.hasChapterDates(chapter))
 
-  const completedCountLabel = () =>
-    completedCount() > 0
-      ? `(${completedCount()} / ${props.data.chapters.length})`
-      : ''
+  const [chapters, setChapters] = createSignal(filteredChapters())
+
+  createEffect(() => {
+    setChapters(filteredChapters())
+  })
 
   function onChapterChange() {
-    const count = api.getCompletedChapterCount(props.data.chapters)
-    setCompletedCount(count)
+    setChapters(filteredChapters())
   }
 
   return (
@@ -41,7 +42,7 @@ export function ChapterGroup(props: ChapterGroupProps) {
           setIsExpanded((prev) => !prev)
         }}>
         <span class={styles.label}>{props.data.name}</span>
-        {completedCountLabel()}
+        {chapters().length}
         <ion-icon
           class={accordionStyles.icon}
           name="chevron-down-sharp"></ion-icon>
@@ -49,7 +50,7 @@ export function ChapterGroup(props: ChapterGroupProps) {
 
       <ol class={className(styles.chapterList, accordionStyles.content)}>
         <Show when={isExpanded()}>
-          <For each={props.data.chapters}>
+          <For each={chapters()}>
             {(chapter) => (
               <li>
                 <Chapter data={chapter} onChange={onChapterChange} />

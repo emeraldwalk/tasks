@@ -15,9 +15,7 @@ export function Chapter(props: ChapterProps) {
   const api = useApi()
   const [isExpanded, setIsExpanded] = createSignal(false)
 
-  const [dates, setDates] = createSignal(
-    api.getChapterDates(props.data.abbrev, props.data.number),
-  )
+  const [dates, setDates] = createSignal(api.getChapterDates(props.data))
 
   async function onAdd() {
     const date = now()
