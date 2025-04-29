@@ -3,11 +3,12 @@ import styles from './Chapter.module.css'
 import { className } from '../utils/cssUtils'
 import accordionStyles from './Accordion.module.css'
 import { mmDD, now } from '../utils/dateUtils'
-import type { BookAbbrev, ChapterData, ChapterID } from '../data/model'
+import type { ChapterData, ISODateTimeString } from '../data/model'
 import { useApi } from './ApiContext'
 
 export interface ChapterProps {
   data: ChapterData
+  onChange: () => void
 }
 
 export function Chapter(props: ChapterProps) {
@@ -22,6 +23,15 @@ export function Chapter(props: ChapterProps) {
     const date = now()
     setDates((prev) => [...prev, date])
     await api.markAsRead(props.data.abbrev, props.data.number, date)
+    props.onChange()
+  }
+
+  function onRemove(date: ISODateTimeString) {
+    return async () => {
+      setDates((prev) => prev.filter((d) => d !== date))
+      await api.markAsUnread(props.data.abbrev, props.data.number, date)
+      props.onChange()
+    }
   }
 
   function onExpanderClick() {
@@ -61,12 +71,7 @@ export function Chapter(props: ChapterProps) {
         <Show when={isExpanded()}>
           <For each={dates()}>
             {(date) => (
-              <button
-                class={styles.date}
-                onClick={() => {
-                  setDates((prev) => prev.filter((d) => d !== date))
-                  api.markAsUnread(props.data.abbrev, props.data.number, date)
-                }}>
+              <button class={styles.date} onClick={onRemove(date)}>
                 {mmDD(date)}
               </button>
             )}

@@ -47,6 +47,13 @@ export class Api {
     ) as ISODateTimeString[]
   }
 
+  getCompletedChapterCount = (chapters: ChapterData[]): number => {
+    return chapters.reduce((acc, chapter) => {
+      const dates = this.getChapterDates(chapter.abbrev, chapter.number)
+      return acc + (dates.length > 0 ? 1 : 0)
+    }, 0)
+  }
+
   getTimeStampData = (): TimeStampData => {
     return this._timeStampData
   }
