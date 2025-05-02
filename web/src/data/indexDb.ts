@@ -2,10 +2,16 @@ import type {
   BookAbbrev,
   ChapterID,
   ISODateTimeString,
+  SettingsData,
   TimeStampData,
 } from './model'
 
 type Key = `${ISODateTimeString}_${BookAbbrev}_${ChapterID}`
+
+interface SettingsRecord {
+  id: '1'
+  showCompleted: boolean
+}
 
 interface TimestampRecord {
   id: Key
@@ -23,13 +29,17 @@ function parseKey(key: Key): [ISODateTimeString, BookAbbrev, ChapterID] {
   return key.split('_') as [ISODateTimeString, BookAbbrev, ChapterID]
 }
 
+/** Initialize IndexDB */
 export async function initDb(): Promise<IDBDatabase> {
   const { promise, resolve, reject } = Promise.withResolvers<IDBDatabase>()
 
-  const request = indexedDB.open('BibleReadDB', 1)
+  const request = indexedDB.open('BibleReadDB', 2)
 
   request.onupgradeneeded = (event) => {
     const db = (event.target as IDBOpenDBRequest).result
+    if (!db.objectStoreNames.contains('settings')) {
+      db.createObjectStore('settings', { keyPath: 'id' })
+    }
     if (!db.objectStoreNames.contains('timestamps')) {
       db.createObjectStore('timestamps', { keyPath: 'id' })
     }
@@ -47,22 +57,27 @@ export async function initDb(): Promise<IDBDatabase> {
   return promise
 }
 
-export async function addTimestamp(
+async function putRecord(
   db: IDBDatabase,
-  book: BookAbbrev,
-  chapter: ChapterID,
-  date: ISODateTimeString,
+  storeName: 'settings',
+  record: SettingsRecord,
+): Promise<void>
+async function putRecord(
+  db: IDBDatabase,
+  storeName: 'timestamp',
+  record: TimestampRecord,
+): Promise<void>
+async function putRecord(
+  db: IDBDatabase,
+  storeName: string,
+  record: SettingsRecord | TimestampRecord,
 ): Promise<void> {
   const { promise, resolve, reject } = Promise.withResolvers<void>()
 
-  const transaction = db.transaction(['timestamps'], 'readwrite')
-  const store = transaction.objectStore('timestamps')
+  const transaction = db.transaction([storeName], 'readwrite')
+  const store = transaction.objectStore(storeName)
 
-  const entry: TimestampRecord = {
-    id: createKey(date, book, chapter),
-  }
-
-  const request = store.put(entry)
+  const request = store.put(record)
 
   request.onsuccess = () => resolve()
   request.onerror = () => reject(request.error)
@@ -75,6 +90,31 @@ export async function addTimestamp(
   return promise
 }
 
+/** Add a timestamp for a Bible chapter that was read */
+export async function addTimestamp(
+  db: IDBDatabase,
+  book: BookAbbrev,
+  chapter: ChapterID,
+  date: ISODateTimeString,
+): Promise<void> {
+  const record: TimestampRecord = {
+    id: createKey(date, book, chapter),
+  }
+
+  return putRecord(db, 'timestamp', record)
+}
+
+/** Update the settings record */
+export async function updateSettings(db: IDBDatabase, showCompleted: boolean) {
+  const record: SettingsRecord = {
+    id: '1',
+    showCompleted,
+  }
+
+  return putRecord(db, 'settings', record)
+}
+
+/** Delete timestamps */
 export async function deleteTimeStamp(
   db: IDBDatabase,
   book: BookAbbrev,
@@ -101,12 +141,32 @@ export async function deleteTimeStamp(
   return promise
 }
 
+/** Get Settings record */
+export async function getSettingsData(db: IDBDatabase): Promise<SettingsData> {
+  const { promise, resolve, reject } = Promise.withResolvers<SettingsData>()
+  const transaction = db.transaction(['settings'], 'readonly')
+  const store = transaction.objectStore('settings')
+  const request = store.get('1')
+
+  request.onsuccess = (event) => {
+    const result = (event.target as IDBRequest<SettingsRecord>).result
+    resolve({
+      showCompleted: result?.showCompleted ?? true,
+    })
+  }
+
+  request.onerror = () => reject(request.error)
+
+  return promise
+}
+
+/** Get timestamp data */
 export async function getTimeStampData(
   db: IDBDatabase,
 ): Promise<TimeStampData> {
   const { promise, resolve, reject } = Promise.withResolvers<TimeStampData>()
 
-  const transaction = (await db).transaction(['timestamps'], 'readonly')
+  const transaction = db.transaction(['timestamps'], 'readonly')
   const store = transaction.objectStore('timestamps')
   // const keyRange = IDBKeyRange.bound(`${book}-`, `${book}.\uffff`) // Match all keys starting with "book-"
   // const request = store.openCursor(keyRange)

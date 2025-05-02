@@ -29,6 +29,10 @@ export interface ChapterGroupData {
 
 export type TagRecord = Record<Tag, Record<BookAbbrev, boolean>>
 
+export interface SettingsData {
+  showCompleted: boolean
+}
+
 export interface TimeStampData {
   [bookId: BookAbbrev]: {
     [chapterId: ChapterID]: {

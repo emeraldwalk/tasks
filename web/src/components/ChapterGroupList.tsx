@@ -39,7 +39,7 @@ export function ChapterGroupList() {
         <input
           type="checkbox"
           checked={api.showCompleted()}
-          onChange={() => api.setShowCompleted((v) => !v)}
+          onChange={() => api.toggleShowCompleted()}
         />
         Show Completed
       </label>
@@ -55,6 +55,7 @@ export function ChapterGroupList() {
                       name: groupName,
                       chapters,
                     }}
+                    searchTextUc={searchTextUc()}
                   />
                 </li>
               )
