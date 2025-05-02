@@ -18,8 +18,8 @@ export function ChapterGroupList() {
   const searchTextUc = () => searchText().toUpperCase()
 
   const chapters = api.getChapterData()
-  const chapterGroupsRecord = groupByBook(chapters)
-  // const chapterGroupsRecord = groupByDay(chapters, api.getTags(), OT_NT)
+  // const chapterGroupsRecord = groupByBook(chapters)
+  const chapterGroupsRecord = groupByDay(chapters, api.getTags(), OT_NT)
   const groupNames = Object.keys(chapterGroupsRecord)
 
   const filteredGroupNames = () =>

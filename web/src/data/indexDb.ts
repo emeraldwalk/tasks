@@ -6,6 +6,9 @@ import type {
   TimeStampData,
 } from './model'
 
+const SETTINGS_STORE_NAME = 'settings'
+const TIMESTAMPS_STORE_NAME = 'timestamps'
+
 type Key = `${ISODateTimeString}_${BookAbbrev}_${ChapterID}`
 
 interface SettingsRecord {
@@ -40,8 +43,8 @@ export async function initDb(): Promise<IDBDatabase> {
     if (!db.objectStoreNames.contains('settings')) {
       db.createObjectStore('settings', { keyPath: 'id' })
     }
-    if (!db.objectStoreNames.contains('timestamps')) {
-      db.createObjectStore('timestamps', { keyPath: 'id' })
+    if (!db.objectStoreNames.contains(TIMESTAMPS_STORE_NAME)) {
+      db.createObjectStore(TIMESTAMPS_STORE_NAME, { keyPath: 'id' })
     }
   }
 
@@ -59,12 +62,12 @@ export async function initDb(): Promise<IDBDatabase> {
 
 async function putRecord(
   db: IDBDatabase,
-  storeName: 'settings',
+  storeName: typeof SETTINGS_STORE_NAME,
   record: SettingsRecord,
 ): Promise<void>
 async function putRecord(
   db: IDBDatabase,
-  storeName: 'timestamp',
+  storeName: typeof TIMESTAMPS_STORE_NAME,
   record: TimestampRecord,
 ): Promise<void>
 async function putRecord(
@@ -101,7 +104,7 @@ export async function addTimestamp(
     id: createKey(date, book, chapter),
   }
 
-  return putRecord(db, 'timestamp', record)
+  return putRecord(db, TIMESTAMPS_STORE_NAME, record)
 }
 
 /** Update the settings record */
@@ -123,8 +126,8 @@ export async function deleteTimeStamp(
 ): Promise<void> {
   const { promise, resolve, reject } = Promise.withResolvers<void>()
 
-  const transaction = db.transaction(['timestamps'], 'readwrite')
-  const store = transaction.objectStore('timestamps')
+  const transaction = db.transaction([TIMESTAMPS_STORE_NAME], 'readwrite')
+  const store = transaction.objectStore(TIMESTAMPS_STORE_NAME)
 
   // Generate the key for the entry to delete
   const key = createKey(date, book, chapter)
@@ -166,8 +169,8 @@ export async function getTimeStampData(
 ): Promise<TimeStampData> {
   const { promise, resolve, reject } = Promise.withResolvers<TimeStampData>()
 
-  const transaction = db.transaction(['timestamps'], 'readonly')
-  const store = transaction.objectStore('timestamps')
+  const transaction = db.transaction([TIMESTAMPS_STORE_NAME], 'readonly')
+  const store = transaction.objectStore(TIMESTAMPS_STORE_NAME)
   // const keyRange = IDBKeyRange.bound(`${book}-`, `${book}.\uffff`) // Match all keys starting with "book-"
   // const request = store.openCursor(keyRange)
   const request = store.openCursor()
