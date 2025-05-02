@@ -46,7 +46,9 @@ export class Api {
     this._settingsData = settingsData
     this._tagsData = tagsData
 
-    const [showCompleted, setShowCompleted] = createSignal(true)
+    const [showCompleted, setShowCompleted] = createSignal(
+      settingsData.showCompleted,
+    )
     this.showCompleted = showCompleted
     this._setShowCompleted = setShowCompleted
   }
