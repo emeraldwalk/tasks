@@ -27,6 +27,8 @@ export interface ChapterGroupData {
   chapters: ChapterData[]
 }
 
+export type TagRecord = Record<Tag, Record<BookAbbrev, boolean>>
+
 export interface TimeStampData {
   [bookId: BookAbbrev]: {
     [chapterId: ChapterID]: {

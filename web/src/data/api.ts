@@ -5,6 +5,7 @@ import type {
   TimeStampData,
   ChapterData,
   Tag,
+  TagRecord,
 } from './model'
 import {
   addTimestamp,
@@ -21,14 +22,14 @@ export class Api {
     const data = await getTimeStampData(db)
     const chapterData = getChapterData()
     const tagsData = getTagsData()
-    return new Api(db, data, chapterData)
+    return new Api(db, data, chapterData, tagsData)
   }
 
   constructor(
     db: IDBDatabase,
     timeStampData: TimeStampData,
     chapterData: ChapterData[],
-    tagsData: Record<Tag, BookAbbrev> = {},
+    tagsData: TagRecord,
   ) {
     this._db = db
     this._timeStampData = timeStampData
@@ -42,7 +43,7 @@ export class Api {
 
   private readonly _db: IDBDatabase
   private readonly _chapterData: ChapterData[]
-  private readonly _tagsData: Record<Tag, BookAbbrev>
+  private readonly _tagsData: TagRecord
   private readonly _timeStampData: TimeStampData
 
   readonly showCompleted: Accessor<boolean>
@@ -61,7 +62,7 @@ export class Api {
     ) as ISODateTimeString[]
   }
 
-  getTags = (): Record<Tag, BookAbbrev> => {
+  getTags = (): TagRecord => {
     return this._tagsData
   }
 

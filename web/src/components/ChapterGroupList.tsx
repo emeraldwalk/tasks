@@ -2,8 +2,14 @@ import { createSignal, For } from 'solid-js'
 import { SearchInput } from './SearchInput'
 import { ChapterGroup } from './ChapterGroup'
 import { useApi } from './ApiContext'
-import { groupByBook } from '../utils/groupUtils'
+import { groupByBook, groupByDay } from '../utils/groupUtils'
 import styles from './ChapterGroupList.module.css'
+import type { Tag } from '../data/model'
+
+const OT_NT = {
+  OT: 3,
+  NT: 2,
+} as Record<Tag, number>
 
 export function ChapterGroupList() {
   const api = useApi()
@@ -13,6 +19,7 @@ export function ChapterGroupList() {
 
   const chapters = api.getChapterData()
   const chapterGroupsRecord = groupByBook(chapters)
+  // const chapterGroupsRecord = groupByDay(chapters, api.getTags(), OT_NT)
   const groupNames = Object.keys(chapterGroupsRecord)
 
   const filteredGroupNames = () =>
