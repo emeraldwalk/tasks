@@ -40,8 +40,8 @@ export async function initDb(): Promise<IDBDatabase> {
 
   request.onupgradeneeded = (event) => {
     const db = (event.target as IDBOpenDBRequest).result
-    if (!db.objectStoreNames.contains('settings')) {
-      db.createObjectStore('settings', { keyPath: 'id' })
+    if (!db.objectStoreNames.contains(SETTINGS_STORE_NAME)) {
+      db.createObjectStore(SETTINGS_STORE_NAME, { keyPath: 'id' })
     }
     if (!db.objectStoreNames.contains(TIMESTAMPS_STORE_NAME)) {
       db.createObjectStore(TIMESTAMPS_STORE_NAME, { keyPath: 'id' })
@@ -114,7 +114,7 @@ export async function updateSettings(db: IDBDatabase, showCompleted: boolean) {
     showCompleted,
   }
 
-  return putRecord(db, 'settings', record)
+  return putRecord(db, SETTINGS_STORE_NAME, record)
 }
 
 /** Delete timestamps */
@@ -147,8 +147,8 @@ export async function deleteTimeStamp(
 /** Get Settings record */
 export async function getSettingsData(db: IDBDatabase): Promise<SettingsData> {
   const { promise, resolve, reject } = Promise.withResolvers<SettingsData>()
-  const transaction = db.transaction(['settings'], 'readonly')
-  const store = transaction.objectStore('settings')
+  const transaction = db.transaction([SETTINGS_STORE_NAME], 'readonly')
+  const store = transaction.objectStore(SETTINGS_STORE_NAME)
   const request = store.get('1')
 
   request.onsuccess = (event) => {
