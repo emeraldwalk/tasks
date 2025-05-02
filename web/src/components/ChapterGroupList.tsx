@@ -25,8 +25,11 @@ export function ChapterGroupList() {
   const filteredGroupNames = () =>
     searchText() === ''
       ? groupNames
-      : groupNames.filter((bookName) =>
-          bookName.toUpperCase().includes(searchTextUc()),
+      : groupNames.filter(
+          (groupName) =>
+            chapterGroupsRecord[groupName].filter((ch) =>
+              ch.name.toUpperCase().includes(searchTextUc()),
+            ).length > 0,
         )
 
   return (

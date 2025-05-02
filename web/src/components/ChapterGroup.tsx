@@ -1,5 +1,5 @@
 import { createEffect, createSignal, For, Show } from 'solid-js'
-import type { ChapterGroupData } from '../data/model'
+import type { ChapterData, ChapterGroupData } from '../data/model'
 import styles from './ChapterGroup.module.css'
 import accordionStyles from './Accordion.module.css'
 import { className } from '../utils/cssUtils'
@@ -8,16 +8,24 @@ import { useApi } from './ApiContext'
 
 export interface ChapterGroupProps {
   data: ChapterGroupData
+  searchTextUc: string
 }
 
 export function ChapterGroup(props: ChapterGroupProps) {
   const api = useApi()
   const [isExpanded, setIsExpanded] = createSignal(false)
 
+  function searchTextFilter({ name }: ChapterData) {
+    return name.toUpperCase().includes(props.searchTextUc)
+  }
+
   const filteredChapters = () =>
     api.showCompleted()
-      ? props.data.chapters
-      : props.data.chapters.filter((chapter) => !api.hasChapterDates(chapter))
+      ? props.data.chapters.filter(searchTextFilter)
+      : props.data.chapters.filter(
+          (chapter) =>
+            !api.hasChapterDates(chapter) && searchTextFilter(chapter),
+        )
 
   const [chapters, setChapters] = createSignal(filteredChapters())
 
