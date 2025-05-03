@@ -33,7 +33,6 @@ export function TagSelector(props: TagSelectorProps) {
           <li>
             <input
               class={styles.addTag}
-              type="search"
               onInput={(event) => {
                 setSearchText(event.target.value)
               }}

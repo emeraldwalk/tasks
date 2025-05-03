@@ -30,7 +30,7 @@
   .tabBar {
     border-top: 1px solid var(--color-border);
     display: flex;
-    height: 83px;
+    height: 50px;
     flex-shrink: 0;
     padding: 0.5rem 1rem;
     justify-content: space-evenly;

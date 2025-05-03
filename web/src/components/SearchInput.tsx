@@ -23,7 +23,7 @@ export function SearchInput({ class: class_, onSearch }: SearchInputProps) {
 
   return (
     <input
-      class={className(styles.SearchInput, class_)}
+      class={className(styles.SearchInput)}
       type="search"
       placeholder="Search..."
       onInput={onInput}
