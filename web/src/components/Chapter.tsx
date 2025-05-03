@@ -5,6 +5,7 @@ import accordionStyles from './Accordion.module.css'
 import { mmDD, now } from '../utils/dateUtils'
 import type { ChapterData, ISODateTimeString } from '../data/model'
 import { useApi } from './ApiContext'
+import { CheckMark } from './CheckMark'
 
 export interface ChapterProps {
   data: ChapterData
@@ -54,9 +55,7 @@ export function Chapter(props: ChapterProps) {
         dates().length > 0 && styles.hasDates,
       )}>
       <span class={styles.header} onClick={onAdd}>
-        <ion-icon
-          name={dates().length ? 'checkmark-circle' : 'ellipse-outline'}
-          size="large"></ion-icon>
+        <CheckMark state={dates().length ? 'complete' : 'incomplete'} />
         <span class={styles.label}>
           {props.data.name} {props.data.number}
         </span>

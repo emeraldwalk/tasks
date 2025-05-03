@@ -1,0 +1,11 @@
+.CheckMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  &.complete {
+    color: green;
+  }
+  &.partial {
+    color: gray;
+  }
+}

@@ -17,10 +17,6 @@
     justify-content: end;
   }
 
-  ion-icon[name='checkmark-circle'] {
-    color: green;
-  }
-
   .label {
     flex-grow: 1;
     text-decoration: underline;

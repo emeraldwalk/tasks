@@ -41,7 +41,6 @@ export class Api {
     tagsData: TagRecord,
   ) {
     this._db = db
-    this._timeStampData = timeStampData
     this._chapterData = chapterData
     this._settingsData = settingsData
     this._tagsData = tagsData
@@ -51,16 +50,22 @@ export class Api {
     )
     this.showCompleted = showCompleted
     this._setShowCompleted = setShowCompleted
+
+    // Always signal when set so we can tell UI when properties change
+    const [ts, setTs] = createSignal(timeStampData, { equals: false })
+    this.timeStampData = ts
+    this._setTimeStampData = setTs
   }
 
   private readonly _db: IDBDatabase
   private readonly _chapterData: ChapterData[]
   private readonly _settingsData: SettingsData
   private readonly _tagsData: TagRecord
-  private readonly _timeStampData: TimeStampData
   private readonly _setShowCompleted: Setter<boolean>
+  private readonly _setTimeStampData: Setter<TimeStampData>
 
   readonly showCompleted: Accessor<boolean>
+  readonly timeStampData: Accessor<TimeStampData>
 
   getChapterData = (): ChapterData[] => {
     return this._chapterData
@@ -71,7 +76,7 @@ export class Api {
     number,
   }: Pick<ChapterData, 'abbrev' | 'number'>): ISODateTimeString[] => {
     return Object.keys(
-      this.getTimeStampData()[abbrev]?.[number] ?? {},
+      this.timeStampData()[abbrev]?.[number] ?? {},
     ) as ISODateTimeString[]
   }
 
@@ -83,10 +88,6 @@ export class Api {
     return this._tagsData
   }
 
-  getTimeStampData = (): TimeStampData => {
-    return this._timeStampData
-  }
-
   hasChapterDates = ({
     abbrev,
     number,
@@ -94,15 +95,21 @@ export class Api {
     return this.getChapterDates({ abbrev, number }).length > 0
   }
 
+  completeCount = (chapters: ChapterData[]): number => {
+    return chapters.filter(this.hasChapterDates).length
+  }
+
   markAsRead = async (
     book: BookAbbrev,
     chapter: ChapterID,
     date: ISODateTimeString,
   ) => {
-    this._timeStampData[book] = this._timeStampData[book] || {}
-    this._timeStampData[book][chapter] =
-      this._timeStampData[book][chapter] || {}
-    this._timeStampData[book][chapter][date] = true
+    const timeStampData = this.timeStampData()
+    timeStampData[book] = timeStampData[book] || {}
+    timeStampData[book][chapter] = timeStampData[book][chapter] || {}
+    timeStampData[book][chapter][date] = true
+
+    this._setTimeStampData(timeStampData)
 
     await addTimestamp(await this._db, book, chapter, date)
   }
@@ -112,8 +119,9 @@ export class Api {
     chapter: ChapterID,
     date: ISODateTimeString,
   ) => {
-    if (this._timeStampData[book][chapter][date]) {
-      delete this._timeStampData[book][chapter][date]
+    if (this.timeStampData()[book][chapter][date]) {
+      delete this.timeStampData()[book][chapter][date]
+      this._setTimeStampData(this.timeStampData())
     }
     deleteTimeStamp(this._db, book, chapter, date)
   }

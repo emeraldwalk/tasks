@@ -5,6 +5,7 @@ import accordionStyles from './Accordion.module.css'
 import { className } from '../utils/cssUtils'
 import { Chapter } from './Chapter'
 import { useApi } from './ApiContext'
+import { CheckMark } from './CheckMark'
 
 export interface ChapterGroupProps {
   data: ChapterGroupData
@@ -14,6 +15,19 @@ export interface ChapterGroupProps {
 export function ChapterGroup(props: ChapterGroupProps) {
   const api = useApi()
   const [isExpanded, setIsExpanded] = createSignal(false)
+  const completionStatus = () => {
+    const count = api.completeCount(props.data.chapters)
+
+    if (count === props.data.chapters.length) {
+      return 'complete'
+    }
+
+    if (count > 0) {
+      return 'partial'
+    }
+
+    return 'incomplete'
+  }
 
   function searchTextFilter({ name }: ChapterData) {
     return name.toUpperCase().includes(props.searchTextUc)
@@ -49,6 +63,7 @@ export function ChapterGroup(props: ChapterGroupProps) {
         onClick={() => {
           setIsExpanded((prev) => !prev)
         }}>
+        <CheckMark state={completionStatus()} />
         <span class={styles.label}>{props.data.name}</span>
         {chapters().length}
         <ion-icon
