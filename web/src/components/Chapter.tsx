@@ -54,9 +54,12 @@ export function Chapter(props: ChapterProps) {
         isExpanded() && accordionStyles.isExpanded,
         dates().length > 0 && styles.hasDates,
       )}>
-      <span class={styles.header} onClick={onAdd}>
-        <CheckMark state={dates().length ? 'complete' : 'incomplete'} />
-        <span class={styles.label}>
+      <span class={styles.header}>
+        <CheckMark
+          state={dates().length ? 'complete' : 'incomplete'}
+          onClick={onAdd}
+        />
+        <span class={styles.label} onClick={onExpanderClick}>
           {props.data.name} {props.data.number}
         </span>
       </span>
