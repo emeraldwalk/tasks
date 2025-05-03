@@ -5,17 +5,19 @@
   .header {
     display: grid;
     align-items: center;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: auto 1fr;
     padding: 1rem 1rem 0.5rem;
     gap: 1rem;
   }
-  .search {
-    grid-column: span 2;
-  }
   .showCompleted {
     display: flex;
+    grid-column: span 2;
+    justify-self: end;
   }
   a {
+    display: flex;
+    align-self: center;
+    justify-content: center;
     color: gray;
     justify-self: end;
   }

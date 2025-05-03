@@ -17,6 +17,15 @@ export function Layout(props: LayoutProps) {
   return (
     <div class={styles.Layout}>
       <header class={styles.header}>
+        {isSettings() ? (
+          <A href="/">
+            <ion-icon name="close" size="large"></ion-icon>
+          </A>
+        ) : (
+          <A href="/settings">
+            <ion-icon name="menu" size="large"></ion-icon>
+          </A>
+        )}
         <SearchInput class={styles.search} onSearch={api.setSearchText} />
         <label class={styles.showCompleted}>
           <input
@@ -26,15 +35,6 @@ export function Layout(props: LayoutProps) {
           />
           Show Completed
         </label>
-        {isSettings() ? (
-          <A href="/">
-            <ion-icon name="close" size="large"></ion-icon>
-          </A>
-        ) : (
-          <A href="/settings">
-            <ion-icon name="settings" size="large"></ion-icon>
-          </A>
-        )}
       </header>
       <main class={styles.main}>{props.children}</main>
     </div>
