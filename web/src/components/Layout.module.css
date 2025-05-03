@@ -30,9 +30,15 @@
   .tabBar {
     border-top: 1px solid var(--color-border);
     display: flex;
-    height: 50px;
+    height: 72px;
     flex-shrink: 0;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1rem 22px;
     justify-content: space-evenly;
+    a {
+      display: flex;
+      align-items: center;
+      height: 50px;
+      flex-grow: 1;
+    }
   }
 }

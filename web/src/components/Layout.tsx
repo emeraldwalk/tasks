@@ -44,6 +44,9 @@ export function Layout(props: LayoutProps) {
         <A href="/plan">
           <ion-icon name="list-outline" size="large"></ion-icon>
         </A>
+        <A href="/history">
+          <ion-icon name="time-outline" size="large"></ion-icon>
+        </A>
       </footer>
     </div>
   )
