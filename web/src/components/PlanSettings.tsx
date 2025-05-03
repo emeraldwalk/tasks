@@ -5,7 +5,7 @@ import styles from './PlanSettings.module.css'
 import { TagSelector } from './TagSelector'
 import type { PerDayTagData, Tag } from '../data/model'
 
-export function PlaySettings() {
+export function PlanSettings() {
   const api = useApi()
 
   const tagRecord = () => api.getTags()

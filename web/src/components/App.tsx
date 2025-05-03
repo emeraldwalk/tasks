@@ -5,7 +5,7 @@ import styles from './App.module.css'
 import { Layout } from './Layout'
 import { Route, Router } from '@solidjs/router'
 import { ChapterGroupList } from './ChapterGroupList'
-import { PlaySettings } from './PlanSettings'
+import { PlanSettings } from './PlanSettings'
 
 export const App: Component = () => {
   const [api] = createResource(Api.create)
@@ -17,7 +17,7 @@ export const App: Component = () => {
           <Router base={import.meta.env.BASE_URL} root={Layout}>
             <Route path="/" component={ChapterGroupList} />
             <Route path="/plan" component={ChapterGroupList} />
-            <Route path="/settings" component={PlaySettings} />
+            <Route path="/settings" component={PlanSettings} />
           </Router>
         </ApiProvider>
       </Show>
