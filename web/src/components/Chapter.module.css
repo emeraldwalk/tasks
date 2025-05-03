@@ -45,7 +45,7 @@
   .date {
     display: flex;
     gap: 4px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--color-border);
     border-radius: 4px;
     padding: 4px 8px;
     height: var(--button-height);

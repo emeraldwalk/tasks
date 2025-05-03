@@ -4,23 +4,45 @@
   height: 100%;
 
   .header {
-    border-bottom: 1px solid var(--color-border);
     display: grid;
+    border-bottom: 1px solid var(--color-border);
     align-items: center;
     grid-template-columns: auto 1fr;
-    padding: 1rem 1rem 0.5rem;
-    gap: 1rem;
+    padding: 20px 1rem 0 0;
+  }
+  .title {
+    font-size: 1rem;
+    line-height: 36px;
+    margin: 0;
+    text-align: center;
+    grid-column: 1 / span 2;
+    grid-row: 1;
   }
   .showCompleted {
     display: flex;
+    height: 36px;
     grid-column: span 2;
+    align-items: center;
     justify-self: end;
   }
   .menuTrigger {
+    grid-row: 1;
+    grid-column: 1;
+    background-color: #fff;
     color: gray;
     display: flex;
-    align-self: center;
+    align-items: center;
     justify-content: center;
+    padding: 0 1rem;
+    width: 64px;
+    height: 44px;
+    &.isSettingsOpen {
+      z-index: 2;
+    }
+  }
+  .search {
+    grid-column: span 2;
+    margin-left: 1rem;
   }
   .main {
     padding: 0.5rem 1rem;
@@ -28,9 +50,12 @@
     flex-grow: 1;
   }
   .sidebar {
+    background-color: #fff;
+    border-right: 1px solid var(--color-border);
     position: absolute;
     padding: 0.5rem 1rem;
-    flex-grow: 1;
+    height: 100vh;
+    z-index: 1;
   }
   .tabBar {
     border-top: 1px solid var(--color-border);
@@ -40,11 +65,15 @@
     padding: 0.5rem 1rem 22px;
     justify-content: space-evenly;
     a {
+      color: gray;
       display: flex;
       align-items: center;
       justify-content: center;
       height: 50px;
       flex-grow: 1;
+      &.activeTab {
+        color: var(--color-link);
+      }
     }
   }
 }

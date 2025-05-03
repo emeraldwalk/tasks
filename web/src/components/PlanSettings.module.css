@@ -1,4 +1,7 @@
 .PlanSettings {
+  h1 {
+    text-align: right;
+  }
   .tagGroupList {
     display: flex;
     flex-direction: column;

@@ -2,7 +2,7 @@ import { className } from '../utils/cssUtils'
 import styles from './SearchInput.module.css'
 
 export interface SearchInputProps {
-  class?: string
+  class: string
   onSearch: (query: string) => void
 }
 
@@ -23,7 +23,7 @@ export function SearchInput({ class: class_, onSearch }: SearchInputProps) {
 
   return (
     <input
-      class={className(styles.SearchInput)}
+      class={className(styles.SearchInput, class_)}
       type="search"
       placeholder="Search..."
       onInput={onInput}

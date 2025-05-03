@@ -1,4 +1,4 @@
-import { For } from 'solid-js'
+import { createMemo, For } from 'solid-js'
 import { ChapterGroup } from './ChapterGroup'
 import { useApi } from './ApiContext'
 import { groupByBook, groupByDay } from '../utils/groupUtils'
@@ -15,14 +15,18 @@ export function ChapterGroupList() {
   const api = useApi()
   const location = useLocation()
 
-  const chapterGroupsRecord = () =>
-    location.pathname.endsWith('/plan')
-      ? groupByDay(chapters, api.getTags(), OT_NT)
-      : groupByBook(chapters)
-
   const searchTextUc = () => api.searchText().toUpperCase()
 
   const chapters = api.getChapterData()
+
+  const bookGroups = createMemo(() => groupByBook(chapters))
+  const planGroups = createMemo(() =>
+    groupByDay(chapters, api.getTags(), OT_NT),
+  )
+
+  const chapterGroupsRecord = () =>
+    location.pathname.endsWith('/plan') ? planGroups() : bookGroups()
+
   const groupNames = Object.keys(chapterGroupsRecord())
 
   const filteredGroupNames = () =>
