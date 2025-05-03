@@ -6,6 +6,8 @@ import type {
   ChapterData,
   TagRecord,
   SettingsData,
+  PerDayTagData,
+  Tag,
 } from './model'
 import {
   addTimestamp,
@@ -40,6 +42,20 @@ export class Api {
     this._settingsData = settingsData
     this._tagsData = tagsData
 
+    // perDayTagData signal
+    const [perDayTagData, setPerDayTagData] = createSignal<PerDayTagData[]>([
+      {
+        tags: ['OT' as Tag],
+        count: 3,
+      },
+      {
+        tags: ['NT' as Tag],
+        count: 2,
+      },
+    ])
+    this.perDayTagData = perDayTagData
+    this.setPerDayTagData = setPerDayTagData
+
     // searchText signal
     const [searchText, setSearchText] = createSignal('')
     this.searchText = searchText
@@ -65,6 +81,8 @@ export class Api {
   private readonly _setShowCompleted: Setter<boolean>
   private readonly _setTimeStampData: Setter<TimeStampData>
 
+  readonly perDayTagData: Accessor<PerDayTagData[]>
+  readonly setPerDayTagData: Setter<PerDayTagData[]>
   readonly searchText: Accessor<string>
   readonly setSearchText: Setter<string>
   readonly showCompleted: Accessor<boolean>

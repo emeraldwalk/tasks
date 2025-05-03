@@ -16,6 +16,7 @@ export const App: Component = () => {
         <ApiProvider value={api()}>
           <Router base={import.meta.env.BASE_URL} root={Layout}>
             <Route path="/" component={ChapterGroupList} />
+            <Route path="/plan" component={ChapterGroupList} />
             <Route path="/settings" component={PlaySettings} />
           </Router>
         </ApiProvider>

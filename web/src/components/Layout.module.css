@@ -3,6 +3,7 @@
   flex-direction: column;
   height: 100%;
   .header {
+    border-bottom: 1px solid var(--color-border);
     display: grid;
     align-items: center;
     grid-template-columns: auto 1fr;
@@ -23,7 +24,15 @@
   }
   .main {
     overflow-y: auto;
-    border-top: 1px solid #ccc;
     padding: 0.5rem 1rem;
+    flex-grow: 1;
+  }
+  .tabBar {
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    height: 83px;
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    justify-content: space-evenly;
   }
 }

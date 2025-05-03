@@ -8,6 +8,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root {
+  --color-border: #ccc;
+  --color-hover: #999;
+}
+
 *,
 *::before,
 *::after {

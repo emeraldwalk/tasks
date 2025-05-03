@@ -33,6 +33,11 @@ export interface SettingsData {
   showCompleted: boolean
 }
 
+export interface PerDayTagData {
+  tags: Tag[]
+  count: number
+}
+
 export interface TimeStampData {
   [bookId: BookAbbrev]: {
     [chapterId: ChapterID]: {

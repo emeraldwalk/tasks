@@ -37,6 +37,14 @@ export function Layout(props: LayoutProps) {
         </label>
       </header>
       <main class={styles.main}>{props.children}</main>
+      <footer class={styles.tabBar}>
+        <A href="/">
+          <ion-icon name="book-outline" size="large"></ion-icon>
+        </A>
+        <A href="/plan">
+          <ion-icon name="list-outline" size="large"></ion-icon>
+        </A>
+      </footer>
     </div>
   )
 }

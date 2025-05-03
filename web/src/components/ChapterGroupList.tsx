@@ -1,9 +1,10 @@
 import { For } from 'solid-js'
 import { ChapterGroup } from './ChapterGroup'
 import { useApi } from './ApiContext'
-import { groupByBook } from '../utils/groupUtils'
+import { groupByBook, groupByDay } from '../utils/groupUtils'
 import type { Tag } from '../data/model'
 import styles from './ChapterGroupList.module.css'
+import { useLocation } from '@solidjs/router'
 
 const OT_NT = {
   OT: 3,
@@ -12,20 +13,24 @@ const OT_NT = {
 
 export function ChapterGroupList() {
   const api = useApi()
+  const location = useLocation()
+
+  const chapterGroupsRecord = () =>
+    location.pathname.endsWith('/plan')
+      ? groupByDay(chapters, api.getTags(), OT_NT)
+      : groupByBook(chapters)
 
   const searchTextUc = () => api.searchText().toUpperCase()
 
   const chapters = api.getChapterData()
-  const chapterGroupsRecord = groupByBook(chapters)
-  // const chapterGroupsRecord = groupByDay(chapters, api.getTags(), OT_NT)
-  const groupNames = Object.keys(chapterGroupsRecord)
+  const groupNames = Object.keys(chapterGroupsRecord())
 
   const filteredGroupNames = () =>
     searchTextUc() === ''
       ? groupNames
       : groupNames.filter(
           (groupName) =>
-            chapterGroupsRecord[groupName].filter((ch) =>
+            chapterGroupsRecord()[groupName].filter((ch) =>
               ch.name.toUpperCase().includes(searchTextUc()),
             ).length > 0,
         )
@@ -35,7 +40,7 @@ export function ChapterGroupList() {
       <ul>
         <For each={filteredGroupNames()}>
           {(groupName) => {
-            const chapters = chapterGroupsRecord[groupName]
+            const chapters = chapterGroupsRecord()[groupName]
             return (
               <li>
                 <ChapterGroup

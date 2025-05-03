@@ -24,7 +24,7 @@ export function SearchInput({ class: class_, onSearch }: SearchInputProps) {
   return (
     <input
       class={className(styles.SearchInput, class_)}
-      type="text"
+      type="search"
       placeholder="Search..."
       onInput={onInput}
     />
