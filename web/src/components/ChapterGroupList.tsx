@@ -1,10 +1,9 @@
-import { createSignal, For } from 'solid-js'
-import { SearchInput } from './SearchInput'
+import { For } from 'solid-js'
 import { ChapterGroup } from './ChapterGroup'
 import { useApi } from './ApiContext'
-import { groupByBook, groupByDay } from '../utils/groupUtils'
-import styles from './ChapterGroupList.module.css'
+import { groupByBook } from '../utils/groupUtils'
 import type { Tag } from '../data/model'
+import styles from './ChapterGroupList.module.css'
 
 const OT_NT = {
   OT: 3,
@@ -14,8 +13,7 @@ const OT_NT = {
 export function ChapterGroupList() {
   const api = useApi()
 
-  const [searchText, setSearchText] = createSignal('')
-  const searchTextUc = () => searchText().toUpperCase()
+  const searchTextUc = () => api.searchText().toUpperCase()
 
   const chapters = api.getChapterData()
   const chapterGroupsRecord = groupByBook(chapters)
@@ -23,7 +21,7 @@ export function ChapterGroupList() {
   const groupNames = Object.keys(chapterGroupsRecord)
 
   const filteredGroupNames = () =>
-    searchText() === ''
+    searchTextUc() === ''
       ? groupNames
       : groupNames.filter(
           (groupName) =>
@@ -34,35 +32,24 @@ export function ChapterGroupList() {
 
   return (
     <div class={styles.ChapterGroupList}>
-      <SearchInput class={styles.search} onSearch={setSearchText} />
-      <label class={styles.showCompleted}>
-        <input
-          type="checkbox"
-          checked={api.showCompleted()}
-          onChange={() => api.toggleShowCompleted()}
-        />
-        Show Completed
-      </label>
-      <div class={styles.scroll}>
-        <ul>
-          <For each={filteredGroupNames()}>
-            {(groupName) => {
-              const chapters = chapterGroupsRecord[groupName]
-              return (
-                <li>
-                  <ChapterGroup
-                    data={{
-                      name: groupName,
-                      chapters,
-                    }}
-                    searchTextUc={searchTextUc()}
-                  />
-                </li>
-              )
-            }}
-          </For>
-        </ul>
-      </div>
+      <ul>
+        <For each={filteredGroupNames()}>
+          {(groupName) => {
+            const chapters = chapterGroupsRecord[groupName]
+            return (
+              <li>
+                <ChapterGroup
+                  data={{
+                    name: groupName,
+                    chapters,
+                  }}
+                  searchTextUc={searchTextUc()}
+                />
+              </li>
+            )
+          }}
+        </For>
+      </ul>
     </div>
   )
 }

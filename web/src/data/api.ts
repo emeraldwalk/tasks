@@ -15,12 +15,7 @@ import {
   initDb,
   updateSettings,
 } from './indexDb'
-import {
-  createEffect,
-  createSignal,
-  type Accessor,
-  type Setter,
-} from 'solid-js'
+import { createSignal, type Accessor, type Setter } from 'solid-js'
 import { getChapterData, getTagsData } from '../utils/dataUtils'
 
 export class Api {
@@ -45,6 +40,12 @@ export class Api {
     this._settingsData = settingsData
     this._tagsData = tagsData
 
+    // searchText signal
+    const [searchText, setSearchText] = createSignal('')
+    this.searchText = searchText
+    this.setSearchText = setSearchText
+
+    // showCompleted signal
     const [showCompleted, setShowCompleted] = createSignal(
       settingsData.showCompleted,
     )
@@ -64,6 +65,8 @@ export class Api {
   private readonly _setShowCompleted: Setter<boolean>
   private readonly _setTimeStampData: Setter<TimeStampData>
 
+  readonly searchText: Accessor<string>
+  readonly setSearchText: Setter<string>
   readonly showCompleted: Accessor<boolean>
   readonly timeStampData: Accessor<TimeStampData>
 

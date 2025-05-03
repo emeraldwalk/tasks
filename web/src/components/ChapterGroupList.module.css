@@ -1,22 +1,6 @@
 .ChapterGroupList {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  .search {
-    margin: 1rem;
-  }
-  .showCompleted {
-    display: flex;
-    justify-content: end;
-    margin: 0 1rem 0.5rem;
-  }
-  .scroll {
-    overflow-y: auto;
-    border-top: 1px solid #ccc;
-    padding-top: 0.5rem;
-  }
   ul {
-    padding: 0 1rem;
+    /* padding: 0 1rem; */
     > li {
       min-height: 36px;
     }

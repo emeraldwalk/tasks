@@ -1,0 +1,42 @@
+import { type JSX } from 'solid-js'
+import { SearchInput } from './SearchInput'
+import { useApi } from './ApiContext'
+import styles from './Layout.module.css'
+import { A, useLocation } from '@solidjs/router'
+
+export interface LayoutProps {
+  children?: JSX.Element
+}
+
+export function Layout(props: LayoutProps) {
+  const api = useApi()
+  const location = useLocation()
+
+  const isSettings = () => location.pathname.endsWith('/settings')
+
+  return (
+    <div class={styles.Layout}>
+      <header class={styles.header}>
+        <SearchInput class={styles.search} onSearch={api.setSearchText} />
+        <label class={styles.showCompleted}>
+          <input
+            type="checkbox"
+            checked={api.showCompleted()}
+            onChange={() => api.toggleShowCompleted()}
+          />
+          Show Completed
+        </label>
+        {isSettings() ? (
+          <A href="/">
+            <ion-icon name="close" size="large"></ion-icon>
+          </A>
+        ) : (
+          <A href="/settings">
+            <ion-icon name="settings" size="large"></ion-icon>
+          </A>
+        )}
+      </header>
+      <main class={styles.main}>{props.children}</main>
+    </div>
+  )
+}
