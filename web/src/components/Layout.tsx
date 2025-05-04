@@ -2,23 +2,19 @@ import { createSignal, Show, type JSX } from 'solid-js'
 import { SearchInput } from './SearchInput'
 import { useApi } from './ApiContext'
 import styles from './Layout.module.css'
-import { A } from '@solidjs/router'
+import { A, type RouteSectionProps } from '@solidjs/router'
 import { PlanSettings } from './PlanSettings'
 import { className } from '../utils/cssUtils'
 import { Icon } from './Icon'
 
-export interface LayoutProps {
-  children?: JSX.Element
-}
-
-export function Layout(props: LayoutProps) {
+export function Layout(props: RouteSectionProps) {
   const api = useApi()
   const [isSettingsOpen, setIsSettingsOpen] = createSignal(false)
 
   return (
     <div class={styles.Layout}>
       <header class={styles.header}>
-        <h1 class={styles.title}>Chapter Plan</h1>
+        <h1 class={styles.title}>Plan</h1>
         <span
           class={className(
             styles.menuTrigger,

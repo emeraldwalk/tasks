@@ -9,6 +9,8 @@ body {
 }
 
 :root {
+  --color-bg: #080;
+  --color-fg: #fff;
   --color-border: #ccc;
   --color-hover: #999;
   --color-link: #0054e9;
