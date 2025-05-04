@@ -5,6 +5,7 @@ import styles from './Layout.module.css'
 import { A } from '@solidjs/router'
 import { PlanSettings } from './PlanSettings'
 import { className } from '../utils/cssUtils'
+import { Icon } from './Icon'
 
 export interface LayoutProps {
   children?: JSX.Element
@@ -26,9 +27,7 @@ export function Layout(props: LayoutProps) {
           onClick={() => {
             setIsSettingsOpen(!isSettingsOpen())
           }}>
-          <ion-icon
-            name={isSettingsOpen() ? 'close' : 'menu'}
-            size="large"></ion-icon>
+          <Icon name={isSettingsOpen() ? 'close' : 'menu'} size="large" />
         </span>
         <SearchInput class={styles.search} onSearch={api.setSearchText} />
         <label class={styles.showCompleted}>
@@ -48,13 +47,13 @@ export function Layout(props: LayoutProps) {
       <main class={styles.main}>{props.children}</main>
       <footer class={styles.tabBar}>
         <A href="/" end activeClass={styles.activeTab}>
-          <ion-icon name="book-outline" size="large"></ion-icon>
+          <Icon name="book-outline" size="large" />
         </A>
         <A href="/plan" activeClass={styles.activeTab}>
-          <ion-icon name="list-outline" size="large"></ion-icon>
+          <Icon name="list-outline" size="large" />
         </A>
         <A href="/history" activeClass={styles.activeTab}>
-          <ion-icon name="time-outline" size="large"></ion-icon>
+          <Icon name="time-outline" size="large" />
         </A>
       </footer>
     </div>

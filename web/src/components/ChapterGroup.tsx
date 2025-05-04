@@ -6,6 +6,7 @@ import { className } from '../utils/cssUtils'
 import { Chapter } from './Chapter'
 import { useApi } from './ApiContext'
 import { CheckMark } from './CheckMark'
+import { Icon } from './Icon'
 
 export interface ChapterGroupProps {
   data: ChapterGroupData
@@ -66,9 +67,7 @@ export function ChapterGroup(props: ChapterGroupProps) {
         <CheckMark state={completionStatus()} />
         <span class={styles.label}>{props.data.name}</span>
         {chapters().length}
-        <ion-icon
-          class={accordionStyles.icon}
-          name="chevron-down-sharp"></ion-icon>
+        <Icon class={accordionStyles.icon} name="chevron-down-sharp" />
       </span>
 
       <ol class={className(styles.chapterList, accordionStyles.content)}>

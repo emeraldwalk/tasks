@@ -1,5 +1,6 @@
 import { className } from '../utils/cssUtils'
 import styles from './CheckMark.module.css'
+import { Icon } from './Icon'
 
 export interface CheckMarkProps {
   state: 'complete' | 'incomplete' | 'partial'
@@ -11,7 +12,7 @@ export function CheckMark(props: CheckMarkProps) {
     <span
       class={className(styles.CheckMark, styles[props.state])}
       onClick={props.onClick}>
-      <ion-icon
+      <Icon
         name={
           props.state === 'complete'
             ? 'checkmark-circle'
@@ -19,7 +20,8 @@ export function CheckMark(props: CheckMarkProps) {
             ? 'remove-circle'
             : 'ellipse-outline'
         }
-        size="large"></ion-icon>
+        size="large"
+      />
     </span>
   )
 }

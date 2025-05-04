@@ -6,6 +6,7 @@ import { mmDD, now } from '../utils/dateUtils'
 import type { ChapterData, ISODateTimeString } from '../data/model'
 import { useApi } from './ApiContext'
 import { CheckMark } from './CheckMark'
+import { Icon } from './Icon'
 
 export interface ChapterProps {
   data: ChapterData
@@ -65,7 +66,7 @@ export function Chapter(props: ChapterProps) {
       </span>
       <span class={styles.expander} onClick={onExpanderClick}>
         <span class={styles.count}>({dates().length})</span>
-        <ion-icon name="chevron-down-sharp"></ion-icon>
+        <Icon class={styles.icon} name="chevron-down-sharp" />
       </span>
       <div class={className(styles.dateList, accordionStyles.content)}>
         <Show when={isExpanded()}>

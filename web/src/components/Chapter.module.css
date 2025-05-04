@@ -15,6 +15,9 @@
   }
   .expander {
     justify-content: end;
+    .icon {
+      display: none;
+    }
   }
 
   .label {
@@ -23,10 +26,6 @@
   }
 
   .count {
-    display: none;
-  }
-
-  ion-icon[name='chevron-down-sharp'] {
     display: none;
   }
 
@@ -63,7 +62,7 @@
     .count {
       display: block;
     }
-    ion-icon[name='chevron-down-sharp'] {
+    .expander .icon {
       display: block;
     }
   }
