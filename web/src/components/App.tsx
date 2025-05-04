@@ -1,11 +1,8 @@
 import { createResource, Show, type Component } from 'solid-js'
-import { Route, Router } from '@solidjs/router'
 import { Api } from '../data/api'
 import { ApiProvider } from './ApiContext'
 import styles from './App.module.css'
-import { Layout } from './Layout'
-import { ChapterGroupList } from './ChapterGroupList'
-import { HistoryList } from './HistoryList'
+import { AppRouter } from './AppRouter'
 
 export const App: Component = () => {
   const [api] = createResource(Api.create)
@@ -14,11 +11,7 @@ export const App: Component = () => {
     <div class={styles.App}>
       <Show when={api()}>
         <ApiProvider value={api()}>
-          <Router base={import.meta.env.BASE_URL} root={Layout}>
-            <Route path="/" component={ChapterGroupList} />
-            <Route path="/plan" component={ChapterGroupList} />
-            <Route path="/history" component={HistoryList} />
-          </Router>
+          <AppRouter />
         </ApiProvider>
       </Show>
     </div>

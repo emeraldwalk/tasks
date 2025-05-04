@@ -1,40 +1,25 @@
-import { createMemo, For } from 'solid-js'
+import { For } from 'solid-js'
 import { ChapterGroup } from './ChapterGroup'
 import { useApi } from './ApiContext'
-import { groupByBook, groupByDay } from '../utils/groupUtils'
-import type { Tag } from '../data/model'
+import type { ChapterData } from '../data/model'
 import styles from './ChapterGroupList.module.css'
-import { useLocation } from '@solidjs/router'
 
-const OT_NT = {
-  OT: 3,
-  NT: 2,
-} as Record<Tag, number>
+export interface ChapterGroupListProps {
+  data: Record<string, ChapterData[]>
+}
 
-export function ChapterGroupList() {
+export function ChapterGroupList(props: ChapterGroupListProps) {
   const api = useApi()
-  const location = useLocation()
 
   const searchTextUc = () => api.searchText().toUpperCase()
-
-  const chapters = api.getChapterData()
-
-  const bookGroups = createMemo(() => groupByBook(chapters))
-  const planGroups = createMemo(() =>
-    groupByDay(chapters, api.getTags(), OT_NT),
-  )
-
-  const chapterGroupsRecord = () =>
-    location.pathname.endsWith('/plan') ? planGroups() : bookGroups()
-
-  const groupNames = Object.keys(chapterGroupsRecord())
+  const groupNames = () => Object.keys(props.data)
 
   const filteredGroupNames = () =>
     searchTextUc() === ''
-      ? groupNames
-      : groupNames.filter(
+      ? groupNames()
+      : groupNames().filter(
           (groupName) =>
-            chapterGroupsRecord()[groupName].filter((ch) =>
+            props.data[groupName].filter((ch) =>
               ch.name.toUpperCase().includes(searchTextUc()),
             ).length > 0,
         )
@@ -44,7 +29,7 @@ export function ChapterGroupList() {
       <ul>
         <For each={filteredGroupNames()}>
           {(groupName) => {
-            const chapters = chapterGroupsRecord()[groupName]
+            const chapters = props.data[groupName]
             return (
               <li>
                 <ChapterGroup
