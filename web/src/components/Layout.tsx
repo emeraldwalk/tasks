@@ -10,11 +10,12 @@ import { Icon } from './Icon'
 export function Layout(props: RouteSectionProps) {
   const api = useApi()
   const [isSettingsOpen, setIsSettingsOpen] = createSignal(false)
-
+  const title = () =>
+    props.location.pathname.endsWith('/plan') ? 'Reading Plan' : 'Books'
   return (
     <div class={styles.Layout}>
       <header class={styles.header}>
-        <h1 class={styles.title}>Plan</h1>
+        <h1 class={styles.title}>{title()}</h1>
         <span
           class={className(
             styles.menuTrigger,
