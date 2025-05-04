@@ -18,9 +18,8 @@ export function groupByDay(
   tagRecord: TagRecord,
   tagPerDay: Record<Tag, number>,
 ): Record<string, ChapterData[]> {
+  console.log('[groupByDay]', { chapters, tagRecord, tagPerDay })
   const groups: Record<string, ChapterData[]> = {}
-
-  console.log('[TESTING]', { chapters, tags: tagRecord, tagPerDay })
 
   const dayTags = keys(tagPerDay)
 
