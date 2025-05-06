@@ -26,15 +26,15 @@ export function Layout(props: RouteSectionProps) {
           }}>
           <Icon name={isSettingsOpen() ? 'close' : 'menu'} size="large" />
         </span>
-        <SearchInput class={styles.search} onSearch={api.setSearchText} />
         <label class={styles.showCompleted}>
           <input
             type="checkbox"
             checked={api.showCompleted()}
             onChange={() => api.toggleShowCompleted()}
           />
-          Show Completed
+          Completed
         </label>
+        <SearchInput class={styles.search} onSearch={api.setSearchText} />
       </header>
       <Show when={isSettingsOpen()}>
         <aside class={styles.sidebar}>

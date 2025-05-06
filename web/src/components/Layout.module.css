@@ -9,7 +9,7 @@
     border-bottom: 1px solid var(--color-border);
     align-items: center;
     grid-template-columns: auto 1fr;
-    padding: 20px 1rem 0 0;
+    padding: 20px 1rem 20px 0;
   }
   .title {
     color: var(--color-fg);
@@ -23,7 +23,8 @@
   .showCompleted {
     display: flex;
     height: 36px;
-    grid-column: span 2;
+    grid-row: 1;
+    grid-column: 1 / span 2;
     align-items: center;
     justify-self: end;
   }
@@ -39,7 +40,8 @@
     width: 64px;
     height: 44px;
     &.isSettingsOpen {
-      z-index: 2;
+      background-color: unset;
+      z-index: 3;
     }
   }
   .search {
@@ -56,7 +58,7 @@
     position: absolute;
     padding: 0.5rem 1rem;
     height: 100vh;
-    z-index: 1;
+    z-index: 2;
   }
   .tabBar {
     border-top: 1px solid var(--color-border);
