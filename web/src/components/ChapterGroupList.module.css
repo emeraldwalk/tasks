@@ -1,8 +1,5 @@
 .ChapterGroupList {
-  ul {
-    /* padding: 0 1rem; */
-    > li {
-      min-height: 36px;
-    }
+  .group:last-child {
+    --is-last-item: 0;
   }
 }

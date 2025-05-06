@@ -31,7 +31,7 @@ export function ChapterGroupList(props: ChapterGroupListProps) {
           {(groupName) => {
             const chapters = props.data[groupName]
             return (
-              <li>
+              <li class={styles.group}>
                 <ChapterGroup
                   data={{
                     name: groupName,

@@ -1,9 +1,11 @@
 .Chapter {
+  background-color: #f0fff0;
   display: grid;
   align-items: center;
   grid-template-columns: auto 1fr;
   row-gap: 0.5rem;
   column-gap: 0.5rem;
+  padding: 0 var(--item-padding-h);
 
   .header,
   .expander {

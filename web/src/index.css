@@ -15,7 +15,8 @@ body {
   --color-hover: #999;
   --color-link: #0054e9;
   --button-height: 36px;
-  --item-height: 36px;
+  --item-height: 44px;
+  --item-padding-h: 1rem;
 }
 
 *,
