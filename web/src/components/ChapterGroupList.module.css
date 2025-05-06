@@ -1,4 +1,5 @@
 .ChapterGroupList {
+  position: relative;
   .group:last-child {
     --is-last-item: 0;
   }
