@@ -26,7 +26,9 @@ export function AppRouter() {
     <Router base={import.meta.env.BASE_URL} root={Layout}>
       <Route
         path="/"
-        component={() => <ChapterGroupList data={bookGroups} />}
+        component={() => (
+          <ChapterGroupList data={bookGroups} sortProgressToTop />
+        )}
       />
       <Route
         path="/plan"

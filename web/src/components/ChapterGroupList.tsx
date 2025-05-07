@@ -5,6 +5,7 @@ import type { ChapterData } from '../data/model'
 import styles from './ChapterGroupList.module.css'
 
 export interface ChapterGroupListProps {
+  sortProgressToTop?: boolean
   data: Record<string, ChapterData[]>
 }
 
@@ -24,10 +25,19 @@ export function ChapterGroupList(props: ChapterGroupListProps) {
             ).length > 0,
         )
 
+  const sortedGroupNames = () =>
+    props.sortProgressToTop
+      ? filteredGroupNames().toSorted((a, b) => {
+          const aCount = api.completeCount(props.data[a]) > 0
+          const bCount = api.completeCount(props.data[b]) > 0
+          return Number(bCount) - Number(aCount)
+        })
+      : filteredGroupNames()
+
   return (
     <div class={styles.ChapterGroupList}>
       <ul>
-        <For each={filteredGroupNames()}>
+        <For each={sortedGroupNames()}>
           {(groupName) => {
             const chapters = props.data[groupName]
             return (
