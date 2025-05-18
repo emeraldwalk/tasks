@@ -11,7 +11,11 @@ export function Layout(props: RouteSectionProps) {
   const api = useApi()
   const [isSettingsOpen, setIsSettingsOpen] = createSignal(false)
   const title = () =>
-    props.location.pathname.endsWith('/plan') ? 'Reading Plan' : 'Books'
+    props.location.pathname.endsWith('/plan')
+      ? 'Plan'
+      : props.location.pathname.endsWith('/history')
+      ? 'History'
+      : 'Books'
   return (
     <div class={styles.Layout}>
       <header class={styles.header}>

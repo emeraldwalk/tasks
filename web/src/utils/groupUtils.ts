@@ -1,16 +1,15 @@
-import type { ChapterData, Tag, TagRecord } from '../data/model'
+import type { BookName, ChapterData, Tag, TagRecord } from '../data/model'
 import { keys } from './dataUtils'
-import { range } from './rangeUtils'
 
 export function groupByBook(
   data: ChapterData[],
-): Record<string, ChapterData[]> {
+): Record<BookName, ChapterData[]> {
   return data.reduce((acc, chapter) => {
     const { name } = chapter
     acc[name] = acc[name] || []
     acc[name].push(chapter)
     return acc
-  }, {} as Record<string, ChapterData[]>)
+  }, {} as Record<BookName, ChapterData[]>)
 }
 
 export function groupByDay(

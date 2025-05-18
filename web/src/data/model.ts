@@ -8,6 +8,7 @@ export type BookAbbrev = Brand<'BookAbbrev'>
 export type ChapterID = Brand<'ChapterID', number>
 export type ISODateTimeString = Brand<'ISODateTimeString'>
 export type MMDD = `${number}/${number}`
+export type MMDDYYYY = `${number}/${number}/${number}`
 export type Tag = Brand<'Tag'>
 
 export interface BookData {
@@ -39,6 +40,12 @@ export interface PerDayTagData {
 }
 
 export interface TimeStampData {
+  date: ISODateTimeString
+  book: BookAbbrev
+  chapter: ChapterID
+}
+
+export interface TimeStampMap {
   [bookId: BookAbbrev]: {
     [chapterId: ChapterID]: {
       [date: ISODateTimeString]: boolean

@@ -3,13 +3,13 @@ import type {
   ChapterID,
   ISODateTimeString,
   SettingsData,
-  TimeStampData,
+  TimeStampMap,
 } from './model'
 
 const SETTINGS_STORE_NAME = 'settings'
 const TIMESTAMPS_STORE_NAME = 'timestamps'
 
-type Key = `${ISODateTimeString}_${BookAbbrev}_${ChapterID}`
+export type TimeStampKey = `${ISODateTimeString}_${BookAbbrev}_${ChapterID}`
 
 interface SettingsRecord {
   id: '1'
@@ -17,18 +17,20 @@ interface SettingsRecord {
 }
 
 interface TimestampRecord {
-  id: Key
+  id: TimeStampKey
 }
 
 function createKey(
   date: ISODateTimeString,
   book: BookAbbrev,
   chapter: ChapterID,
-): Key {
+): TimeStampKey {
   return `${date}_${book}_${chapter}`
 }
 
-function parseKey(key: Key): [ISODateTimeString, BookAbbrev, ChapterID] {
+function parseKey(
+  key: TimeStampKey,
+): [ISODateTimeString, BookAbbrev, ChapterID] {
   return key.split('_') as [ISODateTimeString, BookAbbrev, ChapterID]
 }
 
@@ -164,17 +166,15 @@ export async function getSettingsData(db: IDBDatabase): Promise<SettingsData> {
 }
 
 /** Get timestamp data */
-export async function getTimeStampData(
-  db: IDBDatabase,
-): Promise<TimeStampData> {
-  const { promise, resolve, reject } = Promise.withResolvers<TimeStampData>()
+export async function getTimeStampMap(db: IDBDatabase): Promise<TimeStampMap> {
+  const { promise, resolve, reject } = Promise.withResolvers<TimeStampMap>()
 
   const transaction = db.transaction([TIMESTAMPS_STORE_NAME], 'readonly')
   const store = transaction.objectStore(TIMESTAMPS_STORE_NAME)
   // const keyRange = IDBKeyRange.bound(`${book}-`, `${book}.\uffff`) // Match all keys starting with "book-"
   // const request = store.openCursor(keyRange)
   const request = store.openCursor()
-  const result: TimeStampData = {}
+  const result: TimeStampMap = {}
 
   request.onsuccess = (event) => {
     const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result

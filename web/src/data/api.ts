@@ -2,37 +2,38 @@ import type {
   BookAbbrev,
   ChapterID,
   ISODateTimeString,
-  TimeStampData,
+  TimeStampMap,
   ChapterData,
   TagRecord,
   SettingsData,
   PerDayTagData,
   Tag,
+  TimeStampData,
 } from './model'
 import {
   addTimestamp,
   deleteTimeStamp,
   getSettingsData,
-  getTimeStampData,
+  getTimeStampMap,
   initDb,
   updateSettings,
 } from './indexDb'
 import { createSignal, type Accessor, type Setter } from 'solid-js'
-import { getChapterData, getTagsData } from '../utils/dataUtils'
+import { getChapterData, getTagsData, keys } from '../utils/dataUtils'
 
 export class Api {
   static create = async (): Promise<Api> => {
     const db = await initDb()
-    const data = await getTimeStampData(db)
+    const timeStampMap = await getTimeStampMap(db)
     const chapterData = getChapterData()
     const settingsData = await getSettingsData(db)
     const tagsData = getTagsData()
-    return new Api(db, data, chapterData, settingsData, tagsData)
+    return new Api(db, timeStampMap, chapterData, settingsData, tagsData)
   }
 
   constructor(
     db: IDBDatabase,
-    timeStampData: TimeStampData,
+    timeStampMap: TimeStampMap,
     chapterData: ChapterData[],
     settingsData: SettingsData,
     tagsData: TagRecord,
@@ -69,9 +70,9 @@ export class Api {
     this._setShowCompleted = setShowCompleted
 
     // Always signal when set so we can tell UI when properties change
-    const [ts, setTs] = createSignal(timeStampData, { equals: false })
-    this.timeStampData = ts
-    this._setTimeStampData = setTs
+    const [ts, setTs] = createSignal(timeStampMap, { equals: false })
+    this.timeStampMap = ts
+    this._setTimeStampMap = setTs
   }
 
   private readonly _db: IDBDatabase
@@ -79,14 +80,14 @@ export class Api {
   private readonly _settingsData: SettingsData
   private readonly _tagsData: TagRecord
   private readonly _setShowCompleted: Setter<boolean>
-  private readonly _setTimeStampData: Setter<TimeStampData>
+  private readonly _setTimeStampMap: Setter<TimeStampMap>
 
   readonly perDayTagData: Accessor<PerDayTagData[]>
   readonly setPerDayTagData: Setter<PerDayTagData[]>
   readonly searchText: Accessor<string>
   readonly setSearchText: Setter<string>
   readonly showCompleted: Accessor<boolean>
-  readonly timeStampData: Accessor<TimeStampData>
+  readonly timeStampMap: Accessor<TimeStampMap>
 
   getChapterData = (): ChapterData[] => {
     return this._chapterData
@@ -97,8 +98,33 @@ export class Api {
     number,
   }: Pick<ChapterData, 'abbrev' | 'number'>): ISODateTimeString[] => {
     return Object.keys(
-      this.timeStampData()[abbrev]?.[number] ?? {},
+      this.timeStampMap()[abbrev]?.[number] ?? {},
     ) as ISODateTimeString[]
+  }
+
+  getTimeStampData = (): TimeStampData[] => {
+    const timeStampMap = this.timeStampMap()
+
+    const timeStampData: TimeStampData[] = []
+
+    for (const book of keys(timeStampMap)) {
+      const chapters = timeStampMap[book]
+
+      for (const chapterId of keys(chapters)) {
+        const chapter = +chapterId as ChapterID
+        const dates = chapters[chapter]
+
+        for (const date of keys(dates)) {
+          timeStampData.push({
+            date,
+            book,
+            chapter,
+          })
+        }
+      }
+    }
+
+    return timeStampData
   }
 
   getSettings = () => {
@@ -125,12 +151,12 @@ export class Api {
     chapter: ChapterID,
     date: ISODateTimeString,
   ) => {
-    const timeStampData = this.timeStampData()
-    timeStampData[book] = timeStampData[book] || {}
-    timeStampData[book][chapter] = timeStampData[book][chapter] || {}
-    timeStampData[book][chapter][date] = true
+    const timeStampMap = this.timeStampMap()
+    timeStampMap[book] = timeStampMap[book] || {}
+    timeStampMap[book][chapter] = timeStampMap[book][chapter] || {}
+    timeStampMap[book][chapter][date] = true
 
-    this._setTimeStampData(timeStampData)
+    this._setTimeStampMap(timeStampMap)
 
     await addTimestamp(await this._db, book, chapter, date)
   }
@@ -140,9 +166,9 @@ export class Api {
     chapter: ChapterID,
     date: ISODateTimeString,
   ) => {
-    if (this.timeStampData()[book][chapter][date]) {
-      delete this.timeStampData()[book][chapter][date]
-      this._setTimeStampData(this.timeStampData())
+    if (this.timeStampMap()[book][chapter][date]) {
+      delete this.timeStampMap()[book][chapter][date]
+      this._setTimeStampMap(this.timeStampMap())
     }
     deleteTimeStamp(this._db, book, chapter, date)
   }

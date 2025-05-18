@@ -9,6 +9,16 @@ import type {
 import rawBibleBookMeta from '../data/chapters.txt?raw'
 import tagsData from '../data/tags.txt?raw'
 
+export function getBookNamesMap(
+  chapters: ChapterData[],
+): Record<BookAbbrev, BookName> {
+  const bookNamesMap: Record<BookAbbrev, BookName> = {}
+  for (const chapter of chapters) {
+    bookNamesMap[chapter.abbrev] = chapter.name
+  }
+  return bookNamesMap
+}
+
 export function getChapterData(): ChapterData[] {
   const lines = rawBibleBookMeta.split('\n')
   const chapters: ChapterData[] = []
@@ -47,8 +57,6 @@ export function getTagsData(): TagRecord {
   return tags
 }
 
-export function keys<TKey extends string | number | symbol>(
-  obj: Record<TKey, unknown>,
-) {
+export function keys<TKey extends string>(obj: Record<TKey, unknown>) {
   return Object.keys(obj) as TKey[]
 }

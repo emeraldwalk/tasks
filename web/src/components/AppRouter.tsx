@@ -2,7 +2,7 @@ import { Route, Router } from '@solidjs/router'
 import { Layout } from './Layout'
 import { ChapterGroupList } from './ChapterGroupList'
 import { HistoryList } from './HistoryList'
-import { getChapterData } from '../utils/dataUtils'
+import { getBookNamesMap, getChapterData } from '../utils/dataUtils'
 import { groupByBook, groupByDay } from '../utils/groupUtils'
 import { useApi } from './ApiContext'
 import { createMemo } from 'solid-js'
@@ -17,6 +17,7 @@ export function AppRouter() {
   const api = useApi()
 
   const chapters = getChapterData()
+  const bookNames = getBookNamesMap(chapters)
   const bookGroups = groupByBook(chapters)
   const planGroups = createMemo(() =>
     groupByDay(chapters, api.getTags(), OT_NT),
@@ -35,7 +36,10 @@ export function AppRouter() {
         component={() => <ChapterGroupList data={planGroups()} />}
       />
 
-      <Route path="/history" component={HistoryList} />
+      <Route
+        path="/history"
+        component={() => <HistoryList data={bookNames} />}
+      />
     </Router>
   )
 }
