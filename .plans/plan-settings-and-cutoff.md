@@ -88,15 +88,22 @@ hasChapterDates = ({ abbrev, number }) => {
 
 ---
 
-## Open Questions
+## Resolved: Persistence & UI Scope
 
-### Q5 — Persist `perDayTagData`?
+### Q5 — Persist `perDayTagData` ✓
 
-Currently resets to `[{tags:['OT'],count:3},{tags:['NT'],count:2}]` on every page load. Should it survive a refresh? Requires an IndexedDB schema bump (v2 → v3).
+All new settings fields (`perDayTagData`, `targetDays`, `cutoffDays`, `cutoffDate`) are added to the existing `settings` singleton record in the `settings` object store. No IndexedDB version bump — new fields are simply absent on existing records and `getSettingsData` fills in defaults. This is safe because we are only adding fields, not restructuring existing ones.
 
-### Q6 — Add/remove plan groups?
+**Current storage layout for reference:**
 
-Should the user be able to add a new tag-group row or delete one from PlanSettings, or is the fixed layout sufficient for now?
+| Store | Key | Contents |
+|-------|-----|----------|
+| `timestamps` | `date_ABBREV_chapter` | One record per chapter read event (all progress data) |
+| `settings` | `"1"` (singleton) | User preferences; gains new plan fields |
+
+### Q6 — Add/remove plan group rows ✓ (deferred)
+
+Add/remove of `PerDayTagData` rows in `PlanSettings` is deferred. The default two rows (OT, NT) are fixed for this feature. Row management will come alongside tag management (a future feature that lets users define which books belong to a tag).
 
 ---
 
