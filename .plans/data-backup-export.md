@@ -13,24 +13,37 @@ All reading history lives in IndexedDB (`BibleReadDB`) in the browser. This data
 
 ---
 
-## Proposed Solution: Manual Export / Import
+## Immediate One-Off Dump (Before Any Code Changes)
 
-A simple JSON export lets the user download a snapshot of their data and restore it later. No backend or third-party service required — consistent with the app's static, offline-first design.
+A console script at `scripts/dump-indexeddb.js` can be pasted into browser DevTools right now — no app changes required.
 
-### Export
+### How to run on iPhone data (recommended path)
 
-Serializes all IndexedDB data to a JSON file and triggers a browser download.
+1. **iPhone**: Settings → Safari → Advanced → Web Inspector: ON
+2. Connect iPhone to Mac via USB; trust the connection when prompted
+3. Open the app in Safari on iPhone (`emeraldwalk.github.io/tasks/`)
+4. **Mac**: Safari → Develop → [your iPhone] → `emeraldwalk.github.io/tasks/`
+5. Paste the contents of `scripts/dump-indexeddb.js` into the Console tab, press Enter
+6. A `.json` download is triggered on the iPhone (Files → Downloads)
+7. The full JSON is also printed to the Mac console — copy it from there if the download doesn't land cleanly
 
-**Export format:**
+The script reads `BibleReadDB` without making any writes.
+
+---
+
+## In-App Backup Feature
+
+### Recommended design
+
+**Format: JSON download + JSON import.** Self-contained, works offline, no backend or third-party service. Consistent with the app's static design.
+
+**Export file format:**
 
 ```json
 {
   "version": 1,
   "exportedAt": "2025-05-24T12:00:00.000Z",
-  "timestamps": [
-    { "date": "2025-01-01T08:00:00.000Z", "book": "GEN", "chapter": 1 },
-    { "date": "2025-01-01T08:05:00.000Z", "book": "MAT", "chapter": 1 }
-  ],
+  "recordCount": 412,
   "settings": {
     "showCompleted": true,
     "targetDays": 365,
@@ -40,110 +53,132 @@ Serializes all IndexedDB data to a JSON file and triggers a browser download.
       { "tags": ["OT"], "count": 3 },
       { "tags": ["NT"], "count": 2 }
     ]
-  }
+  },
+  "timestamps": [
+    { "date": "2025-01-01T08:00:00.000Z", "book": "GEN", "chapter": 1 }
+  ]
 }
 ```
 
-The `version` field guards against future format changes.
+The `version` field guards against future format changes — import logic can branch on it.
 
-**Mechanism:** Use `URL.createObjectURL(new Blob([json], { type: 'application/json' }))` and a programmatically clicked `<a download="bible-history-YYYY-MM-DD.json">`. No server involved.
+### Resolved design decisions
 
-### Import
+**Include settings in export (yes).** Full export gives a complete restore point after a device wipe. Settings are small and useful to preserve; a full export is strictly more useful than timestamps-only.
 
-Reads a previously exported JSON file and writes its contents into IndexedDB.
+**Import behavior: merge.** Timestamps are keyed by `date_book_chapter` which is already a natural deduplicator — importing the same record twice is a no-op. Settings are replaced on import. Merge means an old backup cannot wipe newer reads.
 
-**Import behavior options (see Questions):**
+**UI location: new `/settings` route.** The sidebar is plan-focused and already growing. A dedicated Settings page is the right home for data management controls and will absorb future settings without crowding the plan UI. Requires a new tab in the footer and a new route.
 
-- **Merge**: Timestamps are unioned with existing data (same key = deduplicated). Settings are replaced. Safest — no accidental wipe.
-- **Replace**: All existing timestamps deleted first, then import applied. Simpler to implement and reason about.
+### Export mechanism
 
-**Mechanism:** `<input type="file" accept=".json">` → `FileReader` → parse → validate `version` field → write to IndexedDB via existing `addTimestamp` calls (merge) or a new bulk-replace path.
+```ts
+// api.ts
+exportData(): string {
+  const timestamps = this.getTimeStampData()  // already exists
+  const settings = { ...this._settingsData, perDayTagData: this.perDayTagData() }
+  const output = { version: 1, exportedAt: new Date().toISOString(), recordCount: timestamps.length, settings, timestamps }
+  return JSON.stringify(output, null, 2)
+}
+```
+
+Trigger download in component:
+```ts
+const json = api.exportData()
+const blob = new Blob([json], { type: 'application/json' })
+const url = URL.createObjectURL(blob)
+const a = Object.assign(document.createElement('a'), {
+  href: url,
+  download: `bible-history-${new Date().toISOString().slice(0, 10)}.json`,
+})
+a.click()
+URL.revokeObjectURL(url)
+```
+
+### Import mechanism
+
+```ts
+// api.ts
+async importData(file: File): Promise<{ imported: number; skipped: number }> {
+  const text = await file.text()
+  const data = JSON.parse(text)
+  // validate version
+  if (data.version !== 1) throw new Error(`Unknown export version: ${data.version}`)
+  
+  let imported = 0, skipped = 0
+  for (const { date, book, chapter } of data.timestamps) {
+    if (!this.timeStampMap()[book]?.[chapter]?.[date]) {
+      await this.markAsRead(book, chapter, date)
+      imported++
+    } else {
+      skipped++
+    }
+  }
+  // replace settings if present
+  if (data.settings) { /* apply each settings field */ }
+  return { imported, skipped }
+}
+```
+
+Import UI: `<input type="file" accept=".json">` → read → show confirmation with `{ imported, skipped }` counts before committing (or show result after).
 
 ---
 
-## iOS-Specific Considerations
+## iOS Storage Risk Mitigations
 
-### Install to home screen
+### Call `storage.persist()` on startup
 
-When installed as a PWA (Add to Home Screen), iOS grants the app persistent storage that is exempt from the 7-day inactivity eviction applied to regular browser tabs. The app already has a web manifest (`site.webmanifest`) and icons configured.
+Request durable storage as a best-effort measure on first load. Safari support is partial but harmless to call:
 
-**Recommendation:** Add a soft prompt in the app (dismissible, shown once) that explains the storage risk and suggests installing to the home screen. Only show it on iOS Safari where the risk is highest.
+```ts
+// index.tsx or App.tsx, once on mount
+navigator.storage?.persist?.()
+```
 
-Detection:
+### iOS install-to-home-screen prompt
+
+Installed PWAs on iOS get persistent storage exempt from the 7-day inactivity eviction. Show a one-time dismissible prompt on iOS Safari when not installed:
 
 ```ts
 const isIosSafari = /iP(hone|ad|od)/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent)
 const isInstalled = window.matchMedia('(display-mode: standalone)').matches
-const shouldPrompt = isIosSafari && !isInstalled
 ```
 
-### Storage persistence API
-
-Modern browsers support `navigator.storage.persist()` which requests durable storage (prevents eviction). Safari added partial support but it is not reliable on iOS. Worth calling on startup as a best-effort measure:
-
-```ts
-if (navigator.storage?.persist) {
-  navigator.storage.persist()  // fire-and-forget; no UI needed
-}
-```
-
----
-
-## UI Placement
-
-Export and Import controls belong in the `PlanSettings` sidebar (the only existing settings surface) or in a new dedicated Settings route. 
-
-Two options (see Questions):
-
-**Option A — In the existing sidebar (`PlanSettings`):**
-```
-[Export history]   [Import]
-```
-Low friction to add, but the sidebar is already plan-focused.
-
-**Option B — New `/settings` route:**
-Separates data management from plan configuration. Requires a new tab in the footer nav and a new route.
+Store dismissal in `localStorage` (not IndexedDB — `localStorage` is more durable on iOS and survives IndexedDB eviction in practice, though neither is guaranteed).
 
 ---
 
 ## Open Questions
 
-### Q1 — Import behavior: merge or replace?
+### Q4 — Show iOS install prompt?
 
-- **Merge** is safer for the user (can't accidentally wipe data) but requires deduplication logic on import.
-- **Replace** is simpler and predictable ("this file is now my data") but risks data loss if the user imports an old backup.
+A one-time nudge ("Add to Home Screen to protect your data") on iOS Safari. Low implementation cost, meaningful risk reduction. Recommend yes.
 
-Recommendation: merge, since the timestamp key is already a natural deduplicator (`date_book_chapter`).
+### Q5 — Periodic export reminder?
 
-### Q2 — Settings included in export?
-
-Should the export file include settings (`showCompleted`, `perDayTagData`, `targetDays`, cutoff fields) or just timestamps?
-
-- **Timestamps only**: Simpler; settings are easy to re-configure; avoids restoring stale plan config.
-- **Everything**: Full restore to a known state; more useful after a device wipe.
-
-### Q3 — Export/import UI location: sidebar or new settings route?
-
-See options above. A new `/settings` route is cleaner long-term but more work now.
-
-### Q4 — iOS install prompt?
-
-Show a one-time prompt on iOS Safari (non-installed) suggesting the user add to home screen? Would need a dismissal flag stored in `localStorage` (not IndexedDB, to survive a storage eviction).
-
-### Q5 — Backup reminder?
-
-Should the app show a periodic reminder (e.g., once a month) to export? Could be based on last-export timestamp stored in `localStorage`.
+A monthly in-app nudge to export. Could track last-export date in `localStorage`. Lower priority — can be added later without architectural changes.
 
 ---
+
+## Implementation Steps
+
+1. **`data/model.ts`** — Add `ExportFormat` interface matching the JSON structure above.
+2. **`data/api.ts`** — Add `exportData()` and `importData(file)` methods.
+3. **`data/indexDb.ts`** — No changes needed; `addTimestamp` covers import writes.
+4. **`components/AppRouter.tsx`** — Add `/settings` route.
+5. **`components/Layout.tsx`** — Add Settings tab to footer nav; optionally add iOS install prompt.
+6. **`components/Settings.tsx`** (new) — Export button, import file input, result feedback.
+7. **`index.tsx`** — Call `navigator.storage?.persist?.()` on startup.
 
 ## Affected Files
 
 | File | Change |
 |------|--------|
-| `data/api.ts` | Add `exportData()` and `importData(file)` methods |
-| `data/indexDb.ts` | Add `getAllTimestamps()` for export; add bulk-write path for import |
 | `data/model.ts` | Add `ExportFormat` interface |
-| `components/PlanSettings.tsx` | Add export/import buttons (if sidebar approach) |
-| `components/Layout.tsx` | Add iOS install prompt (if Q4 = yes) |
-| `index.tsx` or `App.tsx` | Call `navigator.storage.persist()` on startup |
-| `components/AppRouter.tsx` | Add `/settings` route (if new route approach) |
+| `data/api.ts` | Add `exportData()`, `importData()` |
+| `utils/groupUtils.ts` | No change |
+| `components/AppRouter.tsx` | Add `/settings` route |
+| `components/Layout.tsx` | Add Settings tab; iOS install prompt |
+| `components/Settings.tsx` | New component: export/import UI |
+| `index.tsx` | Call `storage.persist()` on startup |
+| `scripts/dump-indexeddb.js` | One-off console script (no app change needed) |
