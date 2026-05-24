@@ -52,7 +52,6 @@ The `settings` block contains whatever fields exist in `SettingsData` at the tim
   "exportedAt": "2025-05-24T12:00:00.000Z",
   "recordCount": 412,
   "settings": {
-    "showCompleted": true,
     "perDayTagData": [
       { "tags": ["OT"], "count": 3 },
       { "tags": ["NT"], "count": 2 }
@@ -63,6 +62,8 @@ The `settings` block contains whatever fields exist in `SettingsData` at the tim
   ]
 }
 ```
+
+`showCompleted` is not included — it is runtime-only view state that resets to `true` on every load and does not need to be backed up.
 
 After `plan-settings-and-cutoff` is implemented, `targetDays`, `cutoffDays`, and `cutoffDate` will appear in `settings` automatically. The `version` field guards against future format breaks — import logic can branch on it.
 
@@ -139,9 +140,9 @@ async importData(file: File): Promise<{ imported: number; skipped: number }> {
   if (data.settings) {
     const s = data.settings
     // Apply only fields that exist in the current SettingsData shape.
-    // Fields added by later plans (targetDays, cutoffDays, cutoffDate)
-    // are handled here once those plans are implemented.
-    if (s.showCompleted != null) await this.setShowCompleted(s.showCompleted)
+    // Fields added by plan-settings-and-cutoff (targetDays, cutoffDays, cutoffDate)
+    // are handled here once that plan is implemented.
+    // showCompleted is intentionally excluded — it is runtime-only view state.
     if (Array.isArray(s.perDayTagData)) this.setPerDayTagData(s.perDayTagData)
   }
 
@@ -188,7 +189,6 @@ const showPrompt = isIosSafari && !isInstalled
 2. **`data/api.ts`** — Add:
    - `exportData(): string`
    - `async importData(file: File): Promise<{ imported: number; skipped: number }>`
-   - `async setShowCompleted(value: boolean)` — sets signal and persists (complement to the existing `toggleShowCompleted`)
 
 3. **`data/indexDb.ts`** — No changes needed; `addTimestamp` covers import writes, and `updateSettings` covers settings persistence.
 
