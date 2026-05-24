@@ -1,8 +1,10 @@
 # Plan: Data Backup & Export
 
-## Prerequisite
+## Implementation order
 
-**This plan depends on `plan-settings-and-cutoff.md` being implemented first.** The export format includes `targetDays`, `cutoffDays`, `cutoffDate`, and `perDayTagData` which are added to `SettingsData` and `Api` in that plan. Implement this plan against a codebase that already has those changes.
+This plan is **standalone** — implement it before any other plan. Getting a backup mechanism in place first means there is a recovery path before any other code changes touch `indexDb.ts`.
+
+When `plan-settings-and-cutoff.md` is later implemented, its new `SettingsData` fields (`targetDays`, `cutoffDays`, `cutoffDate`) will be included in future exports automatically — `exportData()` spreads `_settingsData` so no changes to this plan's code are needed.
 
 ---
 
@@ -10,20 +12,21 @@
 
 All reading history lives in IndexedDB (`BibleReadDB`) in the browser. This data can be lost:
 
-- **iOS/Safari storage eviction**: Safari can evict origin storage under low-storage conditions. PWAs not installed to the home screen receive the least protection (7-day inactivity eviction applies in some iOS versions).
-- **Browser data cleared**: User clears site data or browser history.
-- **Device replacement**: Moving to a new phone with no data migration.
-- **Browser switch**: Moving from Safari to Chrome or vice versa.
+- **Removing the app from the home screen** — deletes all IndexedDB data immediately, no warning, no recovery. Unlike native apps, PWA uninstall is destructive.
+- **iOS/Safari storage eviction** — Safari can evict origin storage under low-storage conditions.
+- Settings → Safari → Clear History and Website Data
+- Settings → Safari → Advanced → Website Data → deleting the `emeraldwalk.github.io` entry
+- Device wipe, factory reset, or migration to a new device
 
-**Note — republishing is not a risk.** Deploying new app code to GitHub Pages does not affect IndexedDB. The database is tied to the origin (`emeraldwalk.github.io`), not the app files. The only code-side risk is a bad schema migration in `indexDb.ts` (renaming the database or dropping stores in `onupgradeneeded`), which must be guarded carefully when adding new fields.
+**Note — deploying new app code is not a risk in itself.** GitHub Pages deployment only swaps static files on a server; the browser does not wipe IndexedDB when it downloads new JavaScript. The only code-side risk is a bug in `indexDb.ts` that drops or renames existing stores — which must be guarded carefully in any future schema changes.
 
 ---
 
-## Immediate One-Off Dump (Before Any Code Changes)
+## Immediate One-Off Dump (No App Changes Required)
 
-A console script at `scripts/dump-indexeddb.js` can be pasted into browser DevTools right now — no app changes required.
+A console script at `scripts/dump-indexeddb.js` can be pasted into browser DevTools while the app is open.
 
-### How to run on iPhone data (recommended path)
+### How to run on iPhone data
 
 1. **iPhone**: Settings → Safari → Advanced → Web Inspector: ON
 2. Connect iPhone to Mac via USB; trust the connection when prompted
@@ -39,11 +42,9 @@ The script reads `BibleReadDB` without making any writes.
 
 ## In-App Backup Feature
 
-### Recommended design
+### Export file format
 
-**Format: JSON download + JSON import.** Self-contained, works offline, no backend or third-party service. Consistent with the app's static design.
-
-**Export file format:**
+The `settings` block contains whatever fields exist in `SettingsData` at the time. Before `plan-settings-and-cutoff` is implemented this will be:
 
 ```json
 {
@@ -52,9 +53,6 @@ The script reads `BibleReadDB` without making any writes.
   "recordCount": 412,
   "settings": {
     "showCompleted": true,
-    "targetDays": 365,
-    "cutoffDays": null,
-    "cutoffDate": null,
     "perDayTagData": [
       { "tags": ["OT"], "count": 3 },
       { "tags": ["NT"], "count": 2 }
@@ -66,51 +64,68 @@ The script reads `BibleReadDB` without making any writes.
 }
 ```
 
-The `version` field guards against future format changes — import logic can branch on it.
+After `plan-settings-and-cutoff` is implemented, `targetDays`, `cutoffDays`, and `cutoffDate` will appear in `settings` automatically. The `version` field guards against future format breaks — import logic can branch on it.
 
-### Resolved design decisions
+### Where the export goes
 
-**Include settings in export (yes).** Full export gives a complete restore point after a device wipe. Settings are small and useful to preserve; a full export is strictly more useful than timestamps-only.
+**iOS PWA (installed to home screen — the primary use case):** The `<a download>` trick does not reliably trigger a file download in standalone PWA mode on iOS — there is no Safari download manager UI available. Instead, use `navigator.share()` to open the native iOS share sheet. From the share sheet the user can save to Files, Notes, email it to themselves, AirDrop it to a Mac, etc.
 
-**Import behavior: merge.** Timestamps are keyed by `date_book_chapter` which is already a natural deduplicator — importing the same record twice is a no-op. Settings are replaced on import. Merge means an old backup cannot wipe newer reads.
+**Desktop browsers (Chrome, Firefox, Safari on Mac):** `<a download>` works normally and the file goes to the browser's downloads folder. `navigator.share()` is not widely supported on desktop so fall back to `<a download>`.
 
-**UI location: new `/settings` route.** The sidebar is plan-focused and already growing. A dedicated Settings page is the right home for data management controls and will absorb future settings without crowding the plan UI. Requires a new tab in the footer and a new route.
-
-### Export mechanism
+The export function must detect which path to take:
 
 ```ts
-// api.ts
+async function triggerExport(json: string, filename: string): Promise<void> {
+  const file = new File([json], filename, { type: 'application/json' })
+
+  if (navigator.canShare?.({ files: [file] })) {
+    // iOS PWA and iOS Safari — opens native share sheet
+    await navigator.share({ files: [file], title: 'Bible reading backup' })
+  } else {
+    // Desktop browsers
+    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }))
+    const a = Object.assign(document.createElement('a'), { href: url, download: filename })
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+}
+```
+
+Call this from the Settings component's Export button:
+
+```ts
+const json = api.exportData()
+const filename = `bible-history-${new Date().toISOString().slice(0, 10)}.json`
+await triggerExport(json, filename)
+```
+
+### Export method (`api.ts`)
+
+```ts
 exportData(): string {
   const timestamps = this.getTimeStampData()  // already exists
   const settings = { ...this._settingsData, perDayTagData: this.perDayTagData() }
-  const output = { version: 1, exportedAt: new Date().toISOString(), recordCount: timestamps.length, settings, timestamps }
+  const output = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    recordCount: timestamps.length,
+    settings,
+    timestamps,
+  }
   return JSON.stringify(output, null, 2)
 }
 ```
 
-Trigger download in component:
-```ts
-const json = api.exportData()
-const blob = new Blob([json], { type: 'application/json' })
-const url = URL.createObjectURL(blob)
-const a = Object.assign(document.createElement('a'), {
-  href: url,
-  download: `bible-history-${new Date().toISOString().slice(0, 10)}.json`,
-})
-a.click()
-URL.revokeObjectURL(url)
-```
+### Import method (`api.ts`)
 
-### Import mechanism
+Import merges timestamps (deduplicates by key) and replaces settings. Apply only settings fields that have setters — unknown fields from future versions are silently ignored.
 
 ```ts
-// api.ts
 async importData(file: File): Promise<{ imported: number; skipped: number }> {
   const text = await file.text()
   const data = JSON.parse(text)
-  // validate version
   if (data.version !== 1) throw new Error(`Unknown export version: ${data.version}`)
-  
+
   let imported = 0, skipped = 0
   for (const { date, book, chapter } of data.timestamps) {
     if (!this.timeStampMap()[book]?.[chapter]?.[date]) {
@@ -120,44 +135,31 @@ async importData(file: File): Promise<{ imported: number; skipped: number }> {
       skipped++
     }
   }
+
   if (data.settings) {
     const s = data.settings
-    if (s.showCompleted != null) await api.setShowCompleted(s.showCompleted)
-    if (s.targetDays != null) await api.setTargetDays(s.targetDays)
-    if (s.cutoffDays !== undefined) await api.setCutoffDays(s.cutoffDays)
-    if (s.cutoffDate !== undefined) await api.setCutoffDate(s.cutoffDate)
-    if (Array.isArray(s.perDayTagData)) api.setPerDayTagData(s.perDayTagData)
+    // Apply only fields that exist in the current SettingsData shape.
+    // Fields added by later plans (targetDays, cutoffDays, cutoffDate)
+    // are handled here once those plans are implemented.
+    if (s.showCompleted != null) await this.setShowCompleted(s.showCompleted)
+    if (Array.isArray(s.perDayTagData)) this.setPerDayTagData(s.perDayTagData)
   }
+
   return { imported, skipped }
 }
 ```
 
-Import UI: `<input type="file" accept=".json">` hidden, triggered by a visible "Import" button. After import completes, show inline result text: *"Imported 412 records. 3 already existed."* If an error occurs (bad version, invalid JSON), show the error message inline. No modal needed — inline text is sufficient.
+Note: `setShowCompleted` does not currently exist as a standalone setter — `toggleShowCompleted` only toggles. Add a `setShowCompleted(value: boolean)` method to `Api` that sets the signal directly and persists to IndexedDB.
+
+Import UI: `<input type="file" accept=".json">` hidden, triggered by a visible "Import" button. After completion, show inline text: *"Imported 412 records. 3 already existed."* On error (bad version, invalid JSON), show the error message inline. No modal needed.
 
 ---
 
 ## iOS Storage Risk Mitigations
 
-Installing the app to the home screen reduces background eviction risk but does **not** protect against:
-
-- **Removing the app from the home screen** — deletes all IndexedDB data immediately, no warning, no recovery. Unlike native apps, PWA uninstall is destructive.
-- Settings → Safari → Clear History and Website Data
-- Settings → Safari → Advanced → Website Data → deleting the `emeraldwalk.github.io` entry
-- Device wipe, factory reset, or migration to a new device
-
-The in-app export is the only protection against all of these.
-
-### Warn before data loss: export reminder in Settings UI
-
-The Settings page (where export lives) should display a persistent notice:
-
-> **Before removing this app from your home screen, export your data.** Deleting the app also deletes all reading history with no way to recover it.
-
-This should be static text — always visible, not dismissible — since it describes a permanent risk rather than a one-time action.
-
 ### Call `storage.persist()` on startup
 
-Harmless best-effort call; for an installed PWA on modern iOS this will return `true` immediately (storage already persistent), but worth keeping for non-installed contexts:
+Best-effort request for durable storage. For an installed PWA on modern iOS this returns `true` immediately, but worth calling for non-installed contexts:
 
 ```ts
 // index.tsx or App.tsx, once on mount
@@ -166,50 +168,51 @@ navigator.storage?.persist?.()
 
 ### iOS install-to-home-screen prompt
 
-Show a one-time dismissible prompt on iOS Safari when the app is *not* installed to the home screen:
+Show a one-time dismissible banner on iOS Safari when not installed as a PWA. Store the dismissal flag in `localStorage` under key `installPromptDismissed` (not IndexedDB — `localStorage` is slightly more durable in practice).
 
 ```ts
-const isIosSafari = /iP(hone|ad|od)/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent)
+const isIosSafari = /iP(hone|ad|od)/.test(navigator.userAgent)
+  && /WebKit/.test(navigator.userAgent)
+  && !/(CriOS|FxiOS)/.test(navigator.userAgent)
 const isInstalled = window.matchMedia('(display-mode: standalone)').matches
+const showPrompt = isIosSafari && !isInstalled
+  && !localStorage.getItem('installPromptDismissed')
 ```
-
-Store dismissal in `localStorage` (not IndexedDB — `localStorage` is slightly more durable and survives an IndexedDB eviction in practice).
-
----
-
-## Resolved: Remaining Decisions
-
-### Q4 — Show iOS install prompt ✓
-
-Yes. Show a one-time dismissible banner on iOS Safari when the app is not installed to the home screen. Store the dismissal flag in `localStorage` under the key `installPromptDismissed`. Do not show it again once dismissed.
-
-### Q5 — Periodic export reminder ✓ (deferred)
-
-Deferred. Can be added later without architectural changes.
 
 ---
 
 ## Implementation Steps
 
 1. **`data/model.ts`** — Add `ExportFormat` interface matching the JSON structure above.
-2. **`data/api.ts`** — Add `exportData()` and `importData(file)` methods.
-3. **`data/indexDb.ts`** — No changes needed; `addTimestamp` covers import writes.
+
+2. **`data/api.ts`** — Add:
+   - `exportData(): string`
+   - `async importData(file: File): Promise<{ imported: number; skipped: number }>`
+   - `async setShowCompleted(value: boolean)` — sets signal and persists (complement to the existing `toggleShowCompleted`)
+
+3. **`data/indexDb.ts`** — No changes needed; `addTimestamp` covers import writes, and `updateSettings` covers settings persistence.
+
 4. **`components/AppRouter.tsx`** — Add `/settings` route.
-5. **`components/Layout.tsx`** — Add a fourth Settings tab to the footer nav using the `settings-outline` Ionicons icon (same pattern as the existing three tabs). Add the iOS install prompt banner (Q4): detect iOS Safari + not installed, check `localStorage.getItem('installPromptDismissed')`, render a dismissible message if needed.
+
+5. **`components/Layout.tsx`** — Add a fourth Settings tab to the footer nav using the `settings-outline` Ionicons icon (same pattern as the existing three tabs). Add the iOS install prompt banner: detect iOS Safari + not installed + not dismissed, render a dismissible strip with "Add to Home Screen to protect your data" and a dismiss button that sets `localStorage.setItem('installPromptDismissed', '1')`.
+
 6. **`components/Settings.tsx`** (new) — Two sections:
-   - **Data** — Export button (triggers download), Import button (hidden file input), inline result/error text below the import button.
-   - **About** — Static warning text: *"Before removing this app from your home screen, export your data. Deleting the app also deletes all reading history with no way to recover it."*
+   - **Data**: Export button (calls `triggerExport`), Import button (triggers hidden file input), inline result/error text below the import button.
+   - **About**: Static always-visible warning: *"Before removing this app from your home screen, export your data. Deleting the app also deletes all reading history with no way to recover it."*
+
 7. **`index.tsx`** — Call `navigator.storage?.persist?.()` on startup.
+
+---
 
 ## Affected Files
 
 | File | Change |
 |------|--------|
 | `data/model.ts` | Add `ExportFormat` interface |
-| `data/api.ts` | Add `exportData()`, `importData()` |
-| `utils/groupUtils.ts` | No change |
+| `data/api.ts` | Add `exportData()`, `importData()`, `setShowCompleted()` |
+| `data/indexDb.ts` | No change |
 | `components/AppRouter.tsx` | Add `/settings` route |
 | `components/Layout.tsx` | Add Settings tab; iOS install prompt |
-| `components/Settings.tsx` | New component: export/import UI |
+| `components/Settings.tsx` | New component: export/import UI and data loss warning |
 | `index.tsx` | Call `storage.persist()` on startup |
 | `scripts/dump-indexeddb.js` | One-off console script (no app change needed) |
