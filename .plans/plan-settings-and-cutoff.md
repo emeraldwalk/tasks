@@ -23,20 +23,6 @@ const planGroups = createMemo(() =>
 
 `api.perDayTagData` is a live signal that `PlanSettings` writes to, but `AppRouter` ignores it entirely.
 
-### Data model mismatch
-
-`PerDayTagData` (the signal type):
-```ts
-{ tags: Tag[], count: number }  // one count shared across an array of tags
-```
-
-`groupByDay` signature (what AppRouter calls):
-```ts
-tagPerDay: Record<Tag, number>  // one independent count per tag
-```
-
-These are structurally different. Before wiring them together a decision is needed on which model wins (see Questions below).
-
 ### Other gaps in the settings UI
 
 - `TagSelector` number input has no `value` or `onChange` — count changes are lost.
@@ -46,144 +32,176 @@ These are structurally different. Before wiring them together a decision is need
 
 ---
 
-## Proposed Work
+## Resolved Design Decisions
 
-### Part 1 — Wire PlanSettings to plan generation
+### Q1 — Multi-tag group semantics ✓
 
-#### 1a. Decide and fix the data model (see Questions #1)
+Each `PerDayTagData` entry has `tags: Tag[]` and `count: number`. The tags array defines an **ordered concatenated pool**: chapters from each tag are appended in array order to form one sequence. `count` chapters per day are drawn from that sequence.
 
-Assuming the resolution is **one count per group, chapters pooled from all tags in the group**, the transformation from `PerDayTagData[]` → what `groupByDay` needs is either:
+When a pool is exhausted it **loops**. This keeps the daily total consistent across all days. Because the longest pool sets the natural length of the plan, shorter pools will cycle through more than once over the life of the plan.
 
-**Option A** — Transform at the call site, keep `groupByDay` signature as-is:
+Example: `{ tags: ['NT', 'PS'], count: 2 }` means "draw 2 chapters per day from a pool of all NT chapters followed by all PS chapters, looping when the combined pool is exhausted."
+
+A second entry `{ tags: ['OT'], count: 3 }` runs as an independent stream alongside the first.
+
+**Consequence — target days is required.** The current `groupByDay` derives `totalDays` from `ceil(longest tag / count)`, which only works without looping. With looping every stream is infinite, so a separate **target days** value must be specified. This becomes a top-level plan setting (see data model changes below).
+
+**`groupByDay` must be rewritten** to accept `PerDayTagData[]` directly (not `Record<Tag, number>`) so it can build per-entry pooled streams. The old signature is removed.
+
+### Q2 — Cutoff type ✓
+
+Support **both** a rolling window (N days) and a fixed date. Either or both can be active simultaneously. The effective cutoff is the **more recent** of the two active values. If neither is set, all timestamps count.
+
 ```ts
-// flatten: each group's tags all share the same count
-const tagPerDay = api.perDayTagData().reduce((acc, { tags, count }) => {
-  tags.forEach(tag => { acc[tag as Tag] = count })
-  return acc
-}, {} as Record<Tag, number>)
-groupByDay(chapters, api.getTags(), tagPerDay)
+interface CutoffSettings {
+  cutoffDays: number | null   // rolling: now() - N days
+  cutoffDate: string | null   // fixed: specific ISO date string (date only, no time)
+}
 ```
-This loses the pooling concept — each tag still gets its own independent chapter stream.
 
-**Option B** — Change `groupByDay` to accept `PerDayTagData[]` directly, so it can pool chapters from multiple tags into one stream per group:
+Effective cutoff computation:
+
+```ts
+function effectiveCutoff(cutoffDays: number | null, cutoffDate: string | null): string | null {
+  const rolling = cutoffDays != null
+    ? new Date(Date.now() - cutoffDays * 86400000).toISOString().slice(0, 10)
+    : null
+  const candidates = [rolling, cutoffDate].filter(Boolean) as string[]
+  return candidates.length ? candidates.toSorted().at(-1)! : null
+}
+```
+
+### Q3 + Q4 — Cutoff scope ✓
+
+The cutoff affects **both Books and Plan views**. History always shows the full unfiltered log.
+
+`Api.hasChapterDates` is the single gate for completion status in both views. Updating it is sufficient — no component changes needed:
+
+```ts
+hasChapterDates = ({ abbrev, number }) => {
+  const dates = this.getChapterDates({ abbrev, number })
+  const cutoff = this.effectiveCutoff()   // derived from cutoffDays + cutoffDate signals
+  if (!cutoff) return dates.length > 0
+  return dates.some(d => d.slice(0, 10) >= cutoff)
+}
+```
+
+---
+
+## Open Questions
+
+### Q5 — Persist `perDayTagData`?
+
+Currently resets to `[{tags:['OT'],count:3},{tags:['NT'],count:2}]` on every page load. Should it survive a refresh? Requires an IndexedDB schema bump (v2 → v3).
+
+### Q6 — Add/remove plan groups?
+
+Should the user be able to add a new tag-group row or delete one from PlanSettings, or is the fixed layout sufficient for now?
+
+---
+
+## Data Model Changes
+
+### `SettingsData` (new fields)
+
+```ts
+interface SettingsData {
+  showCompleted: boolean
+  targetDays: number          // how many day buckets to generate; default 365
+  cutoffDays: number | null   // rolling window; null = disabled
+  cutoffDate: string | null   // fixed date (YYYY-MM-DD); null = disabled
+}
+```
+
+### `PerDayTagData` — unchanged in shape, clarified semantics
+
+```ts
+interface PerDayTagData {
+  tags: Tag[]    // ordered concatenated pool; chapters drawn in tag-array order
+  count: number  // chapters drawn from this pool per day
+}
+```
+
+### `groupByDay` — new signature
+
 ```ts
 function groupByDay(
   chapters: ChapterData[],
   tagRecord: TagRecord,
   perDayTagData: PerDayTagData[],
+  targetDays: number,
 ): Record<string, ChapterData[]>
 ```
-More correct to the intended semantics, but requires changing the function signature.
 
-#### 1b. Fix TagSelector
+Algorithm sketch:
 
-- Wire `<input type="number" value={props.value.count} onInput={...} onChange={...} />` to call `props.onChange({ ...props.value, count: newCount })`.
-- Add a remove affordance to each tag chip (e.g., an ✕ button) that calls `props.onChange({ ...props.value, tags: tags.filter(t => t !== tagName) })`.
-
-#### 1c. Connect AppRouter
-
-Replace the hardcoded `OT_NT` constant with a reactive read:
-
-```ts
-const planGroups = createMemo(() => {
-  // transform or pass perDayTagData depending on model decision
-  return groupByDay(chapters, api.getTags(), api.perDayTagData())
-})
 ```
+for each entry in perDayTagData:
+  pool = chapters where tagRecord[tag][ch.abbrev] for tag in entry.tags (in order, concatenated)
+  cursor = 0
 
-#### 1d. Add/remove plan groups
-
-Add buttons in `PlanSettings` to append a new empty `PerDayTagData` row and to delete an existing row.
-
-#### 1e. Persist perDayTagData
-
-Add a `perDayTagData` field to the `settings` object store (or a new store). Load it on `Api.create()` and save it on change. Requires an IndexedDB version bump (v2 → v3).
+for day 1..targetDays:
+  group = []
+  for each entry:
+    for i in 0..entry.count-1:
+      group.push(pool[cursor % pool.length])
+      cursor++
+  groups["Day N"] = group
+```
 
 ---
 
-### Part 2 — Sliding cutoff date
+## Implementation Steps
 
-#### Concept
+### Step 1 — Fix `groupByDay` (`utils/groupUtils.ts`)
 
-A cutoff is a point in time before which timestamps do not count for "completion." If a chapter was last read before the cutoff, it shows as unread in the Plan and Books views.
+- Replace `tagPerDay: Record<Tag, number>` parameter with `perDayTagData: PerDayTagData[], targetDays: number`.
+- Build one pooled chapter array per entry (tags concatenated in order).
+- Loop each pool using `cursor % pool.length`.
+- Iterate exactly `targetDays` times.
+- Remove the debug `console.log`.
 
-#### Where it lives
+### Step 2 — Extend settings schema (`data/model.ts`, `data/indexDb.ts`)
 
-- Stored in the `settings` object store alongside `showCompleted`.
-- Exposed on `Api` as a reactive signal `cutoffDate: Accessor<ISODateTimeString | null>` (null = no cutoff, all reads count).
-- UI control in `PlanSettings` sidebar.
+- Add `targetDays`, `cutoffDays`, `cutoffDate` to `SettingsData`.
+- Bump IndexedDB to v3 (settings store already exists; just start reading/writing new fields with safe defaults).
+- Update `getSettingsData` defaults: `targetDays = 365`, `cutoffDays = null`, `cutoffDate = null`.
+- Update `updateSettings` to accept and persist the full `SettingsData`.
 
-#### Effect on existing logic
+### Step 3 — Extend `Api` (`data/api.ts`)
 
-`Api.hasChapterDates` is the single gate used by `ChapterGroup`, `ChapterGroupList`, and `completeCount`. It currently returns true if any timestamp exists. With a cutoff:
+- Add signals: `targetDays`, `cutoffDays`, `cutoffDate`.
+- Add derived accessor `effectiveCutoff(): string | null` (no signal needed — computed from the two cutoff signals).
+- Update `hasChapterDates` to filter by `effectiveCutoff()`.
+- Add setters and persistence calls for all three new settings.
+
+### Step 4 — Fix `TagSelector` (`components/TagSelector.tsx`)
+
+- Bind `<input type="number" value={props.value.count} min={1} onInput={e => props.onChange({...props.value, count: +e.target.value})} />`.
+- Add a remove button to each tag chip: `props.onChange({...props.value, tags: props.value.tags.filter(t => t !== tagName)})`.
+
+### Step 5 — Fix `AppRouter` (`components/AppRouter.tsx`)
+
+- Delete the hardcoded `OT_NT` constant.
+- Update `planGroups` memo to use `api.perDayTagData()` and `api.targetDays()`:
 
 ```ts
-hasChapterDates = ({ abbrev, number }) => {
-  const dates = this.getChapterDates({ abbrev, number })
-  const cutoff = this.cutoffDate()
-  if (!cutoff) return dates.length > 0
-  return dates.some(d => d >= cutoff)
-}
+const planGroups = createMemo(() =>
+  groupByDay(chapters, api.getTags(), api.perDayTagData(), api.targetDays())
+)
 ```
 
-No other files need to change for Books and Plan views to pick up the cutoff automatically.
+### Step 6 — Add cutoff UI to `PlanSettings` (`components/PlanSettings.tsx`)
 
-History view (`HistoryList`) should still show all timestamps regardless of cutoff — it is a full audit log.
+Two inputs below the tag group list:
 
-#### Cutoff UI
-
-Two candidate shapes (see Questions #2):
-
-**Rolling window** — user sets a number of days (e.g., 365):
 ```
-Cutoff: [_365_] days
+Target days:   [_365_]
+Cutoff (days): [_____]   (blank = disabled)
+Cutoff (date): [date picker]   (blank = disabled)
 ```
-The effective cutoff date is computed as `now() - N days` at read time. Stored as a day count integer.
 
-**Fixed date** — user picks a specific date:
-```
-Cutoff: [date picker]
-```
-Stored as an ISO date string. User must update it manually each cycle.
-
----
-
-## Open Questions / Design Decisions
-
-### Q1 — Multi-tag group semantics
-
-`PerDayTagData` allows `tags: ['OT', 'NT']` in a single group (one count for both). What does that mean?
-
-- **Option A (pool)**: Treat OT and NT chapters as one merged pool, pick `count` chapters per day from it. Result: chapters from both tags interleave into a single stream.
-- **Option B (independent)**: Each tag in the group gets its own independent `count`-per-day stream, same as today's behavior. Multiple tags in one row is just a display grouping.
-- **Option C (simplify the model)**: Remove `tags: Tag[]` and make it `tag: Tag` (singular). Each row is always one tag + one count. Simpler model, simpler UI.
-
-The current default only ever uses one tag per group, so the multi-tag case has never been exercised.
-
-### Q2 — Cutoff type: rolling window vs. fixed date
-
-- **Rolling window** (days ago): Natural for "re-read every year" workflows; automatically advances with time; no manual upkeep.
-- **Fixed date**: Explicit; "I started fresh on Jan 1, 2025" is clear; requires manual update each cycle.
-
-Can be both — a fixed date plus a day-count field. But that adds UI complexity.
-
-### Q3 — Cutoff scope: which views does it affect?
-
-- Plan view only?
-- Plan + Books views (same `hasChapterDates` gates both)?
-- History view? (Recommendation: no — History is a raw log.)
-
-### Q4 — Should the cutoff affect the Books view completion display?
-
-If Books always shows "true" completion (any timestamp ever) while Plan uses the cutoff, the two views diverge. That could be confusing or it could be useful (Books = all-time record, Plan = current cycle).
-
-### Q5 — Persist perDayTagData?
-
-Currently it resets on every page load. Should it survive a refresh? Almost certainly yes — it requires an IndexedDB schema bump (v2 → v3).
-
-### Q6 — Add/remove plan groups?
-
-The `PlanSettings` sidebar lists one row per `PerDayTagData` entry. Should the user be able to add a new row or delete an existing one? If yes, needs add/delete buttons and an initial empty state to handle.
+Each calls the corresponding Api setter on change.
 
 ---
 
@@ -191,10 +209,10 @@ The `PlanSettings` sidebar lists one row per `PerDayTagData` entry. Should the u
 
 | File | Change |
 |------|--------|
-| `data/model.ts` | Possibly change `PerDayTagData.tags` to singular; add `cutoffDate` to `SettingsData` |
-| `data/api.ts` | Add `cutoffDate` signal; update `hasChapterDates`; persist `perDayTagData` |
-| `data/indexDb.ts` | Version bump; persist `perDayTagData` and `cutoffDate` in settings store |
-| `utils/groupUtils.ts` | Update `groupByDay` signature if Option B chosen; remove debug `console.log` |
-| `components/AppRouter.tsx` | Replace hardcoded `OT_NT`; pass `api.perDayTagData()` to `groupByDay` |
-| `components/TagSelector.tsx` | Wire number input; add tag remove buttons |
-| `components/PlanSettings.tsx` | Add cutoff UI control; add add/delete group buttons |
+| `data/model.ts` | Add `targetDays`, `cutoffDays`, `cutoffDate` to `SettingsData` |
+| `data/api.ts` | Add signals + setters for new settings; `effectiveCutoff()`; update `hasChapterDates` |
+| `data/indexDb.ts` | Bump to v3; persist new settings fields |
+| `utils/groupUtils.ts` | Rewrite `groupByDay` with new signature, pooling, looping, `targetDays`; remove `console.log` |
+| `components/AppRouter.tsx` | Remove `OT_NT`; pass `api.perDayTagData()` and `api.targetDays()` to `groupByDay` |
+| `components/TagSelector.tsx` | Wire count input; add tag remove buttons |
+| `components/PlanSettings.tsx` | Add `targetDays`, `cutoffDays`, `cutoffDate` inputs |
