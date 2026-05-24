@@ -1,5 +1,11 @@
 # Plan: Data Backup & Export
 
+## Prerequisite
+
+**This plan depends on `plan-settings-and-cutoff.md` being implemented first.** The export format includes `targetDays`, `cutoffDays`, `cutoffDate`, and `perDayTagData` which are added to `SettingsData` and `Api` in that plan. Implement this plan against a codebase that already has those changes.
+
+---
+
 ## Problem
 
 All reading history lives in IndexedDB (`BibleReadDB`) in the browser. This data can be lost:
@@ -114,13 +120,19 @@ async importData(file: File): Promise<{ imported: number; skipped: number }> {
       skipped++
     }
   }
-  // replace settings if present
-  if (data.settings) { /* apply each settings field */ }
+  if (data.settings) {
+    const s = data.settings
+    if (s.showCompleted != null) await api.setShowCompleted(s.showCompleted)
+    if (s.targetDays != null) await api.setTargetDays(s.targetDays)
+    if (s.cutoffDays !== undefined) await api.setCutoffDays(s.cutoffDays)
+    if (s.cutoffDate !== undefined) await api.setCutoffDate(s.cutoffDate)
+    if (Array.isArray(s.perDayTagData)) api.setPerDayTagData(s.perDayTagData)
+  }
   return { imported, skipped }
 }
 ```
 
-Import UI: `<input type="file" accept=".json">` → read → show confirmation with `{ imported, skipped }` counts before committing (or show result after).
+Import UI: `<input type="file" accept=".json">` hidden, triggered by a visible "Import" button. After import completes, show inline result text: *"Imported 412 records. 3 already existed."* If an error occurs (bad version, invalid JSON), show the error message inline. No modal needed — inline text is sufficient.
 
 ---
 
@@ -165,15 +177,15 @@ Store dismissal in `localStorage` (not IndexedDB — `localStorage` is slightly 
 
 ---
 
-## Open Questions
+## Resolved: Remaining Decisions
 
-### Q4 — Show iOS install prompt?
+### Q4 — Show iOS install prompt ✓
 
-A one-time nudge ("Add to Home Screen to protect your data") on iOS Safari. Low implementation cost, meaningful risk reduction. Recommend yes.
+Yes. Show a one-time dismissible banner on iOS Safari when the app is not installed to the home screen. Store the dismissal flag in `localStorage` under the key `installPromptDismissed`. Do not show it again once dismissed.
 
-### Q5 — Periodic export reminder?
+### Q5 — Periodic export reminder ✓ (deferred)
 
-A monthly in-app nudge to export. Could track last-export date in `localStorage`. Lower priority — can be added later without architectural changes.
+Deferred. Can be added later without architectural changes.
 
 ---
 
@@ -183,8 +195,10 @@ A monthly in-app nudge to export. Could track last-export date in `localStorage`
 2. **`data/api.ts`** — Add `exportData()` and `importData(file)` methods.
 3. **`data/indexDb.ts`** — No changes needed; `addTimestamp` covers import writes.
 4. **`components/AppRouter.tsx`** — Add `/settings` route.
-5. **`components/Layout.tsx`** — Add Settings tab to footer nav; optionally add iOS install prompt.
-6. **`components/Settings.tsx`** (new) — Export button, import file input, result feedback.
+5. **`components/Layout.tsx`** — Add a fourth Settings tab to the footer nav using the `settings-outline` Ionicons icon (same pattern as the existing three tabs). Add the iOS install prompt banner (Q4): detect iOS Safari + not installed, check `localStorage.getItem('installPromptDismissed')`, render a dismissible message if needed.
+6. **`components/Settings.tsx`** (new) — Two sections:
+   - **Data** — Export button (triggers download), Import button (hidden file input), inline result/error text below the import button.
+   - **About** — Static warning text: *"Before removing this app from your home screen, export your data. Deleting the app also deletes all reading history with no way to recover it."*
 7. **`index.tsx`** — Call `navigator.storage?.persist?.()` on startup.
 
 ## Affected Files

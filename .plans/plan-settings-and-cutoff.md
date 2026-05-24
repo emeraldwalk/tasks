@@ -171,16 +171,25 @@ for day 1..targetDays:
 ### Step 2 — Extend settings schema (`data/model.ts`, `data/indexDb.ts`)
 
 - Add `targetDays`, `cutoffDays`, `cutoffDate` to `SettingsData`.
-- Bump IndexedDB to v3 (settings store already exists; just start reading/writing new fields with safe defaults).
+- **No IndexedDB version bump.** The `settings` object store already exists; adding new fields to the stored record requires no schema change. Existing records simply won't have the new fields — `getSettingsData` handles this by defaulting them.
 - Update `getSettingsData` defaults: `targetDays = 365`, `cutoffDays = null`, `cutoffDate = null`.
-- Update `updateSettings` to accept and persist the full `SettingsData`.
+- Update `updateSettings` in `indexDb.ts` — change its signature from `(db: IDBDatabase, showCompleted: boolean)` to `(db: IDBDatabase, settings: SettingsData)` and write the full settings object. Update its one call site in `api.ts:toggleShowCompleted` accordingly.
 
 ### Step 3 — Extend `Api` (`data/api.ts`)
 
-- Add signals: `targetDays`, `cutoffDays`, `cutoffDate`.
-- Add derived accessor `effectiveCutoff(): string | null` (no signal needed — computed from the two cutoff signals).
-- Update `hasChapterDates` to filter by `effectiveCutoff()`.
-- Add setters and persistence calls for all three new settings.
+- Add three signals initialised from `settingsData`: `targetDays`, `cutoffDays`, `cutoffDate` (with public accessors and setters following the existing pattern).
+- Add a private method `effectiveCutoff(): string | null` on the `Api` class (not a signal — computed on demand from `cutoffDays()` and `cutoffDate()`):
+  ```ts
+  private effectiveCutoff(): string | null {
+    const rolling = this.cutoffDays() != null
+      ? new Date(Date.now() - this.cutoffDays()! * 86400000).toISOString().slice(0, 10)
+      : null
+    const candidates = [rolling, this.cutoffDate()].filter(Boolean) as string[]
+    return candidates.length ? candidates.toSorted().at(-1)! : null
+  }
+  ```
+- Update `hasChapterDates` to call `this.effectiveCutoff()` and filter dates accordingly.
+- Each setter must also call `updateSettings(this._db, <full current settings object>)` to persist the change. Since `_settingsData` will be stale after construction, derive the current settings from the signals at persist time rather than reading `_settingsData`.
 
 ### Step 4 — Fix `TagSelector` (`components/TagSelector.tsx`)
 

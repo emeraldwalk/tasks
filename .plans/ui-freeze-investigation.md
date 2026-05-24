@@ -157,21 +157,30 @@ const completionStatus = createMemo(() => {
 
 `createMemo` batches re-runs and only propagates downstream if the return value changes (e.g., `'incomplete'` → `'partial'`). Most mark-read events won't change a book's completion tier, so this short-circuits the CheckMark re-render.
 
-### Fix 3 — Eliminate the double-update in Chapter
+### Fix 3 — Remove `props.onChange()` from `onAdd` and `onRemove`
 
-Move `props.onChange()` before the await, or remove it entirely since `markAsRead` already updates the signal:
+`props.onChange()` calls `setChapters(filteredChapters())` in the parent `ChapterGroup`. But `filteredChapters()` already runs reactively via the `createEffect` whenever `timeStampMap` changes — which `markAsRead` and `markAsUnread` both trigger synchronously. `props.onChange()` is therefore redundant and causes the cascade to run a second time after the IndexedDB await resolves.
+
+Remove it from both `onAdd` and `onRemove`, and remove the `onChange` prop from `Chapter` entirely (including its interface and every call site in `ChapterGroup`):
 
 ```ts
+// Chapter.tsx — onAdd
 async function onAdd() {
   const date = now()
   setDates((prev) => [...prev, date])
-  props.onChange()  // move here — signal is updated synchronously in markAsRead
   await api.markAsRead(props.data.abbrev, props.data.number, date)
-  // no second onChange needed
+}
+
+// Chapter.tsx — onRemove
+function onRemove(date: ISODateTimeString) {
+  return async () => {
+    setDates((prev) => prev.filter((d) => d !== date))
+    await api.markAsUnread(props.data.abbrev, props.data.number, date)
+  }
 }
 ```
 
-Or: since `ChapterGroup.filteredChapters` already reacts to `timeStampMap` via its `createEffect`, `props.onChange()` may be redundant entirely once the memo fixes are in place.
+Also remove `onChange: () => void` from `ChapterProps`, `onChapterChange` from `ChapterGroup`, and the `onChange={onChapterChange}` prop passed to `<Chapter>`.
 
 ### Fix 4 — Await `deleteTimeStamp` in `markAsUnread`
 
@@ -184,12 +193,7 @@ markAsUnread = async (...) => {
 
 ### Fix 5 — Remove the `console.log` in `groupByDay`
 
-```ts
-// remove this line from groupUtils.ts:
-console.log('[groupByDay]', { chapters, tagRecord, tagPerDay })
-```
-
-Not a freeze cause in production (no DevTools attached), but serializes 1189 objects on every plan recompute and should go.
+Remove line 20 of `utils/groupUtils.ts` — the `console.log` call inside `groupByDay`. Not a freeze cause in production (no DevTools attached), but should not be in shipped code.
 
 ---
 
