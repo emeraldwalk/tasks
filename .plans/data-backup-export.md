@@ -126,9 +126,26 @@ Import UI: `<input type="file" accept=".json">` → read → show confirmation w
 
 ## iOS Storage Risk Mitigations
 
+Installing the app to the home screen reduces background eviction risk but does **not** protect against:
+
+- **Removing the app from the home screen** — deletes all IndexedDB data immediately, no warning, no recovery. Unlike native apps, PWA uninstall is destructive.
+- Settings → Safari → Clear History and Website Data
+- Settings → Safari → Advanced → Website Data → deleting the `emeraldwalk.github.io` entry
+- Device wipe, factory reset, or migration to a new device
+
+The in-app export is the only protection against all of these.
+
+### Warn before data loss: export reminder in Settings UI
+
+The Settings page (where export lives) should display a persistent notice:
+
+> **Before removing this app from your home screen, export your data.** Deleting the app also deletes all reading history with no way to recover it.
+
+This should be static text — always visible, not dismissible — since it describes a permanent risk rather than a one-time action.
+
 ### Call `storage.persist()` on startup
 
-Request durable storage as a best-effort measure on first load. Safari support is partial but harmless to call:
+Harmless best-effort call; for an installed PWA on modern iOS this will return `true` immediately (storage already persistent), but worth keeping for non-installed contexts:
 
 ```ts
 // index.tsx or App.tsx, once on mount
@@ -137,14 +154,14 @@ navigator.storage?.persist?.()
 
 ### iOS install-to-home-screen prompt
 
-Installed PWAs on iOS get persistent storage exempt from the 7-day inactivity eviction. Show a one-time dismissible prompt on iOS Safari when not installed:
+Show a one-time dismissible prompt on iOS Safari when the app is *not* installed to the home screen:
 
 ```ts
 const isIosSafari = /iP(hone|ad|od)/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent)
 const isInstalled = window.matchMedia('(display-mode: standalone)').matches
 ```
 
-Store dismissal in `localStorage` (not IndexedDB — `localStorage` is more durable on iOS and survives IndexedDB eviction in practice, though neither is guaranteed).
+Store dismissal in `localStorage` (not IndexedDB — `localStorage` is slightly more durable and survives an IndexedDB eviction in practice).
 
 ---
 
