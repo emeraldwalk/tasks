@@ -92,6 +92,28 @@
     height: 100vh;
     z-index: 2;
   }
+  .installPrompt {
+    background: #fff3cd;
+    border-bottom: 1px solid #ffc107;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .installPromptDismiss {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #555;
+    padding: 0 0.25rem;
+    line-height: 1;
+  }
+
   .tabBar {
     border-top: 1px solid var(--color-border);
     display: flex;

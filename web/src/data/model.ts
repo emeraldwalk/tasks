@@ -52,3 +52,13 @@ export interface TimeStampMap {
     }
   }
 }
+
+export interface ExportFormat {
+  version: 1
+  exportedAt: ISODateTimeString
+  recordCount: number
+  settings: {
+    perDayTagData: PerDayTagData[]
+  }
+  timestamps: TimeStampData[]
+}

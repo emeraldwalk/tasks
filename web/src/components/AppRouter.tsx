@@ -2,6 +2,7 @@ import { Route, Router } from '@solidjs/router'
 import { Layout } from './Layout'
 import { ChapterGroupList } from './ChapterGroupList'
 import { HistoryList } from './HistoryList'
+import { Settings } from './Settings'
 import { getBookNamesMap, getChapterData } from '../utils/dataUtils'
 import { groupByBook, groupByDay } from '../utils/groupUtils'
 import { useApi } from './ApiContext'
@@ -40,6 +41,7 @@ export function AppRouter() {
         path="/history"
         component={() => <HistoryList data={bookNames} />}
       />
+      <Route path="/settings" component={() => <Settings />} />
     </Router>
   )
 }
