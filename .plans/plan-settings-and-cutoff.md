@@ -109,12 +109,11 @@ Add/remove of `PerDayTagData` rows in `PlanSettings` is deferred. The default tw
 
 ## Data Model Changes
 
-### `SettingsData` (new fields, `showCompleted` removed)
-
-`showCompleted` is not persisted — it is runtime-only view state, defaulting to `true` on every load. Remove it from `SettingsData` and from the IndexedDB settings record. `toggleShowCompleted` in `Api` should drop its `updateSettings` call.
+### `SettingsData` (new fields)
 
 ```ts
 interface SettingsData {
+  showCompleted: boolean      // persisted UI preference; excluded from export/import
   targetDays: number          // how many day buckets to generate; default 365
   cutoffDays: number | null   // rolling window; null = disabled
   cutoffDate: string | null   // fixed date (YYYY-MM-DD); null = disabled
@@ -173,8 +172,8 @@ for day 1..targetDays:
 
 - Add `targetDays`, `cutoffDays`, `cutoffDate` to `SettingsData`.
 - **No IndexedDB version bump.** The `settings` object store already exists; adding new fields to the stored record requires no schema change. Existing records simply won't have the new fields — `getSettingsData` handles this by defaulting them.
-- Update `getSettingsData` defaults: `targetDays = 365`, `cutoffDays = null`, `cutoffDate = null`. Remove `showCompleted` from what it reads/returns.
-- Update `updateSettings` in `indexDb.ts` — change its signature from `(db: IDBDatabase, showCompleted: boolean)` to `(db: IDBDatabase, settings: SettingsData)` and write the full settings object. Remove the existing call in `api.ts:toggleShowCompleted` (that method no longer persists anything).
+- Update `getSettingsData` defaults: `targetDays = 365`, `cutoffDays = null`, `cutoffDate = null`. `showCompleted` default stays `true` as it already is.
+- Update `updateSettings` in `indexDb.ts` — change its signature from `(db: IDBDatabase, showCompleted: boolean)` to `(db: IDBDatabase, settings: SettingsData)` and write the full settings object. Update the existing call site in `api.ts:toggleShowCompleted` to pass the full settings object instead of just the boolean.
 
 ### Step 3 — Extend `Api` (`data/api.ts`)
 

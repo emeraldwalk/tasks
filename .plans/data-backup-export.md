@@ -63,7 +63,7 @@ The `settings` block contains whatever fields exist in `SettingsData` at the tim
 }
 ```
 
-`showCompleted` is not included — it is runtime-only view state that resets to `true` on every load and does not need to be backed up.
+`showCompleted` is intentionally excluded. It is a UI preference ("remember last toggle") that is persisted to IndexedDB across reloads but does not need to survive a device wipe or restore. Restoring it from an old backup could silently override a recent preference change. All other settings fields represent data or plan configuration worth restoring.
 
 After `plan-settings-and-cutoff` is implemented, `targetDays`, `cutoffDays`, and `cutoffDate` will appear in `settings` automatically. The `version` field guards against future format breaks — import logic can branch on it.
 
