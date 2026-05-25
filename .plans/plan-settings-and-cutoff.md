@@ -113,10 +113,11 @@ Add/remove of `PerDayTagData` rows in `PlanSettings` is deferred. The default tw
 
 ```ts
 interface SettingsData {
-  showCompleted: boolean      // persisted UI preference; excluded from export/import
-  targetDays: number          // how many day buckets to generate; default 365
-  cutoffDays: number | null   // rolling window; null = disabled
-  cutoffDate: string | null   // fixed date (YYYY-MM-DD); null = disabled
+  showCompleted: boolean       // persisted UI preference; excluded from export/import
+  targetDays: number           // how many day buckets to generate; default 365
+  cutoffDays: number | null    // rolling window; null = disabled
+  cutoffDate: string | null    // fixed date (YYYY-MM-DD); null = disabled
+  perDayTagData: PerDayTagData[] // plan configuration; default [{tags:['OT'],count:3},{tags:['NT'],count:2}]
 }
 ```
 
@@ -142,18 +143,23 @@ function groupByDay(
 
 Algorithm sketch:
 
-```
-for each entry in perDayTagData:
-  pool = chapters where tagRecord[tag][ch.abbrev] for tag in entry.tags (in order, concatenated)
-  cursor = 0
+```ts
+// Build one pool and one cursor per entry, indexed in parallel
+const pools: ChapterData[][] = perDayTagData.map(entry =>
+  entry.tags.flatMap(tag => chapters.filter(ch => tagRecord[tag]?.[ch.abbrev]))
+)
+const cursors: number[] = pools.map(() => 0)
 
-for day 1..targetDays:
-  group = []
-  for each entry:
-    for i in 0..entry.count-1:
-      group.push(pool[cursor % pool.length])
-      cursor++
-  groups["Day N"] = group
+for (let day = 0; day < targetDays; day++) {
+  const group: ChapterData[] = []
+  for (let i = 0; i < perDayTagData.length; i++) {
+    for (let j = 0; j < perDayTagData[i].count; j++) {
+      group.push(pools[i][cursors[i] % pools[i].length])
+      cursors[i]++
+    }
+  }
+  groups[`Day ${day + 1}`] = group
+}
 ```
 
 ---
@@ -189,7 +195,19 @@ for day 1..targetDays:
   }
   ```
 - Update `hasChapterDates` to call `this.effectiveCutoff()` and filter dates accordingly.
-- Each setter must also call `updateSettings(this._db, <full current settings object>)` to persist the change. Since `_settingsData` will be stale after construction, derive the current settings from the signals at persist time rather than reading `_settingsData`.
+- Each setter must also call `updateSettings` to persist the change. Since `_settingsData` is stale after construction, derive the full settings object from signals at persist time:
+  ```ts
+  private currentSettings(): SettingsData {
+    return {
+      showCompleted: this.showCompleted(),
+      targetDays: this.targetDays(),
+      cutoffDays: this.cutoffDays(),
+      cutoffDate: this.cutoffDate(),
+      perDayTagData: this.perDayTagData(),
+    }
+  }
+  ```
+  Every setter calls `await updateSettings(this._db, this.currentSettings())` after updating its signal.
 
 ### Step 4 — Fix `TagSelector` (`components/TagSelector.tsx`)
 
@@ -209,7 +227,7 @@ const planGroups = createMemo(() =>
 
 ### Step 6 — Add cutoff UI to `PlanSettings` (`components/PlanSettings.tsx`)
 
-Two inputs below the tag group list:
+Three inputs below the tag group list:
 
 ```
 Target days:   [_365_]
@@ -217,7 +235,9 @@ Cutoff (days): [_____]   (blank = disabled)
 Cutoff (date): [date picker]   (blank = disabled)
 ```
 
-Each calls the corresponding Api setter on change.
+- **Target days**: number input, min 1, calls `api.setTargetDays(value)` on change.
+- **Cutoff (days)**: number input, min 1. A blank or cleared value means disabled — call `api.setCutoffDays(null)`. A numeric value calls `api.setCutoffDays(value)`.
+- **Cutoff (date)**: date input (`type="date"`). A cleared value means disabled — call `api.setCutoffDate(null)`. A selected date calls `api.setCutoffDate(value)` where `value` is the `YYYY-MM-DD` string from `input.value`.
 
 ---
 
@@ -227,7 +247,7 @@ Each calls the corresponding Api setter on change.
 |------|--------|
 | `data/model.ts` | Add `targetDays`, `cutoffDays`, `cutoffDate` to `SettingsData` |
 | `data/api.ts` | Add signals + setters for new settings; `effectiveCutoff()`; update `hasChapterDates` |
-| `data/indexDb.ts` | Bump to v3; persist new settings fields |
+| `data/indexDb.ts` | No version bump; update `updateSettings` signature from `(db, showCompleted)` to `(db, settings: SettingsData)`; update `getSettingsData` defaults |
 | `utils/groupUtils.ts` | Rewrite `groupByDay` with new signature, pooling, looping, `targetDays`; remove `console.log` |
 | `components/AppRouter.tsx` | Remove `OT_NT`; pass `api.perDayTagData()` and `api.targetDays()` to `groupByDay` |
 | `components/TagSelector.tsx` | Wire count input; add tag remove buttons |

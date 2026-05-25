@@ -102,10 +102,19 @@ await triggerExport(json, filename)
 
 ### Export method (`api.ts`)
 
+Read all exportable settings from signals rather than `_settingsData` (which is stale after construction). Explicitly exclude `showCompleted` — it is a UI preference that should not be restored from a backup file.
+
 ```ts
 exportData(): string {
   const timestamps = this.getTimeStampData()  // already exists
-  const settings = { ...this._settingsData, perDayTagData: this.perDayTagData() }
+  const settings = {
+    // showCompleted intentionally omitted — UI preference, not backup data
+    perDayTagData: this.perDayTagData(),
+    // After plan-settings-and-cutoff is implemented, add here:
+    // targetDays: this.targetDays(),
+    // cutoffDays: this.cutoffDays(),
+    // cutoffDate: this.cutoffDate(),
+  }
   const output = {
     version: 1,
     exportedAt: new Date().toISOString(),
@@ -142,15 +151,13 @@ async importData(file: File): Promise<{ imported: number; skipped: number }> {
     // Apply only fields that exist in the current SettingsData shape.
     // Fields added by plan-settings-and-cutoff (targetDays, cutoffDays, cutoffDate)
     // are handled here once that plan is implemented.
-    // showCompleted is intentionally excluded — it is runtime-only view state.
+    // showCompleted intentionally excluded — persisted UI preference, not backup data.
     if (Array.isArray(s.perDayTagData)) this.setPerDayTagData(s.perDayTagData)
   }
 
   return { imported, skipped }
 }
 ```
-
-Note: `setShowCompleted` does not currently exist as a standalone setter — `toggleShowCompleted` only toggles. Add a `setShowCompleted(value: boolean)` method to `Api` that sets the signal directly and persists to IndexedDB.
 
 Import UI: `<input type="file" accept=".json">` hidden, triggered by a visible "Import" button. After completion, show inline text: *"Imported 412 records. 3 already existed."* On error (bad version, invalid JSON), show the error message inline. No modal needed.
 
@@ -209,7 +216,7 @@ const showPrompt = isIosSafari && !isInstalled
 | File | Change |
 |------|--------|
 | `data/model.ts` | Add `ExportFormat` interface |
-| `data/api.ts` | Add `exportData()`, `importData()`, `setShowCompleted()` |
+| `data/api.ts` | Add `exportData()`, `importData()` |
 | `data/indexDb.ts` | No change |
 | `components/AppRouter.tsx` | Add `/settings` route |
 | `components/Layout.tsx` | Add Settings tab; iOS install prompt |
