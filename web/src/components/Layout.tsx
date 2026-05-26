@@ -18,16 +18,18 @@ const shouldShowInstallPrompt =
 export function Layout(props: RouteSectionProps) {
   const api = useApi()
   const [isSettingsOpen, setIsSettingsOpen] = createSignal(false)
-  const [showInstallPrompt, setShowInstallPrompt] = createSignal(shouldShowInstallPrompt)
+  const [showInstallPrompt, setShowInstallPrompt] = createSignal(
+    shouldShowInstallPrompt,
+  )
 
   const title = () =>
     props.location.pathname.endsWith('/plan')
       ? 'Plan'
       : props.location.pathname.endsWith('/history')
-      ? 'History'
-      : props.location.pathname.endsWith('/settings')
-      ? 'Settings'
-      : 'Books'
+        ? 'History'
+        : props.location.pathname.endsWith('/settings')
+          ? 'Settings'
+          : 'Books'
 
   const dismissInstallPrompt = () => {
     localStorage.setItem('installPromptDismissed', '1')
@@ -39,7 +41,9 @@ export function Layout(props: RouteSectionProps) {
       <Show when={showInstallPrompt()}>
         <div class={styles.installPrompt}>
           <span>Add to Home Screen to protect your data</span>
-          <button class={styles.installPromptDismiss} onClick={dismissInstallPrompt}>
+          <button
+            class={styles.installPromptDismiss}
+            onClick={dismissInstallPrompt}>
             ✕
           </button>
         </div>
