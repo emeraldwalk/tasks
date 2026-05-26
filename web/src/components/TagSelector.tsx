@@ -24,12 +24,33 @@ export function TagSelector(props: TagSelectorProps) {
     }
   }
 
+  const onRemove = (tagName: Tag) => {
+    return () => {
+      props.onChange({
+        ...props.value,
+        tags: props.value.tags.filter((t) => t !== tagName),
+      })
+    }
+  }
+
   return (
     <div class={styles.TagSelector}>
-      <input type="number" />
+      <input
+        type="number"
+        value={props.value.count}
+        min={1}
+        onInput={(e) => props.onChange({ ...props.value, count: +e.target.value })}
+      />
       <div>
         <ul class={styles.tagList}>
-          <For each={props.value.tags}>{(tagName) => <li>{tagName}</li>}</For>
+          <For each={props.value.tags}>
+            {(tagName) => (
+              <li>
+                {tagName}
+                <button type="button" onClick={onRemove(tagName)}>×</button>
+              </li>
+            )}
+          </For>
           <li>
             <input
               class={styles.addTag}
