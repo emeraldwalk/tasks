@@ -177,4 +177,44 @@ export class Api {
     this._setShowCompleted((prev) => !prev)
     await updateSettings(this._db, this.showCompleted())
   }
+
+  exportData = (): string => {
+    const timestamps = this.getTimeStampData()
+    const settings = {
+      // showCompleted intentionally omitted — UI preference, not backup data
+      perDayTagData: this.perDayTagData(),
+    }
+    const output = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      recordCount: timestamps.length,
+      settings,
+      timestamps,
+    }
+    return JSON.stringify(output, null, 2)
+  }
+
+  importData = async (file: File): Promise<{ imported: number; skipped: number }> => {
+    const text = await file.text()
+    const data = JSON.parse(text)
+    if (data.version !== 1) throw new Error(`Unknown export version: ${data.version}`)
+
+    let imported = 0, skipped = 0
+    for (const { date, book, chapter } of data.timestamps) {
+      if (!this.timeStampMap()[book]?.[chapter]?.[date]) {
+        await this.markAsRead(book, chapter as ChapterID, date)
+        imported++
+      } else {
+        skipped++
+      }
+    }
+
+    if (data.settings) {
+      const s = data.settings
+      // showCompleted intentionally excluded — persisted UI preference, not backup data
+      if (Array.isArray(s.perDayTagData)) this.setPerDayTagData(s.perDayTagData)
+    }
+
+    return { imported, skipped }
+  }
 }

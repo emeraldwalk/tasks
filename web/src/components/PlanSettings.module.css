@@ -7,4 +7,35 @@
     flex-direction: column;
     gap: 1rem;
   }
+  .dataSection {
+    margin-top: 1.5rem;
+
+    h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.5rem;
+    }
+  }
+  .dataButtons {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .button {
+    background: var(--color-link);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+
+    &:active {
+      opacity: 0.8;
+    }
+  }
+  .importResult {
+    font-size: 0.85rem;
+    margin: 0;
+  }
 }
