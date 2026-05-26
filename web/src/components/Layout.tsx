@@ -26,10 +26,8 @@ export function Layout(props: RouteSectionProps) {
     props.location.pathname.endsWith('/plan')
       ? 'Plan'
       : props.location.pathname.endsWith('/history')
-        ? 'History'
-        : props.location.pathname.endsWith('/settings')
-          ? 'Settings'
-          : 'Books'
+      ? 'History'
+      : 'Books'
 
   const dismissInstallPrompt = () => {
     localStorage.setItem('installPromptDismissed', '1')
@@ -85,9 +83,6 @@ export function Layout(props: RouteSectionProps) {
         </A>
         <A href="/history" activeClass={styles.activeTab}>
           <Icon name="time-outline" size="large" />
-        </A>
-        <A href="/settings" activeClass={styles.activeTab}>
-          <Icon name="settings-outline" size="large" />
         </A>
       </footer>
     </div>

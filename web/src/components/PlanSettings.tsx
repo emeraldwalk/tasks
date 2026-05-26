@@ -5,8 +5,22 @@ import styles from './PlanSettings.module.css'
 import { TagSelector } from './TagSelector'
 import type { PerDayTagData, Tag } from '../data/model'
 
+async function triggerExport(json: string, filename: string): Promise<void> {
+  const file = new File([json], filename, { type: 'application/json' })
+  if (navigator.canShare?.({ files: [file] })) {
+    await navigator.share({ files: [file], title: 'Bible reading backup' })
+  } else {
+    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }))
+    const a = Object.assign(document.createElement('a'), { href: url, download: filename })
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+}
+
 export function PlanSettings() {
   const api = useApi()
+  const [importResult, setImportResult] = createSignal<string | null>(null)
+  let fileInput: HTMLInputElement | undefined
 
   const tagRecord = () => api.getTags()
   const tagNames = () => keys(tagRecord())
@@ -19,6 +33,25 @@ export function PlanSettings() {
         return newData
       })
     }
+  }
+
+  const handleExport = async () => {
+    const json = api.exportData()
+    const filename = `bible-history-${new Date().toISOString().slice(0, 10)}.json`
+    await triggerExport(json, filename)
+  }
+
+  const handleImport = async (e: Event) => {
+    const input = e.target as HTMLInputElement
+    const file = input.files?.[0]
+    if (!file) return
+    try {
+      const { imported, skipped } = await api.importData(file)
+      setImportResult(`Imported ${imported} records. ${skipped} already existed.`)
+    } catch (err) {
+      setImportResult(`Error: ${err instanceof Error ? err.message : String(err)}`)
+    }
+    input.value = ''
   }
 
   return (
@@ -38,6 +71,20 @@ export function PlanSettings() {
           )}
         </For>
       </ul>
+
+      <section class={styles.dataSection}>
+        <h2>Data</h2>
+        <div class={styles.dataButtons}>
+          <button class={styles.button} onClick={handleExport}>Export</button>
+          <button class={styles.button} onClick={() => fileInput?.click()}>Import</button>
+          <input ref={fileInput} type="file" accept=".json" style="display:none" onChange={handleImport} />
+        </div>
+        {importResult() && <p class={styles.importResult}>{importResult()}</p>}
+        <p class={styles.warning}>
+          Before removing this app from your home screen, export your data.
+          Deleting the app also deletes all reading history with no way to recover it.
+        </p>
+      </section>
     </div>
   )
 }
