@@ -12,6 +12,4 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   )
 }
 
-navigator.storage?.persist?.()
-
 render(() => <App />, root!)
