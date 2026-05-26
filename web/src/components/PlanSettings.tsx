@@ -80,10 +80,6 @@ export function PlanSettings() {
           <input ref={fileInput} type="file" accept=".json" style="display:none" onChange={handleImport} />
         </div>
         {importResult() && <p class={styles.importResult}>{importResult()}</p>}
-        <p class={styles.warning}>
-          Before removing this app from your home screen, export your data.
-          Deleting the app also deletes all reading history with no way to recover it.
-        </p>
       </section>
     </div>
   )
