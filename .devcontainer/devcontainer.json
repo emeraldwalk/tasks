@@ -16,6 +16,7 @@
     "PROJECT_PATH": "${containerWorkspaceFolder}",
     "TZ": "America/Chicago"
   },
+  "forwardPorts": [3000],
   "mounts": [
     // Isolated Claude settings per worktree
     "source=claude-code-config-${localWorkspaceFolderBasename},target=/home/vscode/.claude,type=volume",
@@ -36,7 +37,7 @@
     // "source=${localEnv:HOME}/.plans/tasks,target=${containerWorkspaceFolder}/.plans,type=bind,consistency=cached",
 
     // node_modules per worktree
-    "source=node-modules-${localWorkspaceFolderBasename},target=${containerWorkspaceFolder}/node_modules,type=volume"
+    "source=node-modules-${localWorkspaceFolderBasename},target=${containerWorkspaceFolder}/web/node_modules,type=volume"
   ],
   "postCreateCommand": "bash .devcontainer/postCreateCommand.sh",
   "customizations": {

@@ -1,0 +1,919 @@
+{
+  "version": 1,
+  "exportedAt": "2026-05-26T15:32:58.689Z",
+  "recordCount": 180,
+  "settings": {
+    "perDayTagData": [
+      {
+        "tags": ["OT"],
+        "count": 3
+      },
+      {
+        "tags": ["NT"],
+        "count": 2
+      }
+    ]
+  },
+  "timestamps": [
+    {
+      "date": "2025-05-06T01:42:19.391Z",
+      "book": "DAN",
+      "chapter": 1
+    },
+    {
+      "date": "2025-05-06T01:42:19.924Z",
+      "book": "DAN",
+      "chapter": 2
+    },
+    {
+      "date": "2025-05-06T01:42:20.424Z",
+      "book": "DAN",
+      "chapter": 3
+    },
+    {
+      "date": "2025-05-06T01:42:20.941Z",
+      "book": "DAN",
+      "chapter": 4
+    },
+    {
+      "date": "2025-05-06T01:42:21.358Z",
+      "book": "DAN",
+      "chapter": 5
+    },
+    {
+      "date": "2025-05-06T01:42:22.876Z",
+      "book": "DAN",
+      "chapter": 6
+    },
+    {
+      "date": "2025-05-06T01:42:23.426Z",
+      "book": "DAN",
+      "chapter": 7
+    },
+    {
+      "date": "2025-05-06T01:42:24.791Z",
+      "book": "DAN",
+      "chapter": 8
+    },
+    {
+      "date": "2025-05-06T01:42:25.359Z",
+      "book": "DAN",
+      "chapter": 9
+    },
+    {
+      "date": "2025-05-06T01:42:25.925Z",
+      "book": "DAN",
+      "chapter": 10
+    },
+    {
+      "date": "2025-05-06T01:42:26.443Z",
+      "book": "DAN",
+      "chapter": 11
+    },
+    {
+      "date": "2025-05-06T01:42:27.658Z",
+      "book": "DAN",
+      "chapter": 12
+    },
+    {
+      "date": "2025-05-06T12:47:48.382Z",
+      "book": "MAT",
+      "chapter": 1
+    },
+    {
+      "date": "2025-05-06T13:02:04.952Z",
+      "book": "MAT",
+      "chapter": 2
+    },
+    {
+      "date": "2025-05-07T12:37:47.258Z",
+      "book": "MAT",
+      "chapter": 3
+    },
+    {
+      "date": "2025-05-15T12:39:48.932Z",
+      "book": "MAT",
+      "chapter": 4
+    },
+    {
+      "date": "2025-06-23T12:38:11.828Z",
+      "book": "MAT",
+      "chapter": 5
+    },
+    {
+      "date": "2025-06-23T12:38:13.609Z",
+      "book": "MAT",
+      "chapter": 6
+    },
+    {
+      "date": "2025-06-23T12:38:14.674Z",
+      "book": "MAT",
+      "chapter": 7
+    },
+    {
+      "date": "2025-06-24T12:45:09.260Z",
+      "book": "MAT",
+      "chapter": 8
+    },
+    {
+      "date": "2025-06-24T12:45:10.256Z",
+      "book": "MAT",
+      "chapter": 9
+    },
+    {
+      "date": "2025-06-24T12:45:11.275Z",
+      "book": "MAT",
+      "chapter": 10
+    },
+    {
+      "date": "2025-07-06T13:50:29.347Z",
+      "book": "MAT",
+      "chapter": 11
+    },
+    {
+      "date": "2025-07-14T12:22:57.731Z",
+      "book": "MAT",
+      "chapter": 12
+    },
+    {
+      "date": "2025-07-14T12:22:59.350Z",
+      "book": "MAT",
+      "chapter": 13
+    },
+    {
+      "date": "2025-07-15T12:14:00.741Z",
+      "book": "MAT",
+      "chapter": 14
+    },
+    {
+      "date": "2025-07-15T12:14:01.771Z",
+      "book": "MAT",
+      "chapter": 15
+    },
+    {
+      "date": "2025-08-12T12:31:21.356Z",
+      "book": "MAT",
+      "chapter": 16
+    },
+    {
+      "date": "2025-08-13T13:00:17.408Z",
+      "book": "MAT",
+      "chapter": 17
+    },
+    {
+      "date": "2025-08-25T12:06:51.092Z",
+      "book": "MAT",
+      "chapter": 18
+    },
+    {
+      "date": "2025-08-29T12:19:12.317Z",
+      "book": "MAT",
+      "chapter": 19
+    },
+    {
+      "date": "2025-10-13T12:50:57.735Z",
+      "book": "MAT",
+      "chapter": 20
+    },
+    {
+      "date": "2025-10-13T12:50:58.767Z",
+      "book": "MAT",
+      "chapter": 21
+    },
+    {
+      "date": "2025-10-14T12:58:54.135Z",
+      "book": "MAT",
+      "chapter": 22
+    },
+    {
+      "date": "2025-10-14T12:58:55.959Z",
+      "book": "MAT",
+      "chapter": 23
+    },
+    {
+      "date": "2025-10-15T13:01:11.835Z",
+      "book": "MAT",
+      "chapter": 24
+    },
+    {
+      "date": "2025-10-16T12:49:09.478Z",
+      "book": "MAT",
+      "chapter": 25
+    },
+    {
+      "date": "2025-10-16T12:49:10.457Z",
+      "book": "MAT",
+      "chapter": 26
+    },
+    {
+      "date": "2025-10-20T12:36:48.151Z",
+      "book": "MAT",
+      "chapter": 27
+    },
+    {
+      "date": "2025-10-20T12:36:49.029Z",
+      "book": "MAT",
+      "chapter": 28
+    },
+    {
+      "date": "2025-05-15T04:15:22.368Z",
+      "book": "ISA",
+      "chapter": 1
+    },
+    {
+      "date": "2025-05-15T04:15:25.781Z",
+      "book": "ISA",
+      "chapter": 2
+    },
+    {
+      "date": "2025-05-15T12:23:22.158Z",
+      "book": "ISA",
+      "chapter": 3
+    },
+    {
+      "date": "2025-05-15T12:23:22.916Z",
+      "book": "ISA",
+      "chapter": 4
+    },
+    {
+      "date": "2025-05-15T12:56:02.915Z",
+      "book": "PSA",
+      "chapter": 1
+    },
+    {
+      "date": "2025-05-17T15:23:26.577Z",
+      "book": "PSA",
+      "chapter": 2
+    },
+    {
+      "date": "2025-05-17T15:23:27.145Z",
+      "book": "PSA",
+      "chapter": 3
+    },
+    {
+      "date": "2025-05-17T15:23:27.664Z",
+      "book": "PSA",
+      "chapter": 4
+    },
+    {
+      "date": "2025-05-17T15:23:28.098Z",
+      "book": "PSA",
+      "chapter": 5
+    },
+    {
+      "date": "2025-05-17T15:23:28.614Z",
+      "book": "PSA",
+      "chapter": 6
+    },
+    {
+      "date": "2025-05-17T15:23:28.998Z",
+      "book": "PSA",
+      "chapter": 7
+    },
+    {
+      "date": "2025-05-15T12:56:06.932Z",
+      "book": "PSA",
+      "chapter": 8
+    },
+    {
+      "date": "2025-05-17T15:23:30.499Z",
+      "book": "PSA",
+      "chapter": 9
+    },
+    {
+      "date": "2025-05-17T15:23:31.814Z",
+      "book": "PSA",
+      "chapter": 10
+    },
+    {
+      "date": "2025-05-17T15:23:33.835Z",
+      "book": "PSA",
+      "chapter": 11
+    },
+    {
+      "date": "2025-05-17T15:23:34.649Z",
+      "book": "PSA",
+      "chapter": 12
+    },
+    {
+      "date": "2025-05-17T15:23:35.830Z",
+      "book": "PSA",
+      "chapter": 13
+    },
+    {
+      "date": "2025-05-17T15:23:37.361Z",
+      "book": "PSA",
+      "chapter": 14
+    },
+    {
+      "date": "2025-05-17T15:23:37.910Z",
+      "book": "PSA",
+      "chapter": 15
+    },
+    {
+      "date": "2025-05-17T15:23:38.478Z",
+      "book": "PSA",
+      "chapter": 16
+    },
+    {
+      "date": "2025-05-22T13:11:08.181Z",
+      "book": "PSA",
+      "chapter": 17
+    },
+    {
+      "date": "2025-05-22T13:11:09.273Z",
+      "book": "PSA",
+      "chapter": 18
+    },
+    {
+      "date": "2025-05-22T13:11:10.457Z",
+      "book": "PSA",
+      "chapter": 19
+    },
+    {
+      "date": "2025-05-22T13:11:13.145Z",
+      "book": "PSA",
+      "chapter": 20
+    },
+    {
+      "date": "2025-05-23T12:23:19.435Z",
+      "book": "PSA",
+      "chapter": 21
+    },
+    {
+      "date": "2025-05-23T12:23:20.347Z",
+      "book": "PSA",
+      "chapter": 22
+    },
+    {
+      "date": "2025-05-23T12:23:21.246Z",
+      "book": "PSA",
+      "chapter": 23
+    },
+    {
+      "date": "2025-05-23T12:23:21.966Z",
+      "book": "PSA",
+      "chapter": 24
+    },
+    {
+      "date": "2025-05-23T12:23:22.616Z",
+      "book": "PSA",
+      "chapter": 25
+    },
+    {
+      "date": "2025-05-23T12:23:23.901Z",
+      "book": "PSA",
+      "chapter": 26
+    },
+    {
+      "date": "2025-06-12T12:30:03.967Z",
+      "book": "PSA",
+      "chapter": 27
+    },
+    {
+      "date": "2025-07-09T12:45:23.836Z",
+      "book": "PSA",
+      "chapter": 73
+    },
+    {
+      "date": "2025-07-09T12:45:25.132Z",
+      "book": "PSA",
+      "chapter": 74
+    },
+    {
+      "date": "2025-07-09T12:45:26.131Z",
+      "book": "PSA",
+      "chapter": 75
+    },
+    {
+      "date": "2025-07-09T12:45:27.130Z",
+      "book": "PSA",
+      "chapter": 76
+    },
+    {
+      "date": "2025-07-09T12:45:28.049Z",
+      "book": "PSA",
+      "chapter": 77
+    },
+    {
+      "date": "2025-07-09T12:45:28.934Z",
+      "book": "PSA",
+      "chapter": 78
+    },
+    {
+      "date": "2025-06-24T12:28:13.929Z",
+      "book": "GEN",
+      "chapter": 1
+    },
+    {
+      "date": "2025-06-24T12:28:16.387Z",
+      "book": "GEN",
+      "chapter": 2
+    },
+    {
+      "date": "2025-06-24T12:55:45.840Z",
+      "book": "GEN",
+      "chapter": 3
+    },
+    {
+      "date": "2025-06-24T12:55:46.773Z",
+      "book": "GEN",
+      "chapter": 4
+    },
+    {
+      "date": "2025-06-25T12:31:17.039Z",
+      "book": "GEN",
+      "chapter": 5
+    },
+    {
+      "date": "2025-05-22T12:57:50.654Z",
+      "book": "GEN",
+      "chapter": 6
+    },
+    {
+      "date": "2025-05-22T12:57:56.272Z",
+      "book": "GEN",
+      "chapter": 7
+    },
+    {
+      "date": "2025-05-22T12:57:57.035Z",
+      "book": "GEN",
+      "chapter": 8
+    },
+    {
+      "date": "2025-05-22T12:58:24.093Z",
+      "book": "GEN",
+      "chapter": 9
+    },
+    {
+      "date": "2025-05-22T12:58:24.790Z",
+      "book": "GEN",
+      "chapter": 10
+    },
+    {
+      "date": "2025-07-14T11:59:48.552Z",
+      "book": "GEN",
+      "chapter": 11
+    },
+    {
+      "date": "2025-07-14T11:59:49.691Z",
+      "book": "GEN",
+      "chapter": 12
+    },
+    {
+      "date": "2025-07-15T12:04:40.981Z",
+      "book": "GEN",
+      "chapter": 13
+    },
+    {
+      "date": "2025-07-15T12:04:42.741Z",
+      "book": "GEN",
+      "chapter": 14
+    },
+    {
+      "date": "2025-08-12T12:15:54.274Z",
+      "book": "GEN",
+      "chapter": 15
+    },
+    {
+      "date": "2025-08-13T12:44:58.065Z",
+      "book": "GEN",
+      "chapter": 16
+    },
+    {
+      "date": "2025-08-25T12:01:02.826Z",
+      "book": "GEN",
+      "chapter": 17
+    },
+    {
+      "date": "2025-08-25T12:01:03.950Z",
+      "book": "GEN",
+      "chapter": 18
+    },
+    {
+      "date": "2025-08-29T12:19:14.614Z",
+      "book": "GEN",
+      "chapter": 19
+    },
+    {
+      "date": "2025-10-13T12:16:15.222Z",
+      "book": "GEN",
+      "chapter": 20
+    },
+    {
+      "date": "2025-10-13T12:16:16.251Z",
+      "book": "GEN",
+      "chapter": 21
+    },
+    {
+      "date": "2025-10-14T12:03:43.527Z",
+      "book": "GEN",
+      "chapter": 22
+    },
+    {
+      "date": "2025-10-14T12:03:44.541Z",
+      "book": "GEN",
+      "chapter": 23
+    },
+    {
+      "date": "2025-10-15T12:49:27.893Z",
+      "book": "GEN",
+      "chapter": 24
+    },
+    {
+      "date": "2025-10-15T12:49:30.295Z",
+      "book": "GEN",
+      "chapter": 25
+    },
+    {
+      "date": "2025-10-16T12:25:15.157Z",
+      "book": "GEN",
+      "chapter": 26
+    },
+    {
+      "date": "2025-10-16T12:25:16.216Z",
+      "book": "GEN",
+      "chapter": 27
+    },
+    {
+      "date": "2025-10-17T12:29:51.614Z",
+      "book": "GEN",
+      "chapter": 28
+    },
+    {
+      "date": "2025-10-17T12:29:52.760Z",
+      "book": "GEN",
+      "chapter": 29
+    },
+    {
+      "date": "2025-10-20T12:58:19.381Z",
+      "book": "GEN",
+      "chapter": 30
+    },
+    {
+      "date": "2025-10-20T12:58:20.397Z",
+      "book": "GEN",
+      "chapter": 31
+    },
+    {
+      "date": "2025-10-26T13:58:30.826Z",
+      "book": "GEN",
+      "chapter": 32
+    },
+    {
+      "date": "2025-10-26T13:58:37.010Z",
+      "book": "GEN",
+      "chapter": 33
+    },
+    {
+      "date": "2025-10-28T12:51:50.834Z",
+      "book": "GEN",
+      "chapter": 34
+    },
+    {
+      "date": "2025-10-28T12:51:52.000Z",
+      "book": "GEN",
+      "chapter": 35
+    },
+    {
+      "date": "2025-10-29T12:37:01.629Z",
+      "book": "GEN",
+      "chapter": 36
+    },
+    {
+      "date": "2025-10-29T12:37:02.540Z",
+      "book": "GEN",
+      "chapter": 37
+    },
+    {
+      "date": "2025-11-03T13:05:31.558Z",
+      "book": "GEN",
+      "chapter": 38
+    },
+    {
+      "date": "2025-11-03T13:05:33.707Z",
+      "book": "GEN",
+      "chapter": 39
+    },
+    {
+      "date": "2025-11-06T13:28:19.671Z",
+      "book": "GEN",
+      "chapter": 40
+    },
+    {
+      "date": "2025-11-06T13:28:20.915Z",
+      "book": "GEN",
+      "chapter": 41
+    },
+    {
+      "date": "2025-11-06T13:28:22.819Z",
+      "book": "GEN",
+      "chapter": 42
+    },
+    {
+      "date": "2025-11-07T14:02:28.317Z",
+      "book": "GEN",
+      "chapter": 43
+    },
+    {
+      "date": "2025-11-07T14:02:29.280Z",
+      "book": "GEN",
+      "chapter": 44
+    },
+    {
+      "date": "2025-11-07T14:02:30.158Z",
+      "book": "GEN",
+      "chapter": 45
+    },
+    {
+      "date": "2025-11-08T16:39:32.223Z",
+      "book": "GEN",
+      "chapter": 46
+    },
+    {
+      "date": "2025-11-08T16:39:33.171Z",
+      "book": "GEN",
+      "chapter": 47
+    },
+    {
+      "date": "2025-11-08T16:39:35.494Z",
+      "book": "GEN",
+      "chapter": 48
+    },
+    {
+      "date": "2025-11-09T15:57:34.505Z",
+      "book": "GEN",
+      "chapter": 49
+    },
+    {
+      "date": "2025-11-09T15:57:35.390Z",
+      "book": "GEN",
+      "chapter": 50
+    },
+    {
+      "date": "2025-06-30T13:03:12.990Z",
+      "book": "ROM",
+      "chapter": 1
+    },
+    {
+      "date": "2025-06-30T13:03:14.019Z",
+      "book": "ROM",
+      "chapter": 2
+    },
+    {
+      "date": "2025-06-30T13:03:14.670Z",
+      "book": "ROM",
+      "chapter": 3
+    },
+    {
+      "date": "2025-06-30T13:03:15.502Z",
+      "book": "ROM",
+      "chapter": 4
+    },
+    {
+      "date": "2025-06-30T13:03:16.272Z",
+      "book": "ROM",
+      "chapter": 5
+    },
+    {
+      "date": "2025-05-23T12:32:38.350Z",
+      "book": "ROM",
+      "chapter": 8
+    },
+    {
+      "date": "2025-05-28T12:59:07.775Z",
+      "book": "REV",
+      "chapter": 4
+    },
+    {
+      "date": "2025-05-28T12:59:14.830Z",
+      "book": "REV",
+      "chapter": 5
+    },
+    {
+      "date": "2025-05-28T12:59:15.876Z",
+      "book": "REV",
+      "chapter": 6
+    },
+    {
+      "date": "2025-05-28T12:59:16.974Z",
+      "book": "REV",
+      "chapter": 7
+    },
+    {
+      "date": "2025-10-20T13:12:26.164Z",
+      "book": "JOH",
+      "chapter": 1
+    },
+    {
+      "date": "2025-10-21T12:45:09.834Z",
+      "book": "JOH",
+      "chapter": 2
+    },
+    {
+      "date": "2025-10-21T12:45:11.842Z",
+      "book": "JOH",
+      "chapter": 3
+    },
+    {
+      "date": "2025-09-02T12:32:57.732Z",
+      "book": "JOH",
+      "chapter": 4
+    },
+    {
+      "date": "2025-09-02T12:33:06.877Z",
+      "book": "JOH",
+      "chapter": 5
+    },
+    {
+      "date": "2025-11-09T16:48:27.852Z",
+      "book": "MAR",
+      "chapter": 1
+    },
+    {
+      "date": "2025-11-13T13:50:12.431Z",
+      "book": "MAR",
+      "chapter": 2
+    },
+    {
+      "date": "2025-11-13T13:50:13.531Z",
+      "book": "MAR",
+      "chapter": 3
+    },
+    {
+      "date": "2025-11-13T14:06:21.912Z",
+      "book": "MAR",
+      "chapter": 4
+    },
+    {
+      "date": "2025-11-15T15:20:21.408Z",
+      "book": "MAR",
+      "chapter": 5
+    },
+    {
+      "date": "2025-12-20T17:19:26.409Z",
+      "book": "MAR",
+      "chapter": 6
+    },
+    {
+      "date": "2026-03-01T23:51:10.243Z",
+      "book": "MAR",
+      "chapter": 7
+    },
+    {
+      "date": "2026-03-01T23:51:11.475Z",
+      "book": "MAR",
+      "chapter": 8
+    },
+    {
+      "date": "2026-04-13T12:53:24.968Z",
+      "book": "MAR",
+      "chapter": 9
+    },
+    {
+      "date": "2026-04-19T14:18:03.686Z",
+      "book": "MAR",
+      "chapter": 10
+    },
+    {
+      "date": "2026-04-19T14:18:04.528Z",
+      "book": "MAR",
+      "chapter": 11
+    },
+    {
+      "date": "2026-04-19T14:18:05.312Z",
+      "book": "MAR",
+      "chapter": 12
+    },
+    {
+      "date": "2026-04-19T14:18:06.065Z",
+      "book": "MAR",
+      "chapter": 13
+    },
+    {
+      "date": "2026-04-19T14:18:06.848Z",
+      "book": "MAR",
+      "chapter": 14
+    },
+    {
+      "date": "2026-04-19T14:18:09.499Z",
+      "book": "MAR",
+      "chapter": 15
+    },
+    {
+      "date": "2026-04-20T12:56:24.520Z",
+      "book": "MAR",
+      "chapter": 16
+    },
+    {
+      "date": "2025-11-12T12:57:51.159Z",
+      "book": "EXO",
+      "chapter": 1
+    },
+    {
+      "date": "2025-11-12T12:57:52.875Z",
+      "book": "EXO",
+      "chapter": 2
+    },
+    {
+      "date": "2025-11-13T13:49:15.742Z",
+      "book": "EXO",
+      "chapter": 3
+    },
+    {
+      "date": "2025-11-13T13:49:16.784Z",
+      "book": "EXO",
+      "chapter": 4
+    },
+    {
+      "date": "2025-11-15T15:19:31.378Z",
+      "book": "EXO",
+      "chapter": 5
+    },
+    {
+      "date": "2025-11-15T15:29:09.263Z",
+      "book": "EXO",
+      "chapter": 6
+    },
+    {
+      "date": "2025-11-15T15:58:58.415Z",
+      "book": "EXO",
+      "chapter": 7
+    },
+    {
+      "date": "2025-11-17T13:24:15.130Z",
+      "book": "EXO",
+      "chapter": 8
+    },
+    {
+      "date": "2025-11-17T13:24:16.179Z",
+      "book": "EXO",
+      "chapter": 9
+    },
+    {
+      "date": "2025-11-19T13:42:31.230Z",
+      "book": "EXO",
+      "chapter": 10
+    },
+    {
+      "date": "2025-11-19T13:42:33.816Z",
+      "book": "EXO",
+      "chapter": 11
+    },
+    {
+      "date": "2025-11-21T14:14:40.310Z",
+      "book": "EXO",
+      "chapter": 12
+    },
+    {
+      "date": "2025-11-22T16:32:25.561Z",
+      "book": "EXO",
+      "chapter": 13
+    },
+    {
+      "date": "2025-11-22T16:32:27.729Z",
+      "book": "EXO",
+      "chapter": 14
+    },
+    {
+      "date": "2025-11-23T18:02:04.075Z",
+      "book": "EXO",
+      "chapter": 15
+    },
+    {
+      "date": "2025-11-24T13:30:28.174Z",
+      "book": "EXO",
+      "chapter": 16
+    },
+    {
+      "date": "2025-12-06T17:25:38.740Z",
+      "book": "EXO",
+      "chapter": 17
+    },
+    {
+      "date": "2025-12-06T17:25:40.684Z",
+      "book": "EXO",
+      "chapter": 18
+    },
+    {
+      "date": "2025-12-06T17:25:41.553Z",
+      "book": "EXO",
+      "chapter": 19
+    },
+    {
+      "date": "2025-12-17T13:38:38.784Z",
+      "book": "EXO",
+      "chapter": 20
+    },
+    {
+      "date": "2025-12-20T16:16:32.579Z",
+      "book": "EXO",
+      "chapter": 21
+    },
+    {
+      "date": "2026-01-04T14:58:26.244Z",
+      "book": "EXO",
+      "chapter": 22
+    }
+  ]
+}
