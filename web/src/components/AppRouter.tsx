@@ -6,12 +6,6 @@ import { getBookNamesMap, getChapterData } from '../utils/dataUtils'
 import { groupByBook, groupByDay } from '../utils/groupUtils'
 import { useApi } from './ApiContext'
 import { createMemo } from 'solid-js'
-import type { Tag } from '../data/model'
-
-const OT_NT = {
-  OT: 3,
-  NT: 2,
-} as Record<Tag, number>
 
 export function AppRouter() {
   const api = useApi()
@@ -20,7 +14,7 @@ export function AppRouter() {
   const bookNames = getBookNamesMap(chapters)
   const bookGroups = groupByBook(chapters)
   const planGroups = createMemo(() =>
-    groupByDay(chapters, api.getTags(), OT_NT),
+    groupByDay(chapters, api.getTags(), api.perDayTagData(), api.targetDays()),
   )
 
   return (

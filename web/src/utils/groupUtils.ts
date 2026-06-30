@@ -1,5 +1,4 @@
-import type { BookName, ChapterData, Tag, TagRecord } from '../data/model'
-import { keys } from './dataUtils'
+import type { BookName, ChapterData, PerDayTagData, TagRecord } from '../data/model'
 
 export function groupByBook(
   data: ChapterData[],
@@ -15,45 +14,27 @@ export function groupByBook(
 export function groupByDay(
   chapters: ChapterData[],
   tagRecord: TagRecord,
-  tagPerDay: Record<Tag, number>,
+  perDayTagData: PerDayTagData[],
+  targetDays: number,
 ): Record<string, ChapterData[]> {
-  console.log('[groupByDay]', { chapters, tagRecord, tagPerDay })
   const groups: Record<string, ChapterData[]> = {}
 
-  const dayTags = keys(tagPerDay)
+  const pools: ChapterData[][] = perDayTagData.map((entry) =>
+    entry.tags.flatMap((tag) => chapters.filter((ch) => tagRecord[tag]?.[ch.abbrev]))
+  )
+  const cursors: number[] = pools.map(() => 0)
 
-  let totalDays = 0
-  const cursors: Record<Tag, number> = {}
-  const tagChapters: Record<Tag, ChapterData[]> = {}
-
-  for (const tag of dayTags) {
-    cursors[tag] = 0
-    tagChapters[tag] = chapters.filter((ch) => tagRecord[tag][ch.abbrev])
-
-    // total days is the minimum number of buckets needed to fit the longest tag
-    // chapter / tags per day count
-    totalDays = Math.max(
-      totalDays,
-      Math.ceil(tagChapters[tag].length / tagPerDay[tag]),
-    )
-  }
-
-  for (let i = 0; i < totalDays; i++) {
+  for (let day = 0; day < targetDays; day++) {
     const group: ChapterData[] = []
-
-    for (const tag of dayTags) {
-      for (let j = 0; j < tagPerDay[tag]; j++) {
-        const c = cursors[tag] % tagChapters[tag].length
-        // for last day, make sure we don't loop the longest tag
-        if (i === totalDays - 1 && c < cursors[tag]) {
-          break
-        }
-        cursors[tag] = c + 1
-        group.push(tagChapters[tag][c])
+    for (let i = 0; i < perDayTagData.length; i++) {
+      const pool = pools[i]
+      if (!pool.length) continue
+      for (let j = 0; j < perDayTagData[i].count; j++) {
+        group.push(pool[cursors[i] % pool.length])
+        cursors[i]++
       }
     }
-
-    groups[`Day ${i + 1}`] = group
+    groups[`Day ${day + 1}`] = group
   }
 
   return groups

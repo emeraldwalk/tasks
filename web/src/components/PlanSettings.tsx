@@ -72,6 +72,41 @@ export function PlanSettings() {
         </For>
       </ul>
 
+      <section class={styles.cutoffSection}>
+        <label>
+          Target days:
+          <input
+            type="number"
+            min={1}
+            value={api.targetDays()}
+            onInput={(e) => api.setTargetDays(+e.target.value)}
+          />
+        </label>
+        <label>
+          Cutoff (days):
+          <input
+            type="number"
+            min={1}
+            value={api.cutoffDays() ?? ''}
+            onInput={(e) => {
+              const v = e.target.value
+              api.setCutoffDays(v === '' ? null : +v)
+            }}
+          />
+        </label>
+        <label>
+          Cutoff (date):
+          <input
+            type="date"
+            value={api.cutoffDate() ?? ''}
+            onInput={(e) => {
+              const v = e.target.value
+              api.setCutoffDate(v === '' ? null : v)
+            }}
+          />
+        </label>
+      </section>
+
       <section class={styles.dataSection}>
         <h2>Data</h2>
         <div class={styles.dataButtons}>

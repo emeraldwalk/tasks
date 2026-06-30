@@ -44,18 +44,26 @@ export class Api {
     this._tagsData = tagsData
 
     // perDayTagData signal
-    const [perDayTagData, setPerDayTagData] = createSignal<PerDayTagData[]>([
-      {
-        tags: ['OT' as Tag],
-        count: 3,
-      },
-      {
-        tags: ['NT' as Tag],
-        count: 2,
-      },
-    ])
+    const [perDayTagData, setPerDayTagData] = createSignal<PerDayTagData[]>(
+      settingsData.perDayTagData,
+    )
     this.perDayTagData = perDayTagData
-    this.setPerDayTagData = setPerDayTagData
+    this._setPerDayTagData = setPerDayTagData
+
+    // targetDays signal
+    const [targetDays, setTargetDays] = createSignal(settingsData.targetDays)
+    this.targetDays = targetDays
+    this._setTargetDays = setTargetDays
+
+    // cutoffDays signal
+    const [cutoffDays, setCutoffDays] = createSignal<number | null>(settingsData.cutoffDays)
+    this.cutoffDays = cutoffDays
+    this._setCutoffDays = setCutoffDays
+
+    // cutoffDate signal
+    const [cutoffDate, setCutoffDate] = createSignal<string | null>(settingsData.cutoffDate)
+    this.cutoffDate = cutoffDate
+    this._setCutoffDate = setCutoffDate
 
     // searchText signal
     const [searchText, setSearchText] = createSignal('')
@@ -80,14 +88,37 @@ export class Api {
   private readonly _settingsData: SettingsData
   private readonly _tagsData: TagRecord
   private readonly _setShowCompleted: Setter<boolean>
+  private readonly _setTargetDays: Setter<number>
+  private readonly _setCutoffDays: Setter<number | null>
+  private readonly _setCutoffDate: Setter<string | null>
+  private readonly _setPerDayTagData: Setter<PerDayTagData[]>
   private readonly _setTimeStampMap: Setter<TimeStampMap>
 
   readonly perDayTagData: Accessor<PerDayTagData[]>
-  readonly setPerDayTagData: Setter<PerDayTagData[]>
+  readonly targetDays: Accessor<number>
+  readonly cutoffDays: Accessor<number | null>
+  readonly cutoffDate: Accessor<string | null>
   readonly searchText: Accessor<string>
   readonly setSearchText: Setter<string>
   readonly showCompleted: Accessor<boolean>
   readonly timeStampMap: Accessor<TimeStampMap>
+
+  private currentSettings = (): SettingsData => ({
+    showCompleted: this.showCompleted(),
+    targetDays: this.targetDays(),
+    cutoffDays: this.cutoffDays(),
+    cutoffDate: this.cutoffDate(),
+    perDayTagData: this.perDayTagData(),
+  })
+
+  private effectiveCutoff = (): string | null => {
+    const days = this.cutoffDays()
+    const rolling = days != null
+      ? new Date(Date.now() - days * 86400000).toISOString().slice(0, 10)
+      : null
+    const candidates = [rolling, this.cutoffDate()].filter(Boolean) as string[]
+    return candidates.length ? candidates.toSorted().at(-1)! : null
+  }
 
   getChapterData = (): ChapterData[] => {
     return this._chapterData
@@ -139,7 +170,10 @@ export class Api {
     abbrev,
     number,
   }: Pick<ChapterData, 'abbrev' | 'number'>) => {
-    return this.getChapterDates({ abbrev, number }).length > 0
+    const dates = this.getChapterDates({ abbrev, number })
+    const cutoff = this.effectiveCutoff()
+    if (!cutoff) return dates.length > 0
+    return dates.some((d) => d.slice(0, 10) >= cutoff)
   }
 
   completeCount = (chapters: ChapterData[]): number => {
@@ -173,9 +207,31 @@ export class Api {
     deleteTimeStamp(this._db, book, chapter, date)
   }
 
+  setPerDayTagData = async (
+    valueOrUpdater: PerDayTagData[] | ((prev: PerDayTagData[]) => PerDayTagData[]),
+  ) => {
+    this._setPerDayTagData(valueOrUpdater as PerDayTagData[])
+    await updateSettings(this._db, this.currentSettings())
+  }
+
+  setTargetDays = async (value: number) => {
+    this._setTargetDays(value)
+    await updateSettings(this._db, this.currentSettings())
+  }
+
+  setCutoffDays = async (value: number | null) => {
+    this._setCutoffDays(value)
+    await updateSettings(this._db, this.currentSettings())
+  }
+
+  setCutoffDate = async (value: string | null) => {
+    this._setCutoffDate(value)
+    await updateSettings(this._db, this.currentSettings())
+  }
+
   toggleShowCompleted = async () => {
     this._setShowCompleted((prev) => !prev)
-    await updateSettings(this._db, this.showCompleted())
+    await updateSettings(this._db, this.currentSettings())
   }
 
   exportData = (): string => {

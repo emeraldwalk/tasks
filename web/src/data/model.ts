@@ -32,6 +32,10 @@ export type TagRecord = Record<Tag, Record<BookAbbrev, boolean>>
 
 export interface SettingsData {
   showCompleted: boolean
+  targetDays: number
+  cutoffDays: number | null
+  cutoffDate: string | null
+  perDayTagData: PerDayTagData[]
 }
 
 export interface PerDayTagData {

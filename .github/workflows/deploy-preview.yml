@@ -1,19 +1,20 @@
-name: Deploy static content to Pages
+name: Deploy preview
 
 on:
   push:
-    branches: ['main']
-  workflow_dispatch:
+    branches-ignore:
+      - main
+      - gh-pages
 
 permissions:
   contents: write
 
 concurrency:
-  group: 'pages'
+  group: 'pages-preview-${{ github.ref_name }}'
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  deploy-preview:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,26 +27,23 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ./web/package-lock.json
 
+      - name: Sanitize branch name
+        id: branch
+        run: |
+          SAFE="${{ github.ref_name }}"
+          SAFE="${SAFE//\//-}"
+          echo "safe=$SAFE" >> $GITHUB_OUTPUT
+
       - name: Install and Build
         working-directory: ./web
         run: |
           npm ci
-          npm run build
+          npm run build -- --base=/tasks/preview/${{ steps.branch.outputs.safe }}
 
-      - name: Restore preview directory from gh-pages
-        run: |
-          git fetch origin gh-pages 2>/dev/null || true
-          if git rev-parse origin/gh-pages >/dev/null 2>&1; then
-            git checkout origin/gh-pages -- preview 2>/dev/null || true
-            if [ -d preview ]; then
-              cp -r preview ./web/dist/preview
-            fi
-          fi
-
-      - name: Deploy to GitHub Pages
+      - name: Deploy preview to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./web/dist
           publish_branch: gh-pages
-          force_orphan: true
+          destination_dir: preview/${{ steps.branch.outputs.safe }}

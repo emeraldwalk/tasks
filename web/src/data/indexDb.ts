@@ -2,7 +2,9 @@ import type {
   BookAbbrev,
   ChapterID,
   ISODateTimeString,
+  PerDayTagData,
   SettingsData,
+  Tag,
   TimeStampMap,
 } from './model'
 
@@ -14,6 +16,10 @@ export type TimeStampKey = `${ISODateTimeString}_${BookAbbrev}_${ChapterID}`
 interface SettingsRecord {
   id: '1'
   showCompleted: boolean
+  targetDays?: number
+  cutoffDays?: number | null
+  cutoffDate?: string | null
+  perDayTagData?: PerDayTagData[]
 }
 
 interface TimestampRecord {
@@ -110,10 +116,10 @@ export async function addTimestamp(
 }
 
 /** Update the settings record */
-export async function updateSettings(db: IDBDatabase, showCompleted: boolean) {
+export async function updateSettings(db: IDBDatabase, settings: SettingsData) {
   const record: SettingsRecord = {
     id: '1',
-    showCompleted,
+    ...settings,
   }
 
   return putRecord(db, SETTINGS_STORE_NAME, record)
@@ -157,6 +163,13 @@ export async function getSettingsData(db: IDBDatabase): Promise<SettingsData> {
     const result = (event.target as IDBRequest<SettingsRecord>).result
     resolve({
       showCompleted: result?.showCompleted ?? true,
+      targetDays: result?.targetDays ?? 365,
+      cutoffDays: result?.cutoffDays ?? null,
+      cutoffDate: result?.cutoffDate ?? null,
+      perDayTagData: result?.perDayTagData ?? [
+        { tags: ['OT' as Tag], count: 3 },
+        { tags: ['NT' as Tag], count: 2 },
+      ],
     })
   }
 
