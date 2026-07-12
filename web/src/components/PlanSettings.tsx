@@ -1,5 +1,6 @@
 import { createSignal, For, Show } from 'solid-js'
 import { keys } from '../utils/dataUtils'
+import { computeGroupStat } from '../utils/groupUtils'
 import { useApi } from './ApiContext'
 import styles from './PlanSettings.module.css'
 import { TagSelector } from './TagSelector'
@@ -26,6 +27,20 @@ export function PlanSettings() {
 
   const tagRecord = () => api.getTags()
   const tagNames = () => keys(tagRecord())
+  const chapters = api.getChapterData()
+
+  const formatGroupStat = (entry: PerDayTagData) => {
+    const stat = computeGroupStat(chapters, tagRecord(), entry, api.targetDays())
+    if (stat.poolSize === 0) return 'No chapters match these tags yet'
+
+    const overall = `${stat.poolSize} chapters · ${stat.timesThrough.toFixed(1)}× over ${api.targetDays()} days`
+    if (stat.tagStats.length <= 1) return overall
+
+    const perTag = stat.tagStats
+      .map((t) => `${t.tag} ${t.timesThrough.toFixed(1)}×`)
+      .join(' · ')
+    return `${overall} (${perTag})`
+  }
 
   const onChange = (i: number) => {
     return (value: PerDayTagData) => {
@@ -102,6 +117,7 @@ export function PlanSettings() {
                     aria-label="Remove group">
                     <Icon name="remove-circle" size="large" />
                   </button>
+                  <p class={styles.groupStat}>{formatGroupStat(datum)}</p>
                 </li>
               )}
             </For>

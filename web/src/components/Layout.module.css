@@ -8,23 +8,25 @@
     background-color: var(--color-primary);
     border-bottom: 1px solid var(--color-border);
     align-items: center;
-    grid-template-columns: 1fr;
-    padding: 20px 1rem;
+    grid-template-columns: 1fr auto;
+    padding: calc(20px + env(safe-area-inset-top)) 1rem 20px;
   }
   .title {
+    grid-column: 1 / -1;
+    grid-row: 1;
     color: var(--color-on-primary);
     font-size: 34px;
     line-height: 36px;
     margin: 0;
     text-align: center;
-    grid-row: 1;
   }
   .showCompleted {
+    grid-column: 2;
+    grid-row: 1;
     color: var(--color-on-primary);
     display: flex;
     gap: 0.2rem;
     height: 36px;
-    grid-row: 1;
     align-items: center;
     justify-self: end;
 
@@ -59,7 +61,9 @@
     }
   }
   .search {
+    grid-column: 1 / -1;
     grid-row: 2;
+    width: 100%;
     margin-top: 0.5rem;
   }
   .main {
@@ -91,9 +95,9 @@
   .tabBar {
     border-top: 1px solid var(--color-border);
     display: flex;
-    height: 72px;
+    min-height: 72px;
     flex-shrink: 0;
-    padding: 0.5rem 1rem 22px;
+    padding: 0.5rem 1rem calc(22px + env(safe-area-inset-bottom));
     justify-content: space-evenly;
     a {
       color: var(--color-muted);
