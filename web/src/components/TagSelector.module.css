@@ -1,38 +1,114 @@
 .TagSelector {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.countField {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 
   input[type='number'] {
-    text-align: right;
-    width: 40px;
+    width: 52px;
     height: 32px;
-  }
-
-  .tagList {
+    text-align: center;
     border: 1px solid var(--color-border);
+    border-radius: 8px;
+  }
+}
+
+.countLabel {
+  font-size: 0.85rem;
+  color: #6b6b70;
+}
+
+.tagArea {
+  position: relative;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tagChip {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: #eef1f6;
+  border-radius: 999px;
+  padding: 0.3rem 0.5rem 0.3rem 0.75rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+
+  button {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border: none;
+    border-radius: 50%;
+    background-color: #b7bcc4;
+    color: #fff;
+    font-size: 0.7rem;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+
+    &:active {
+      background-color: var(--color-checkbox);
+    }
+  }
+}
+
+.addTagItem {
+  display: flex;
+}
+
+.addTag {
+  border: 1px dashed var(--color-border);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+  width: 90px;
+  height: auto;
+  background: none;
+
+  &::placeholder {
+    color: #aaa;
   }
 
-  .addTag {
-    height: 32px;
+  &:focus {
+    outline: none;
+    border-color: var(--color-link);
   }
+}
 
-  .popup {
-    background-color: #fff;
-    border: 1px solid var(--color-border);
-    position: absolute;
-    width: 250px;
-    li {
-      display: flex;
-      align-items: center;
-      height: 36px;
-      padding: 0.5rem;
-      &:hover {
-        background-color: var(--color-hover);
-      }
+.popup {
+  background-color: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  position: absolute;
+  margin-top: 0.25rem;
+  width: 200px;
+  z-index: 5;
+  overflow: hidden;
+
+  li {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 0.85rem;
+    font-size: 0.9rem;
+
+    &:hover {
+      background-color: var(--color-hover);
     }
   }
 }

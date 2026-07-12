@@ -35,25 +35,30 @@ export function TagSelector(props: TagSelectorProps) {
 
   return (
     <div class={styles.TagSelector}>
-      <input
-        type="number"
-        value={props.value.count}
-        min={1}
-        onInput={(e) => props.onChange({ ...props.value, count: +e.target.value })}
-      />
-      <div>
+      <div class={styles.countField}>
+        <input
+          type="number"
+          value={props.value.count}
+          min={1}
+          onInput={(e) => props.onChange({ ...props.value, count: +e.target.value })}
+        />
+        <span class={styles.countLabel}>chapters/day</span>
+      </div>
+      <div class={styles.tagArea}>
         <ul class={styles.tagList}>
           <For each={props.value.tags}>
             {(tagName) => (
-              <li>
+              <li class={styles.tagChip}>
                 {tagName}
                 <button type="button" onClick={onRemove(tagName)}>×</button>
               </li>
             )}
           </For>
-          <li>
+          <li class={styles.addTagItem}>
             <input
               class={styles.addTag}
+              placeholder="Add tag…"
+              value={searchText()}
               onInput={(event) => {
                 setSearchText(event.target.value)
               }}
