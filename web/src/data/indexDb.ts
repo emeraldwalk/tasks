@@ -19,6 +19,7 @@ interface SettingsRecord {
   targetDays?: number
   cutoffDays?: number | null
   cutoffDate?: string | null
+  showAllDates?: boolean
   perDayTagData?: PerDayTagData[]
 }
 
@@ -166,6 +167,7 @@ export async function getSettingsData(db: IDBDatabase): Promise<SettingsData> {
       targetDays: result?.targetDays ?? 365,
       cutoffDays: result?.cutoffDays ?? null,
       cutoffDate: result?.cutoffDate ?? null,
+      showAllDates: result?.showAllDates ?? false,
       perDayTagData: result?.perDayTagData ?? [
         { tags: ['OT' as Tag], count: 3 },
         { tags: ['NT' as Tag], count: 2 },

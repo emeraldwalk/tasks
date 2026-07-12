@@ -119,6 +119,14 @@ export function PlanSettings() {
             }}
           />
         </label>
+        <label class={styles.showAllDates}>
+          <input
+            type="checkbox"
+            checked={api.showAllDates()}
+            onChange={() => api.setShowAllDates(!api.showAllDates())}
+          />
+          Show full history
+        </label>
       </section>
 
       <section class={styles.dataSection}>

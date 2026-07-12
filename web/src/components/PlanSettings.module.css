@@ -1,6 +1,13 @@
 .PlanSettings {
   padding: 1rem;
 
+  .showAllDates {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+
   .tagGroupList {
     display: flex;
     flex-direction: column;

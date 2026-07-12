@@ -65,6 +65,13 @@ export class Api {
     this.cutoffDate = cutoffDate
     this._setCutoffDate = setCutoffDate
 
+    // showAllDates signal
+    const [showAllDates, setShowAllDates] = createSignal<boolean>(
+      settingsData.showAllDates,
+    )
+    this.showAllDates = showAllDates
+    this._setShowAllDates = setShowAllDates
+
     // searchText signal
     const [searchText, setSearchText] = createSignal('')
     this.searchText = searchText
@@ -91,6 +98,7 @@ export class Api {
   private readonly _setTargetDays: Setter<number>
   private readonly _setCutoffDays: Setter<number | null>
   private readonly _setCutoffDate: Setter<string | null>
+  private readonly _setShowAllDates: Setter<boolean>
   private readonly _setPerDayTagData: Setter<PerDayTagData[]>
   private readonly _setTimeStampMap: Setter<TimeStampMap>
 
@@ -98,6 +106,7 @@ export class Api {
   readonly targetDays: Accessor<number>
   readonly cutoffDays: Accessor<number | null>
   readonly cutoffDate: Accessor<string | null>
+  readonly showAllDates: Accessor<boolean>
   readonly searchText: Accessor<string>
   readonly setSearchText: Setter<string>
   readonly showCompleted: Accessor<boolean>
@@ -108,6 +117,7 @@ export class Api {
     targetDays: this.targetDays(),
     cutoffDays: this.cutoffDays(),
     cutoffDate: this.cutoffDate(),
+    showAllDates: this.showAllDates(),
     perDayTagData: this.perDayTagData(),
   })
 
@@ -176,6 +186,13 @@ export class Api {
     return dates.some((d) => d.slice(0, 10) >= cutoff)
   }
 
+  filterDatesToCutoff = (dates: ISODateTimeString[]): ISODateTimeString[] => {
+    if (this.showAllDates()) return dates
+    const cutoff = this.effectiveCutoff()
+    if (!cutoff) return dates
+    return dates.filter((d) => d.slice(0, 10) >= cutoff)
+  }
+
   completeCount = (chapters: ChapterData[]): number => {
     return chapters.filter(this.hasChapterDates).length
   }
@@ -226,6 +243,11 @@ export class Api {
 
   setCutoffDate = async (value: string | null) => {
     this._setCutoffDate(value)
+    await updateSettings(this._db, this.currentSettings())
+  }
+
+  setShowAllDates = async (value: boolean) => {
+    this._setShowAllDates(value)
     await updateSettings(this._db, this.currentSettings())
   }
 
