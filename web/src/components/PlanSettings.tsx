@@ -20,6 +20,7 @@ async function triggerExport(json: string, filename: string): Promise<void> {
 export function PlanSettings() {
   const api = useApi()
   const [importResult, setImportResult] = createSignal<string | null>(null)
+  const [reloadResult, setReloadResult] = createSignal<string | null>(null)
   let fileInput: HTMLInputElement | undefined
 
   const tagRecord = () => api.getTags()
@@ -52,6 +53,21 @@ export function PlanSettings() {
       setImportResult(`Error: ${err instanceof Error ? err.message : String(err)}`)
     }
     input.value = ''
+  }
+
+  const handleReloadContent = async () => {
+    setReloadResult('Clearing cached content…')
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations()
+      await Promise.all(registrations.map((r) => r.unregister()))
+    }
+    if ('caches' in window) {
+      const cacheKeys = await caches.keys()
+      await Promise.all(cacheKeys.map((key) => caches.delete(key)))
+    }
+    const url = new URL(window.location.href)
+    url.searchParams.set('_r', Date.now().toString())
+    window.location.replace(url.toString())
   }
 
   return (
@@ -115,6 +131,14 @@ export function PlanSettings() {
           <input ref={fileInput} type="file" accept=".json" style="display:none" onChange={handleImport} />
         </div>
         {importResult() && <p class={styles.importResult}>{importResult()}</p>}
+      </section>
+
+      <section class={styles.dataSection}>
+        <h2>App</h2>
+        <div class={styles.dataButtons}>
+          <button class={styles.button} onClick={handleReloadContent}>Reload Content</button>
+        </div>
+        {reloadResult() && <p class={styles.importResult}>{reloadResult()}</p>}
       </section>
     </div>
   )
