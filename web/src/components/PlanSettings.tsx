@@ -91,7 +91,7 @@ export function PlanSettings() {
       const cacheKeys = await caches.keys()
       await Promise.all(cacheKeys.map((key) => caches.delete(key)))
     }
-    const url = new URL(window.location.href)
+    const url = new URL(import.meta.env.BASE_URL, window.location.origin)
     url.searchParams.set('_r', Date.now().toString())
     window.location.replace(url.toString())
   }
