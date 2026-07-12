@@ -8,8 +8,8 @@
     background-color: var(--color-bg);
     border-bottom: 1px solid var(--color-border);
     align-items: center;
-    grid-template-columns: auto 1fr;
-    padding: 20px 1rem 20px 0;
+    grid-template-columns: 1fr;
+    padding: 20px 1rem;
   }
   .title {
     color: var(--color-fg);
@@ -17,7 +17,6 @@
     line-height: 36px;
     margin: 0;
     text-align: center;
-    grid-column: 1 / span 2;
     grid-row: 1;
   }
   .showCompleted {
@@ -26,7 +25,6 @@
     gap: 0.2rem;
     height: 36px;
     grid-row: 1;
-    grid-column: 1 / span 2;
     align-items: center;
     justify-self: end;
 
@@ -60,37 +58,13 @@
       transform: rotate(45deg);
     }
   }
-  .menuTrigger {
-    grid-row: 1;
-    grid-column: 1;
-    background-color: var(--color-bg);
-    color: var(--color-fg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 1rem;
-    width: 64px;
-    height: 44px;
-    &.isSettingsOpen {
-      background-color: unset;
-      z-index: 3;
-    }
-  }
   .search {
-    grid-column: span 2;
-    margin-left: 1rem;
+    grid-row: 2;
+    margin-top: 0.5rem;
   }
   .main {
     overflow-y: auto;
     flex-grow: 1;
-  }
-  .sidebar {
-    background-color: #fff;
-    border-right: 1px solid var(--color-border);
-    position: absolute;
-    padding: 0.5rem 1rem;
-    height: 100vh;
-    z-index: 2;
   }
   .installPrompt {
     background: #fff3cd;

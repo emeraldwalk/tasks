@@ -2,7 +2,7 @@ import { createEffect, createSignal, For, Show } from 'solid-js'
 import styles from './Chapter.module.css'
 import { className } from '../utils/cssUtils'
 import accordionStyles from './Accordion.module.css'
-import { mmDD, now } from '../utils/dateUtils'
+import { mmDDYY, now } from '../utils/dateUtils'
 import type { ChapterData, ISODateTimeString } from '../data/model'
 import { useApi } from './ApiContext'
 import { CheckMark } from './CheckMark'
@@ -57,7 +57,7 @@ export function Chapter(props: ChapterProps) {
       )}>
       <span class={styles.header}>
         <CheckMark
-          state={dates().length ? 'complete' : 'incomplete'}
+          state={api.hasChapterDates(props.data) ? 'complete' : 'incomplete'}
           onClick={onAdd}
         />
         <span class={styles.label} onClick={onExpanderClick}>
@@ -73,7 +73,7 @@ export function Chapter(props: ChapterProps) {
           <For each={dates()}>
             {(date) => (
               <button class={styles.date} onClick={onRemove(date)}>
-                {mmDD(date)}
+                {mmDDYY(date)}
               </button>
             )}
           </For>
