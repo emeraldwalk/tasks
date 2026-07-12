@@ -9,12 +9,24 @@ body {
 }
 
 :root {
-  --color-bg: #080;
-  --color-fg: #fff;
+  /* Brand: header / tab bar */
+  --color-primary: #080;
+  --color-on-primary: #fff;
+
+  /* Accent: buttons, links, checked/complete state — harmonizes with the primary green */
+  --color-accent: #0b582c;
+  --color-on-accent: #fff;
+
+  /* Danger: destructive actions */
+  --color-danger: #ff3b30;
+
+  /* Neutrals */
   --color-border: #ccc;
-  --color-checkbox: #0b582c;
   --color-hover: #999;
-  --color-link: #0054e9;
+  --color-muted: #6b6b70;
+  --color-surface: #fff;
+  --color-page: #f2f2f7;
+
   --button-height: 36px;
   --item-height: 44px;
   --item-padding-h: 1rem;
