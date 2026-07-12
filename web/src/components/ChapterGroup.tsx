@@ -16,8 +16,9 @@ export interface ChapterGroupProps {
 export function ChapterGroup(props: ChapterGroupProps) {
   const api = useApi()
   const [isExpanded, setIsExpanded] = createSignal(false)
+  const completedCount = () => api.completeCount(props.data.chapters)
   const completionStatus = () => {
-    const count = api.completeCount(props.data.chapters)
+    const count = completedCount()
 
     if (count === props.data.chapters.length) {
       return 'complete'
@@ -65,7 +66,12 @@ export function ChapterGroup(props: ChapterGroupProps) {
           setIsExpanded((prev) => !prev)
         }}>
         <CheckMark state={completionStatus()} />
-        <span class={styles.label}>{props.data.name}</span>
+        <span class={styles.label}>
+          <Show when={completedCount() > 0}>
+            <span class={styles.completedCount}>({completedCount()})</span>
+          </Show>
+          {props.data.name}
+        </span>
         {chapters().length}
         <Icon class={accordionStyles.icon} name="chevron-down-sharp" />
       </span>
