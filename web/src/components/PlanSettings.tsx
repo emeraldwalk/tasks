@@ -72,8 +72,6 @@ export function PlanSettings() {
 
   return (
     <div class={styles.PlanSettings}>
-      <h1>Plan Settings</h1>
-
       <ul class={styles.tagGroupList}>
         <For each={api.perDayTagData()}>
           {(datum, i) => (

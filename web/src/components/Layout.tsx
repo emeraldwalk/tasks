@@ -3,8 +3,6 @@ import { SearchInput } from './SearchInput'
 import { useApi } from './ApiContext'
 import styles from './Layout.module.css'
 import { A, type RouteSectionProps } from '@solidjs/router'
-import { PlanSettings } from './PlanSettings'
-import { className } from '../utils/cssUtils'
 import { Icon } from './Icon'
 
 const isIosSafari =
@@ -17,16 +15,19 @@ const shouldShowInstallPrompt =
 
 export function Layout(props: RouteSectionProps) {
   const api = useApi()
-  const [isSettingsOpen, setIsSettingsOpen] = createSignal(false)
   const [showInstallPrompt, setShowInstallPrompt] = createSignal(
     shouldShowInstallPrompt,
   )
+
+  const isSettingsRoute = () => props.location.pathname.endsWith('/settings')
 
   const title = () =>
     props.location.pathname.endsWith('/plan')
       ? 'Plan'
       : props.location.pathname.endsWith('/history')
       ? 'History'
+      : isSettingsRoute()
+      ? 'Settings'
       : 'Books'
 
   const dismissInstallPrompt = () => {
@@ -48,31 +49,18 @@ export function Layout(props: RouteSectionProps) {
       </Show>
       <header class={styles.header}>
         <h1 class={styles.title}>{title()}</h1>
-        <span
-          class={className(
-            styles.menuTrigger,
-            isSettingsOpen() && styles.isSettingsOpen,
-          )}
-          onClick={() => {
-            setIsSettingsOpen(!isSettingsOpen())
-          }}>
-          <Icon name={isSettingsOpen() ? 'close' : 'menu'} size="large" />
-        </span>
-        <label class={styles.showCompleted}>
-          <input
-            type="checkbox"
-            checked={api.showCompleted()}
-            onChange={() => api.toggleShowCompleted()}
-          />
-          Completed
-        </label>
-        <SearchInput class={styles.search} onSearch={api.setSearchText} />
+        <Show when={!isSettingsRoute()}>
+          <label class={styles.showCompleted}>
+            <input
+              type="checkbox"
+              checked={api.showCompleted()}
+              onChange={() => api.toggleShowCompleted()}
+            />
+            Completed
+          </label>
+          <SearchInput class={styles.search} onSearch={api.setSearchText} />
+        </Show>
       </header>
-      <Show when={isSettingsOpen()}>
-        <aside class={styles.sidebar}>
-          <PlanSettings />
-        </aside>
-      </Show>
       <main class={styles.main}>{props.children}</main>
       <footer class={styles.tabBar}>
         <A href="/" end activeClass={styles.activeTab}>
@@ -83,6 +71,9 @@ export function Layout(props: RouteSectionProps) {
         </A>
         <A href="/history" activeClass={styles.activeTab}>
           <Icon name="time-outline" size="large" />
+        </A>
+        <A href="/settings" activeClass={styles.activeTab}>
+          <Icon name="settings-outline" size="large" />
         </A>
       </footer>
     </div>
