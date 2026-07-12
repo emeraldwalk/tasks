@@ -21,7 +21,7 @@
 
 .countLabel {
   font-size: 0.85rem;
-  color: #6b6b70;
+  color: var(--color-muted);
 }
 
 .tagArea {
@@ -39,7 +39,7 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  background-color: #eef1f6;
+  background-color: var(--color-page);
   border-radius: 999px;
   padding: 0.3rem 0.5rem 0.3rem 0.75rem;
   font-size: 0.85rem;
@@ -53,15 +53,15 @@
     height: 16px;
     border: none;
     border-radius: 50%;
-    background-color: #b7bcc4;
-    color: #fff;
+    background-color: var(--color-hover);
+    color: var(--color-surface);
     font-size: 0.7rem;
     line-height: 1;
     padding: 0;
     cursor: pointer;
 
     &:active {
-      background-color: var(--color-checkbox);
+      background-color: var(--color-accent);
     }
   }
 }
@@ -80,17 +80,17 @@
   background: none;
 
   &::placeholder {
-    color: #aaa;
+    color: var(--color-hover);
   }
 
   &:focus {
     outline: none;
-    border-color: var(--color-link);
+    border-color: var(--color-accent);
   }
 }
 
 .popup {
-  background-color: #fff;
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);

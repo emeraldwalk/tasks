@@ -8,10 +8,11 @@ export interface IconProps {
 
 const iconContent = {
   'add-circle': () => (
-    <path
-      fill="currentColor"
-      d="M256 48C141.31 48 48 141.31 48 256s93.31 208 208 208 208-93.31 208-208S370.69 48 256 48zm94.49 246.34H295.7v54.79a8 8 0 01-8 8h-22.86a8 8 0 01-8-8v-54.79h-54.79a8 8 0 01-8-8v-22.86a8 8 0 018-8h54.79v-54.79a8 8 0 018-8h22.86a8 8 0 018 8v54.79h54.79a8 8 0 018 8v22.86a8 8 0 01-8 8z"
-    />
+    <>
+      <circle cx="256" cy="256" r="208" fill="currentColor" />
+      <rect x="240" y="176" width="32" height="160" rx="8" fill="var(--color-on-accent)" />
+      <rect x="176" y="240" width="160" height="32" rx="8" fill="var(--color-on-accent)" />
+    </>
   ),
   'book-outline': () => (
     <path
@@ -157,7 +158,8 @@ export function Icon(props: IconProps) {
       xmlns="http://www.w3.org/2000/svg"
       class={className('ionicon', `icon-${props.name}`, props.class)}
       viewBox="0 0 512 512"
-      width={size()}>
+      width={size()}
+      height={size()}>
       {content()}
     </svg>
   )

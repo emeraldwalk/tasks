@@ -5,14 +5,14 @@
 
   .header {
     display: grid;
-    background-color: var(--color-bg);
+    background-color: var(--color-primary);
     border-bottom: 1px solid var(--color-border);
     align-items: center;
     grid-template-columns: 1fr;
     padding: 20px 1rem;
   }
   .title {
-    color: var(--color-fg);
+    color: var(--color-on-primary);
     font-size: 34px;
     line-height: 36px;
     margin: 0;
@@ -20,7 +20,7 @@
     grid-row: 1;
   }
   .showCompleted {
-    color: var(--color-fg);
+    color: var(--color-on-primary);
     display: flex;
     gap: 0.2rem;
     height: 36px;
@@ -33,16 +33,16 @@
       -webkit-appearance: none;
       width: 20px;
       height: 20px;
-      border: 2px solid #888;
+      border: 2px solid var(--color-hover);
       border-radius: 4px;
-      background: #fff;
+      background: var(--color-surface);
       position: relative;
       cursor: pointer;
     }
 
     input[type='checkbox']:checked {
-      background: var(--color-checkbox);
-      border-color: var(--color-checkbox);
+      background: var(--color-accent);
+      border-color: var(--color-accent);
     }
 
     input[type='checkbox']:checked::after {
@@ -53,7 +53,7 @@
       top: 1px;
       width: 6px;
       height: 12px;
-      border: solid #fff;
+      border: solid var(--color-on-accent);
       border-width: 0 2px 2px 0;
       transform: rotate(45deg);
     }
@@ -96,14 +96,14 @@
     padding: 0.5rem 1rem 22px;
     justify-content: space-evenly;
     a {
-      color: gray;
+      color: var(--color-muted);
       display: flex;
       align-items: center;
       justify-content: center;
       height: 50px;
       flex-grow: 1;
       &.activeTab {
-        color: var(--color-link);
+        color: var(--color-accent);
       }
     }
   }

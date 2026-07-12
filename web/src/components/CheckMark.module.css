@@ -3,9 +3,9 @@
   align-items: center;
   justify-content: center;
   &.complete {
-    color: green;
+    color: var(--color-accent);
   }
   &.partial {
-    color: gray;
+    color: var(--color-muted);
   }
 }
