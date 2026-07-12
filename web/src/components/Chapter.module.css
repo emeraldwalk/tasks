@@ -38,25 +38,39 @@
 
   .dateList {
     display: none;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
     gap: 8px;
     grid-column: span 2;
   }
 
   .date {
     display: flex;
-    gap: 4px;
+    gap: 6px;
+    background-color: #fff;
     border: 1px solid var(--color-border);
-    border-radius: 4px;
-    padding: 4px 8px;
+    border-radius: 999px;
+    padding: 4px 6px 4px 12px;
     height: var(--button-height);
     font-size: 0.8rem;
     align-items: center;
     justify-content: space-between;
     white-space: nowrap;
     &:after {
-      content: 'X';
-      display: block;
+      content: '\00d7';
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background-color: #999;
+      color: #fff;
+      font-size: 0.85rem;
+      line-height: 1;
+    }
+    &:active:after {
+      background-color: var(--color-checkbox);
     }
   }
 
