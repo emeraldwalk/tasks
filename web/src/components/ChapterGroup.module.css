@@ -21,7 +21,6 @@
   .completedCount {
     color: var(--color-muted);
     font-size: 1rem;
-    margin-right: 0.3rem;
   }
   .chapterList {
     border-bottom: 1px solid var(--color-border);

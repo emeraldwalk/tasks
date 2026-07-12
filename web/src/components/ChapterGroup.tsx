@@ -66,12 +66,10 @@ export function ChapterGroup(props: ChapterGroupProps) {
           setIsExpanded((prev) => !prev)
         }}>
         <CheckMark state={completionStatus()} />
-        <span class={styles.label}>
-          <Show when={completedCount() > 0}>
-            <span class={styles.completedCount}>({completedCount()})</span>
-          </Show>
-          {props.data.name}
-        </span>
+        <span class={styles.label}>{props.data.name}</span>
+        <Show when={completedCount() > 0}>
+          <span class={styles.completedCount}>({completedCount()})</span>
+        </Show>
         {chapters().length}
         <Icon class={accordionStyles.icon} name="chevron-down-sharp" />
       </span>
