@@ -54,7 +54,6 @@ export function Chapter(props: ChapterProps) {
         styles.Chapter,
         isExpanded() && styles.isExpanded,
         isExpanded() && accordionStyles.isExpanded,
-        dates().length > 0 && styles.hasDates,
       )}>
       <span class={styles.header}>
         <CheckMark

@@ -17,18 +17,11 @@
   }
   .expander {
     justify-content: end;
-    .icon {
-      display: none;
-    }
   }
 
   .label {
     flex-grow: 1;
     text-decoration: underline;
-  }
-
-  .count {
-    display: none;
   }
 
   button {
@@ -71,15 +64,6 @@
     }
     &:active:after {
       background-color: var(--color-accent);
-    }
-  }
-
-  &.hasDates {
-    .count {
-      display: block;
-    }
-    .expander .icon {
-      display: block;
     }
   }
 
