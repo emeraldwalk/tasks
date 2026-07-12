@@ -35,7 +35,7 @@ export interface SettingsData {
   targetDays: number
   cutoffDays: number | null
   cutoffDate: string | null
-  restrictDatesToCutoff: boolean
+  showAllDates: boolean
   perDayTagData: PerDayTagData[]
 }
 

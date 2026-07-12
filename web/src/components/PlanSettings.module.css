@@ -1,7 +1,7 @@
 .PlanSettings {
   padding: 1rem;
 
-  .restrictDatesToCutoff {
+  .showAllDates {
     display: flex;
     align-items: center;
     gap: 0.4rem;

@@ -119,13 +119,13 @@ export function PlanSettings() {
             }}
           />
         </label>
-        <label class={styles.restrictDatesToCutoff}>
+        <label class={styles.showAllDates}>
           <input
             type="checkbox"
-            checked={api.restrictDatesToCutoff()}
-            onChange={() => api.setRestrictDatesToCutoff(!api.restrictDatesToCutoff())}
+            checked={api.showAllDates()}
+            onChange={() => api.setShowAllDates(!api.showAllDates())}
           />
-          Limit history to cutoff range
+          Show full history
         </label>
       </section>
 
