@@ -65,6 +65,13 @@ export class Api {
     this.cutoffDate = cutoffDate
     this._setCutoffDate = setCutoffDate
 
+    // restrictDatesToCutoff signal
+    const [restrictDatesToCutoff, setRestrictDatesToCutoff] = createSignal<boolean>(
+      settingsData.restrictDatesToCutoff,
+    )
+    this.restrictDatesToCutoff = restrictDatesToCutoff
+    this._setRestrictDatesToCutoff = setRestrictDatesToCutoff
+
     // searchText signal
     const [searchText, setSearchText] = createSignal('')
     this.searchText = searchText
@@ -91,6 +98,7 @@ export class Api {
   private readonly _setTargetDays: Setter<number>
   private readonly _setCutoffDays: Setter<number | null>
   private readonly _setCutoffDate: Setter<string | null>
+  private readonly _setRestrictDatesToCutoff: Setter<boolean>
   private readonly _setPerDayTagData: Setter<PerDayTagData[]>
   private readonly _setTimeStampMap: Setter<TimeStampMap>
 
@@ -98,6 +106,7 @@ export class Api {
   readonly targetDays: Accessor<number>
   readonly cutoffDays: Accessor<number | null>
   readonly cutoffDate: Accessor<string | null>
+  readonly restrictDatesToCutoff: Accessor<boolean>
   readonly searchText: Accessor<string>
   readonly setSearchText: Setter<string>
   readonly showCompleted: Accessor<boolean>
@@ -108,6 +117,7 @@ export class Api {
     targetDays: this.targetDays(),
     cutoffDays: this.cutoffDays(),
     cutoffDate: this.cutoffDate(),
+    restrictDatesToCutoff: this.restrictDatesToCutoff(),
     perDayTagData: this.perDayTagData(),
   })
 
@@ -176,6 +186,13 @@ export class Api {
     return dates.some((d) => d.slice(0, 10) >= cutoff)
   }
 
+  filterDatesToCutoff = (dates: ISODateTimeString[]): ISODateTimeString[] => {
+    if (!this.restrictDatesToCutoff()) return dates
+    const cutoff = this.effectiveCutoff()
+    if (!cutoff) return dates
+    return dates.filter((d) => d.slice(0, 10) >= cutoff)
+  }
+
   completeCount = (chapters: ChapterData[]): number => {
     return chapters.filter(this.hasChapterDates).length
   }
@@ -226,6 +243,11 @@ export class Api {
 
   setCutoffDate = async (value: string | null) => {
     this._setCutoffDate(value)
+    await updateSettings(this._db, this.currentSettings())
+  }
+
+  setRestrictDatesToCutoff = async (value: boolean) => {
+    this._setRestrictDatesToCutoff(value)
     await updateSettings(this._db, this.currentSettings())
   }
 

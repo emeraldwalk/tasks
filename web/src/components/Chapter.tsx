@@ -18,6 +18,7 @@ export function Chapter(props: ChapterProps) {
   const [isExpanded, setIsExpanded] = createSignal(false)
 
   const [dates, setDates] = createSignal(api.getChapterDates(props.data))
+  const visibleDates = () => api.filterDatesToCutoff(dates())
 
   async function onAdd() {
     const date = now()
@@ -65,12 +66,12 @@ export function Chapter(props: ChapterProps) {
         </span>
       </span>
       <span class={styles.expander} onClick={onExpanderClick}>
-        <span class={styles.count}>({dates().length})</span>
+        <span class={styles.count}>({visibleDates().length})</span>
         <Icon class={styles.icon} name="chevron-down-sharp" />
       </span>
       <div class={className(styles.dateList, accordionStyles.content)}>
         <Show when={isExpanded()}>
-          <For each={dates()}>
+          <For each={visibleDates()}>
             {(date) => (
               <button class={styles.date} onClick={onRemove(date)}>
                 {mmDDYY(date)}

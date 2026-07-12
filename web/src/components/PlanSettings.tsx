@@ -119,6 +119,14 @@ export function PlanSettings() {
             }}
           />
         </label>
+        <label class={styles.restrictDatesToCutoff}>
+          <input
+            type="checkbox"
+            checked={api.restrictDatesToCutoff()}
+            onChange={() => api.setRestrictDatesToCutoff(!api.restrictDatesToCutoff())}
+          />
+          Limit history to cutoff range
+        </label>
       </section>
 
       <section class={styles.dataSection}>
