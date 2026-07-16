@@ -117,6 +117,28 @@
   }
 }
 
+.popup .popupSectionLabel {
+  position: sticky;
+  top: 0;
+  min-height: 0;
+  padding: 0.35rem 0.85rem;
+  background-color: var(--color-surface);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  cursor: default;
+
+  &:not(:first-child) {
+    border-top: 1px solid var(--color-border);
+  }
+
+  &:hover {
+    background-color: var(--color-surface);
+  }
+}
+
 .popupTagName {
   font-weight: 600;
 }

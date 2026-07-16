@@ -67,6 +67,14 @@ Record<Tag, Record<BookAbbrev, boolean>>
 
 Default tags defined in `tags.txt`; see `web/src/data/tags.txt` below for the full built-in list.
 
+There are two independent sources of `TagRecord` entries, both computed in `Api`:
+
+- `Api.getTags()` — the curated group tags from `tags.txt` (`OT`, `Pentateuch`, `Gospels`, ...).
+- `Api.getBookTags()` — one synthetic pseudo-tag per Bible book, generated at runtime from `chapters.txt` (`getBookTagsData()` in `dataUtils.ts`) rather than a static file. Each is keyed by the book's full name (e.g. `"Genesis"`) and maps to just that one book, so a single book can be added to a plan group the same way a tag group is. `Api.getBookTagDescriptions()` gives each a `"N chapters"` description.
+- `Api.getAllTags()` — the merged union (`{ ...getTags(), ...getBookTags() }`), precomputed once at construction. This is what actually resolves a `PerDayTagData`'s `tags: Tag[]` to chapters — `groupByDay` (plan generation) and `computeGroupStat` (Settings group stats) both take this merged record, not `getTags()` alone.
+
+A few tags (`Acts`, `Revelation`) exist in both sources, since each covers exactly one book. `TagSelector`'s picker lists books after tags in a separate, visually distinct section, and excludes any book name that collides with an existing tag name (so those two aren't shown twice) — see `PlanSettings.tsx`'s `bookTagNames()`. Where a name exists in both sources, the tag's hand-written description wins over the book's chapter count (`PlanSettings.tsx`'s `tagDescriptions()` spreads book descriptions first, tag descriptions second).
+
 ### `PerDayTagData`
 One row within a `ReadingPlan` — which tags and how many chapters of each to read per day.
 

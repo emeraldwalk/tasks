@@ -76,6 +76,34 @@ export function getTagDescriptions(): TagDescriptions {
   return descriptions
 }
 
+/** One pseudo-tag per Bible book (keyed by its full name, e.g. "Genesis"), covering just that book. Lets a single book be picked the same way a tag group is. */
+export function getBookTagsData(chapters: ChapterData[]): TagRecord {
+  const bookNames = getBookNamesMap(chapters)
+  const tags: TagRecord = {}
+
+  for (const abbrev of keys(bookNames)) {
+    const tag = bookNames[abbrev] as unknown as Tag
+    tags[tag] = { [abbrev]: true }
+  }
+  return tags
+}
+
+export function getBookTagDescriptions(chapters: ChapterData[]): TagDescriptions {
+  const bookNames = getBookNamesMap(chapters)
+  const chapterCounts: Partial<Record<BookAbbrev, number>> = {}
+  for (const { abbrev } of chapters) {
+    chapterCounts[abbrev] = (chapterCounts[abbrev] ?? 0) + 1
+  }
+
+  const descriptions: TagDescriptions = {}
+  for (const abbrev of keys(bookNames)) {
+    const tag = bookNames[abbrev] as unknown as Tag
+    const count = chapterCounts[abbrev] ?? 0
+    descriptions[tag] = `${count} chapter${count === 1 ? '' : 's'}`
+  }
+  return descriptions
+}
+
 export function keys<TKey extends string>(obj: Record<TKey, unknown>) {
   return Object.keys(obj) as TKey[]
 }
