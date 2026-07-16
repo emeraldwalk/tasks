@@ -1,11 +1,11 @@
-import { createSignal, For, Show } from 'solid-js'
+import { createSignal, Index, Show, type Accessor } from 'solid-js'
 import { keys } from '../utils/dataUtils'
 import { computeGroupStat } from '../utils/groupUtils'
 import { useApi } from './ApiContext'
 import styles from './PlanSettings.module.css'
 import { TagSelector } from './TagSelector'
 import { Icon } from './Icon'
-import type { PerDayTagData, PlanId, Tag } from '../data/model'
+import type { PerDayTagData, ReadingPlan, Tag } from '../data/model'
 
 async function triggerExport(json: string, filename: string): Promise<void> {
   const file = new File([json], filename, { type: 'application/json' })
@@ -67,18 +67,20 @@ export function PlanSettings() {
     api.addPlan(`Plan ${api.plans().length + 1}`)
   }
 
-  const onRenamePlan = (id: PlanId) => {
+  // Takes the row's live Accessor (not a plain id) so a rename/reorder elsewhere
+  // can't leave the handler pointing at a stale plan — see note on the <Index> below.
+  const onRenamePlan = (plan: Accessor<ReadingPlan>) => {
     return (e: Event & { target: HTMLInputElement }) => {
-      api.renamePlan(id, e.target.value)
+      api.renamePlan(plan().id, e.target.value)
     }
   }
 
-  const onSetActivePlan = (id: PlanId) => {
-    return () => api.setActivePlanId(id)
+  const onSetActivePlan = (plan: Accessor<ReadingPlan>) => {
+    return () => api.setActivePlanId(plan().id)
   }
 
-  const onRemovePlan = (id: PlanId) => {
-    return () => api.removePlan(id)
+  const onRemovePlan = (plan: Accessor<ReadingPlan>) => {
+    return () => api.removePlan(plan().id)
   }
 
   const handleExport = async () => {
@@ -121,36 +123,43 @@ export function PlanSettings() {
         <h2 class={styles.sectionTitle}>Plans</h2>
         <div class={styles.card}>
           <ul class={styles.planList}>
-            <For each={api.plans()}>
+            {/*
+              Index (not For): each row's DOM node — and the focused <input> inside
+              it — must stay put across edits. renamePlan/setPerDayTagData replace
+              the edited item with a new object on every keystroke, so a value-keyed
+              For would tear down and recreate the row (and its focused input) each
+              time, which drops focus and dismisses the keyboard on iOS.
+            */}
+            <Index each={api.plans()}>
               {(plan) => (
                 <li class={styles.planRow}>
                   <button
                     type="button"
                     class={styles.planActiveToggle}
-                    onClick={onSetActivePlan(plan.id)}
+                    onClick={onSetActivePlan(plan)}
                     aria-label={
-                      plan.id === api.activePlanId() ? 'Active plan' : 'Set as active plan'
+                      plan().id === api.activePlanId() ? 'Active plan' : 'Set as active plan'
                     }>
                     <Icon
-                      name={plan.id === api.activePlanId() ? 'checkmark-circle' : 'ellipse-outline'}
+                      name={plan().id === api.activePlanId() ? 'checkmark-circle' : 'ellipse-outline'}
                     />
                   </button>
                   <input
                     class={styles.planNameInput}
-                    value={plan.name}
-                    onInput={onRenamePlan(plan.id)}
+                    value={plan().name}
+                    onInput={onRenamePlan(plan)}
                   />
                   <button
                     type="button"
                     class={styles.removeGroup}
                     disabled={api.plans().length <= 1}
-                    onClick={onRemovePlan(plan.id)}
+                    onClick={onRemovePlan(plan)}
                     aria-label="Delete plan">
                     <Icon name="remove-circle" size="large" />
                   </button>
                 </li>
               )}
-            </For>
+            </Index>
           </ul>
           <button type="button" class={styles.addGroup} onClick={onAddPlan}>
             <Icon name="add-circle" />
@@ -163,26 +172,27 @@ export function PlanSettings() {
         <h2 class={styles.sectionTitle}>Reading Plan — {api.activePlan().name}</h2>
         <div class={styles.card}>
           <ul class={styles.tagGroupList}>
-            <For each={api.perDayTagData()}>
+            {/* Index, not For — see note on the Plans list above; same keystroke-vs-focus issue applies to the chapters/day input inside TagSelector. */}
+            <Index each={api.perDayTagData()}>
               {(datum, i) => (
                 <li class={styles.tagGroupRow}>
                   <TagSelector
                     tagNames={tagNames()}
                     tagDescriptions={tagDescriptions()}
-                    value={datum}
-                    onChange={onChange(i())}
+                    value={datum()}
+                    onChange={onChange(i)}
                   />
                   <button
                     type="button"
                     class={styles.removeGroup}
-                    onClick={onRemoveGroup(i())}
+                    onClick={onRemoveGroup(i)}
                     aria-label="Remove group">
                     <Icon name="remove-circle" size="large" />
                   </button>
-                  <p class={styles.groupStat}>{formatGroupStat(datum)}</p>
+                  <p class={styles.groupStat}>{formatGroupStat(datum())}</p>
                 </li>
               )}
-            </For>
+            </Index>
           </ul>
           <button type="button" class={styles.addGroup} onClick={onAddGroup}>
             <Icon name="add-circle" />
