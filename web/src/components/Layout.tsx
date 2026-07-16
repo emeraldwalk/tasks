@@ -4,6 +4,7 @@ import { useApi } from './ApiContext'
 import styles from './Layout.module.css'
 import { A, type RouteSectionProps } from '@solidjs/router'
 import { Icon } from './Icon'
+import { PlanPicker } from './PlanPicker'
 
 const isIosSafari =
   /iP(hone|ad|od)/.test(navigator.userAgent) &&
@@ -20,9 +21,11 @@ export function Layout(props: RouteSectionProps) {
   )
 
   const isSettingsRoute = () => props.location.pathname.endsWith('/settings')
+  const isPlanRoute = () => props.location.pathname.endsWith('/plan')
+  const showPlanPicker = () => isPlanRoute() && api.plans().length > 1
 
   const title = () =>
-    props.location.pathname.endsWith('/plan')
+    isPlanRoute()
       ? 'Plan'
       : props.location.pathname.endsWith('/history')
       ? 'History'
@@ -48,7 +51,11 @@ export function Layout(props: RouteSectionProps) {
         </div>
       </Show>
       <header class={styles.header}>
-        <h1 class={styles.title}>{title()}</h1>
+        <h1 class={styles.title}>
+          <Show when={showPlanPicker()} fallback={title()}>
+            <PlanPicker />
+          </Show>
+        </h1>
         <Show when={!isSettingsRoute()}>
           <label class={styles.showCompleted}>
             <input

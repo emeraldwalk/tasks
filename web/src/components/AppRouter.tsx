@@ -3,7 +3,6 @@ import { Layout } from './Layout'
 import { ChapterGroupList } from './ChapterGroupList'
 import { HistoryList } from './HistoryList'
 import { PlanSettings } from './PlanSettings'
-import { PlanToggle } from './PlanToggle'
 import { getBookNamesMap, getChapterData } from '../utils/dataUtils'
 import { groupByBook, groupByDay } from '../utils/groupUtils'
 import { useApi } from './ApiContext'
@@ -29,12 +28,7 @@ export function AppRouter() {
       />
       <Route
         path="/plan"
-        component={() => (
-          <>
-            <PlanToggle />
-            <ChapterGroupList data={planGroups()} />
-          </>
-        )}
+        component={() => <ChapterGroupList data={planGroups()} />}
       />
 
       <Route

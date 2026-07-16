@@ -9,6 +9,7 @@ App
 └── AppRouter
     └── Layout (root for all routes)
         ├── header
+        │   ├── title → PlanPicker on /plan when >1 plan exists, else plain text
         │   ├── SearchInput
         │   ├── show-completed checkbox
         │   └── menu icon → PlanSettings (sidebar)
@@ -17,8 +18,7 @@ App
         │   ├── / → ChapterGroupList (Books view)
         │   │         └── ChapterGroup (one per book)
         │   │               └── Chapter (one per chapter)
-        │   ├── /plan → PlanToggle (segmented control, hidden if only one plan)
-        │   │           + ChapterGroupList (Plan view)
+        │   ├── /plan → ChapterGroupList (Plan view)
         │   │             └── ChapterGroup (one per day)
         │   │                   └── Chapter
         │   └── /history → HistoryList
@@ -38,21 +38,19 @@ Configures routes. Computes two top-level data structures passed as props:
 - `bookGroups: Record<BookName, ChapterData[]>` — computed once via `groupByBook`
 - `planGroups: Accessor<Record<string, ChapterData[]>>` — `createMemo` around `groupByDay`; reactive to `api.perDayTagData()`
 
-The `/plan` route renders `PlanToggle` above `ChapterGroupList`.
-
-### `PlanToggle` (`PlanToggle.tsx`)
-
-iOS-style segmented control for switching `api.activePlanId()` — one segment per `api.plans()` entry, tapping calls `api.setActivePlanId`. Renders nothing (`<Show when={api.plans().length > 1}>`) when there's only one plan, since a toggle with a single, permanently-selected option is pointless. Scrolls away with the page content rather than staying pinned — `ChapterGroup`'s own day headers are already `position: sticky; top: 0` inside the same scroll container (`Layout`'s `<main>`), and that component is shared across the Books/Plan/History routes, so pinning the toggle at the same `top: 0` would fight with — and visually sit on top of — the day headers once they reach the top of the scroll area.
-
 ### `Layout` (`Layout.tsx`)
 
 Shell shared by all routes. Contains:
 
-- Page title (derived from current path)
+- Page title (derived from current path) — on `/plan`, replaced with `PlanPicker` once there's more than one plan to switch between
 - Show Completed checkbox (toggles `api.showCompleted`)
 - Search input (writes to `api.setSearchText`)
 - Sidebar toggle (shows/hides `PlanSettings`)
-- Tab bar navigation
+- Tab bar navigation (Plan, Books, History, Settings)
+
+### `PlanPicker` (`PlanPicker.tsx`)
+
+iOS-style "tap the title to switch context" menu, the same pattern Mail uses for its inbox picker and Reminders for its list picker — chosen over a segmented control specifically because a segmented control runs out of horizontal room once there are more than a couple of plans. `Layout` only renders it (in place of the plain `<h1>` title text) when `api.plans().length > 1`; the trigger button shows `api.activePlan().name` plus a chevron and, when tapped, opens an absolutely-positioned menu (closed on outside `pointerdown` or on selecting an item) listing every `api.plans()` entry with a checkmark on the active one. Selecting an entry calls `api.setActivePlanId`.
 
 ### `ChapterGroupList` (`ChapterGroupList.tsx`)
 
@@ -61,6 +59,8 @@ Renders a list of `ChapterGroup` accordions from a `Record<string, ChapterData[]
 Key behaviors:
 - Filters groups by `api.searchText()` — only groups containing a matching chapter name are shown
 - When `sortProgressToTop` is true (Books view), groups with any completed chapters are sorted above those with none
+
+The `<For>` over group names looks up each group's chapters (`props.data[groupName]`) *inline* in the `ChapterGroup` `data` prop rather than pre-computing it into a local `const`. This matters specifically on the Plan view: the group names are always `"Day 1"`, `"Day 2"`, ... regardless of which plan is active, so `<For>` (keyed by value) never re-invokes its callback when you switch plans — a plain `const chapters = props.data[groupName]` computed once inside that callback would freeze at whichever plan was active on first render. Keeping the lookup inline lets it compile to a getter that's re-read reactively instead.
 
 ### `ChapterGroup` (`ChapterGroup.tsx`)
 

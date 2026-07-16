@@ -38,20 +38,17 @@ export function ChapterGroupList(props: ChapterGroupListProps) {
     <div class={styles.ChapterGroupList}>
       <ul>
         <For each={sortedGroupNames()}>
-          {(groupName) => {
-            const chapters = props.data[groupName]
-            return (
-              <li class={styles.group}>
-                <ChapterGroup
-                  data={{
-                    name: groupName,
-                    chapters,
-                  }}
-                  searchTextUc={searchTextUc()}
-                />
-              </li>
-            )
-          }}
+          {(groupName) => (
+            <li class={styles.group}>
+              <ChapterGroup
+                data={{
+                  name: groupName,
+                  chapters: props.data[groupName],
+                }}
+                searchTextUc={searchTextUc()}
+              />
+            </li>
+          )}
         </For>
       </ul>
     </div>
