@@ -5,7 +5,7 @@ import { useApi } from './ApiContext'
 import styles from './PlanSettings.module.css'
 import { TagSelector } from './TagSelector'
 import { Icon } from './Icon'
-import type { PerDayTagData, Tag } from '../data/model'
+import type { PerDayTagData, PlanId, Tag } from '../data/model'
 
 async function triggerExport(json: string, filename: string): Promise<void> {
   const file = new File([json], filename, { type: 'application/json' })
@@ -63,6 +63,24 @@ export function PlanSettings() {
     }
   }
 
+  const onAddPlan = () => {
+    api.addPlan(`Plan ${api.plans().length + 1}`)
+  }
+
+  const onRenamePlan = (id: PlanId) => {
+    return (e: Event & { target: HTMLInputElement }) => {
+      api.renamePlan(id, e.target.value)
+    }
+  }
+
+  const onSetActivePlan = (id: PlanId) => {
+    return () => api.setActivePlanId(id)
+  }
+
+  const onRemovePlan = (id: PlanId) => {
+    return () => api.removePlan(id)
+  }
+
   const handleExport = async () => {
     const json = api.exportData()
     const filename = `bible-history-${new Date().toISOString().slice(0, 10)}.json`
@@ -100,7 +118,49 @@ export function PlanSettings() {
   return (
     <div class={styles.PlanSettings}>
       <section class={styles.section}>
-        <h2 class={styles.sectionTitle}>Reading Plan</h2>
+        <h2 class={styles.sectionTitle}>Plans</h2>
+        <div class={styles.card}>
+          <ul class={styles.planList}>
+            <For each={api.plans()}>
+              {(plan) => (
+                <li class={styles.planRow}>
+                  <button
+                    type="button"
+                    class={styles.planActiveToggle}
+                    onClick={onSetActivePlan(plan.id)}
+                    aria-label={
+                      plan.id === api.activePlanId() ? 'Active plan' : 'Set as active plan'
+                    }>
+                    <Icon
+                      name={plan.id === api.activePlanId() ? 'checkmark-circle' : 'ellipse-outline'}
+                    />
+                  </button>
+                  <input
+                    class={styles.planNameInput}
+                    value={plan.name}
+                    onInput={onRenamePlan(plan.id)}
+                  />
+                  <button
+                    type="button"
+                    class={styles.removeGroup}
+                    disabled={api.plans().length <= 1}
+                    onClick={onRemovePlan(plan.id)}
+                    aria-label="Delete plan">
+                    <Icon name="remove-circle" size="large" />
+                  </button>
+                </li>
+              )}
+            </For>
+          </ul>
+          <button type="button" class={styles.addGroup} onClick={onAddPlan}>
+            <Icon name="add-circle" />
+            Add Plan
+          </button>
+        </div>
+      </section>
+
+      <section class={styles.section}>
+        <h2 class={styles.sectionTitle}>Reading Plan — {api.activePlan().name}</h2>
         <div class={styles.card}>
           <ul class={styles.tagGroupList}>
             <For each={api.perDayTagData()}>

@@ -87,7 +87,12 @@ Flat chronological log of all read events. Reads `api.getTimeStampData()` (deriv
 
 ### `PlanSettings` (`PlanSettings.tsx`)
 
-Sidebar panel listing one `TagSelector` per entry in `api.perDayTagData()`. Changes are written back via `api.setPerDayTagData`, which triggers `planGroups` memo in `AppRouter` to recompute.
+Sidebar panel with several sections:
+
+- **Plans** — lists every `ReadingPlan` in `api.plans()`. Each row has an active-toggle (`checkmark-circle`/`ellipse-outline`, same idiom as `CheckMark`) calling `api.setActivePlanId`, an inline-editable name (`api.renamePlan`), and a delete button (`api.removePlan`, disabled when only one plan remains). "Add Plan" calls `api.addPlan` with an auto-numbered name; new plans start empty and are *not* auto-activated, so building one out doesn't disturb whatever plan is currently driving `/plan`.
+- **Reading Plan — {active plan name}** — one `TagSelector` per entry in `api.perDayTagData()` plus a "Target days" field. Both always read/write the *active* plan (`api.activePlan()`); to edit a different plan, activate it first via the Plans list above. Changes are written back via `api.setPerDayTagData`/`api.setTargetDays`, which trigger the `planGroups` memo in `AppRouter` to recompute.
+
+Cutoff, Data (export/import), and App sections below are unchanged and remain global (not per-plan).
 
 ### `TagSelector` (`TagSelector.tsx`)
 

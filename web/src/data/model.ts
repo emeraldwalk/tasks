@@ -10,6 +10,7 @@ export type ISODateTimeString = Brand<'ISODateTimeString'>
 export type MMDDYY = `${number}/${number}/${number}`
 export type MMDDYYYY = `${number}/${number}/${number}`
 export type Tag = Brand<'Tag'>
+export type PlanId = Brand<'PlanId'>
 
 export interface BookData {
   name: BookName
@@ -34,10 +35,17 @@ export type TagDescriptions = Record<Tag, string>
 
 export interface SettingsData {
   showCompleted: boolean
-  targetDays: number
   cutoffDays: number | null
   cutoffDate: string | null
   showAllDates: boolean
+  plans: ReadingPlan[]
+  activePlanId: PlanId
+}
+
+export interface ReadingPlan {
+  id: PlanId
+  name: string
+  targetDays: number
   perDayTagData: PerDayTagData[]
 }
 
@@ -61,11 +69,12 @@ export interface TimeStampMap {
 }
 
 export interface ExportFormat {
-  version: 1
+  version: 2
   exportedAt: ISODateTimeString
   recordCount: number
   settings: {
-    perDayTagData: PerDayTagData[]
+    plans: ReadingPlan[]
+    activePlanId: PlanId
   }
   timestamps: TimeStampData[]
 }
