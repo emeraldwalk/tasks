@@ -27,6 +27,7 @@ export function PlanSettings() {
 
   const tagRecord = () => api.getTags()
   const tagNames = () => keys(tagRecord())
+  const tagDescriptions = () => api.getTagDescriptions()
   const chapters = api.getChapterData()
 
   const formatGroupStat = (entry: PerDayTagData) => {
@@ -107,6 +108,7 @@ export function PlanSettings() {
                 <li class={styles.tagGroupRow}>
                   <TagSelector
                     tagNames={tagNames()}
+                    tagDescriptions={tagDescriptions()}
                     value={datum}
                     onChange={onChange(i())}
                   />

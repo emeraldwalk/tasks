@@ -30,6 +30,8 @@ export interface ChapterGroupData {
 
 export type TagRecord = Record<Tag, Record<BookAbbrev, boolean>>
 
+export type TagDescriptions = Record<Tag, string>
+
 export interface SettingsData {
   showCompleted: boolean
   targetDays: number

@@ -5,6 +5,7 @@ import type {
   TimeStampMap,
   ChapterData,
   TagRecord,
+  TagDescriptions,
   SettingsData,
   PerDayTagData,
   Tag,
@@ -19,7 +20,7 @@ import {
   updateSettings,
 } from './indexDb'
 import { createSignal, type Accessor, type Setter } from 'solid-js'
-import { getChapterData, getTagsData, keys } from '../utils/dataUtils'
+import { getChapterData, getTagDescriptions, getTagsData, keys } from '../utils/dataUtils'
 
 export class Api {
   static create = async (): Promise<Api> => {
@@ -28,7 +29,8 @@ export class Api {
     const chapterData = getChapterData()
     const settingsData = await getSettingsData(db)
     const tagsData = getTagsData()
-    return new Api(db, timeStampMap, chapterData, settingsData, tagsData)
+    const tagDescriptions = getTagDescriptions()
+    return new Api(db, timeStampMap, chapterData, settingsData, tagsData, tagDescriptions)
   }
 
   constructor(
@@ -37,11 +39,13 @@ export class Api {
     chapterData: ChapterData[],
     settingsData: SettingsData,
     tagsData: TagRecord,
+    tagDescriptions: TagDescriptions,
   ) {
     this._db = db
     this._chapterData = chapterData
     this._settingsData = settingsData
     this._tagsData = tagsData
+    this._tagDescriptions = tagDescriptions
 
     // perDayTagData signal
     const [perDayTagData, setPerDayTagData] = createSignal<PerDayTagData[]>(
@@ -94,6 +98,7 @@ export class Api {
   private readonly _chapterData: ChapterData[]
   private readonly _settingsData: SettingsData
   private readonly _tagsData: TagRecord
+  private readonly _tagDescriptions: TagDescriptions
   private readonly _setShowCompleted: Setter<boolean>
   private readonly _setTargetDays: Setter<number>
   private readonly _setCutoffDays: Setter<number | null>
@@ -174,6 +179,10 @@ export class Api {
 
   getTags = (): TagRecord => {
     return this._tagsData
+  }
+
+  getTagDescriptions = (): TagDescriptions => {
+    return this._tagDescriptions
   }
 
   hasChapterDates = ({

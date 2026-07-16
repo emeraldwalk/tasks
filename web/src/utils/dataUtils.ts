@@ -4,10 +4,12 @@ import type {
   ChapterData,
   ChapterID,
   Tag,
+  TagDescriptions,
   TagRecord,
 } from '../data/model'
 import rawBibleBookMeta from '../data/chapters.txt?raw'
 import tagsData from '../data/tags.txt?raw'
+import tagDescriptionsData from '../data/tagDescriptions.txt?raw'
 
 export function getBookNamesMap(
   chapters: ChapterData[],
@@ -55,6 +57,23 @@ export function getTagsData(): TagRecord {
     }
   }
   return tags
+}
+
+export function getTagDescriptions(): TagDescriptions {
+  const lines = tagDescriptionsData.split('\n')
+  const descriptions: TagDescriptions = {}
+
+  for (const line of lines) {
+    const commaIndex = line.indexOf(',')
+    if (commaIndex === -1) continue
+
+    const tag = line.slice(0, commaIndex) as Tag
+    const description = line.slice(commaIndex + 1).trim()
+    if (tag && description) {
+      descriptions[tag] = description
+    }
+  }
+  return descriptions
 }
 
 export function keys<TKey extends string>(obj: Record<TKey, unknown>) {

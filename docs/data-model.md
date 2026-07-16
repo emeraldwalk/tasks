@@ -64,7 +64,7 @@ Maps each tag name to the set of books it covers (used to filter chapters for pl
 Record<Tag, Record<BookAbbrev, boolean>>
 ```
 
-Default tags defined in `tags.txt`: `OT` (39 books) and `NT` (27 books).
+Default tags defined in `tags.txt`; see `web/src/data/tags.txt` below for the full built-in list.
 
 ### `PerDayTagData`
 One row in the Plan Settings — which tags and how many chapters of each to read per day.
@@ -138,4 +138,16 @@ NT,MAT
 ...
 ```
 
-Parsed by `getTagsData()` into a `TagRecord`. Additional tags beyond `OT`/`NT` can be added here to enable custom plan groupings.
+Parsed by `getTagsData()` into a `TagRecord`. Built-in tags: `OT`, `NT`, `Gospels`, `Pentateuch`, `History`, `Wisdom`, `MajorProphets`, `MinorProphets`, `Acts`, `PaulineEpistles`, `GeneralEpistles`, `Revelation`. Additional tags can be added here to enable custom plan groupings.
+
+### `web/src/data/tagDescriptions.txt`
+
+CSV format: `TAG,Description` (only the first comma is a delimiter — the description may contain further commas).
+
+```
+OT,Old Testament — Genesis through Malachi (39 books)
+NT,New Testament — Matthew through Revelation (27 books)
+...
+```
+
+Parsed by `getTagDescriptions()` into a `TagDescriptions` (`Record<Tag, string>`), surfaced in `TagSelector`'s tag picker so users can see what each tag covers before selecting it. A tag without an entry here simply has no description shown.

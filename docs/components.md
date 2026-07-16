@@ -91,7 +91,7 @@ Sidebar panel listing one `TagSelector` per entry in `api.perDayTagData()`. Chan
 
 ### `TagSelector` (`TagSelector.tsx`)
 
-Controlled input for one `PerDayTagData` entry. Shows selected tags as chips; a text input filters available tags from `tagNames` and pops up a selection list. Also contains a number input for chapters-per-day count (not yet wired to `onChange`).
+Controlled input for one `PerDayTagData` entry. Shows selected tags as chips; a text input filters available tags from `tagNames` (by name or description) and pops up a selection list — shown on focus so all existing tags are browsable, narrowing as you type. Each popup entry shows the tag's description from `tagDescriptions` (`api.getTagDescriptions()`), and selected chips carry the description as a `title` tooltip. Also contains a number input for chapters-per-day count, wired to `onChange`.
 
 ### `SearchInput` (`SearchInput.tsx`)
 
