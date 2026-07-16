@@ -15,7 +15,7 @@ export function AppRouter() {
   const bookNames = getBookNamesMap(chapters)
   const bookGroups = groupByBook(chapters)
   const planGroups = createMemo(() =>
-    groupByDay(chapters, api.getTags(), api.perDayTagData(), api.targetDays()),
+    groupByDay(chapters, api.getAllTags(), api.perDayTagData(), api.targetDays()),
   )
 
   return (

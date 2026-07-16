@@ -25,13 +25,17 @@ export function PlanSettings() {
   const [reloadResult, setReloadResult] = createSignal<string | null>(null)
   let fileInput: HTMLInputElement | undefined
 
-  const tagRecord = () => api.getTags()
-  const tagNames = () => keys(tagRecord())
-  const tagDescriptions = () => api.getTagDescriptions()
+  const tagNames = () => keys(api.getTags())
+  // Books that duplicate an existing tag group (e.g. Acts, Revelation are each
+  // both a tag and a single book) are left out here — they already appear above.
+  const bookTagNames = () => keys(api.getBookTags()).filter((name) => !(name in api.getTags()))
+  // Tag descriptions win over book descriptions for names that are both
+  // (Acts, Revelation) — a hand-written tag description beats "N chapters".
+  const tagDescriptions = () => ({ ...api.getBookTagDescriptions(), ...api.getTagDescriptions() })
   const chapters = api.getChapterData()
 
   const formatGroupStat = (entry: PerDayTagData) => {
-    const stat = computeGroupStat(chapters, tagRecord(), entry, api.targetDays())
+    const stat = computeGroupStat(chapters, api.getAllTags(), entry, api.targetDays())
     if (stat.poolSize === 0) return 'No chapters match these tags yet'
 
     const overall = `${stat.poolSize} chapters · ${stat.timesThrough.toFixed(1)}× over ${api.targetDays()} days`
@@ -178,6 +182,7 @@ export function PlanSettings() {
                 <li class={styles.tagGroupRow}>
                   <TagSelector
                     tagNames={tagNames()}
+                    bookTagNames={bookTagNames()}
                     tagDescriptions={tagDescriptions()}
                     value={datum()}
                     onChange={onChange(i)}

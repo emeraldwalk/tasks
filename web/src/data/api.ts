@@ -21,7 +21,14 @@ import {
   updateSettings,
 } from './indexDb'
 import { createSignal, type Accessor, type Setter } from 'solid-js'
-import { getChapterData, getTagDescriptions, getTagsData, keys } from '../utils/dataUtils'
+import {
+  getBookTagDescriptions,
+  getBookTagsData,
+  getChapterData,
+  getTagDescriptions,
+  getTagsData,
+  keys,
+} from '../utils/dataUtils'
 
 export class Api {
   static create = async (): Promise<Api> => {
@@ -31,7 +38,18 @@ export class Api {
     const settingsData = await getSettingsData(db)
     const tagsData = getTagsData()
     const tagDescriptions = getTagDescriptions()
-    return new Api(db, timeStampMap, chapterData, settingsData, tagsData, tagDescriptions)
+    const bookTagsData = getBookTagsData(chapterData)
+    const bookTagDescriptions = getBookTagDescriptions(chapterData)
+    return new Api(
+      db,
+      timeStampMap,
+      chapterData,
+      settingsData,
+      tagsData,
+      tagDescriptions,
+      bookTagsData,
+      bookTagDescriptions,
+    )
   }
 
   constructor(
@@ -41,12 +59,17 @@ export class Api {
     settingsData: SettingsData,
     tagsData: TagRecord,
     tagDescriptions: TagDescriptions,
+    bookTagsData: TagRecord,
+    bookTagDescriptions: TagDescriptions,
   ) {
     this._db = db
     this._chapterData = chapterData
     this._settingsData = settingsData
     this._tagsData = tagsData
     this._tagDescriptions = tagDescriptions
+    this._bookTagsData = bookTagsData
+    this._bookTagDescriptions = bookTagDescriptions
+    this._allTagsData = { ...tagsData, ...bookTagsData }
 
     // plans signal
     const [plans, setPlans] = createSignal<ReadingPlan[]>(settingsData.plans)
@@ -100,6 +123,9 @@ export class Api {
   private readonly _settingsData: SettingsData
   private readonly _tagsData: TagRecord
   private readonly _tagDescriptions: TagDescriptions
+  private readonly _bookTagsData: TagRecord
+  private readonly _bookTagDescriptions: TagDescriptions
+  private readonly _allTagsData: TagRecord
   private readonly _setShowCompleted: Setter<boolean>
   private readonly _setCutoffDays: Setter<number | null>
   private readonly _setCutoffDate: Setter<string | null>
@@ -194,6 +220,20 @@ export class Api {
 
   getTagDescriptions = (): TagDescriptions => {
     return this._tagDescriptions
+  }
+
+  /** One pseudo-tag per Bible book (e.g. "Genesis"), each covering just that book. */
+  getBookTags = (): TagRecord => {
+    return this._bookTagsData
+  }
+
+  getBookTagDescriptions = (): TagDescriptions => {
+    return this._bookTagDescriptions
+  }
+
+  /** getTags() ∪ getBookTags() — what chapter-pool resolution (plan generation, group stats) needs. */
+  getAllTags = (): TagRecord => {
+    return this._allTagsData
   }
 
   hasChapterDates = ({

@@ -4,6 +4,8 @@ import styles from './TagSelector.module.css'
 
 export interface TagSelectorProps {
   tagNames: Tag[]
+  /** Single-book pseudo-tags (e.g. "Genesis"), listed after tagNames in their own section. */
+  bookTagNames: Tag[]
   tagDescriptions: TagDescriptions
   value: PerDayTagData
   onChange: (value: PerDayTagData) => void
@@ -13,9 +15,9 @@ export function TagSelector(props: TagSelectorProps) {
   const [searchText, setSearchText] = createSignal('')
   const [focused, setFocused] = createSignal(false)
 
-  const tagNames = () => {
+  const filterCandidates = (candidates: Tag[]) => {
     const search = searchText().trim().toLowerCase()
-    return props.tagNames
+    return candidates
       .filter((tagName) => !props.value.tags.includes(tagName))
       .filter((tagName) => {
         if (!search) return true
@@ -26,6 +28,9 @@ export function TagSelector(props: TagSelectorProps) {
         )
       })
   }
+
+  const filteredTagNames = () => filterCandidates(props.tagNames)
+  const filteredBookTagNames = () => filterCandidates(props.bookTagNames)
 
   const showPopup = () => focused() || !!searchText()
 
@@ -47,6 +52,15 @@ export function TagSelector(props: TagSelectorProps) {
       })
     }
   }
+
+  const renderOption = (tagName: Tag) => (
+    <li onMouseDown={(e) => e.preventDefault()} onClick={onAdd(tagName)}>
+      <span class={styles.popupTagName}>{tagName}</span>
+      <Show when={props.tagDescriptions[tagName]}>
+        <span class={styles.popupTagDescription}>{props.tagDescriptions[tagName]}</span>
+      </Show>
+    </li>
+  )
 
   return (
     <div class={styles.TagSelector}>
@@ -84,18 +98,17 @@ export function TagSelector(props: TagSelectorProps) {
         </ul>
         <Show when={showPopup()}>
           <ul class={styles.popup}>
-            <For each={tagNames()} fallback={<li class={styles.popupEmpty}>No matching tags</li>}>
-              {(tagName) => (
-                <li onMouseDown={(e) => e.preventDefault()} onClick={onAdd(tagName)}>
-                  <span class={styles.popupTagName}>{tagName}</span>
-                  <Show when={props.tagDescriptions[tagName]}>
-                    <span class={styles.popupTagDescription}>
-                      {props.tagDescriptions[tagName]}
-                    </span>
-                  </Show>
-                </li>
-              )}
-            </For>
+            <Show when={filteredTagNames().length}>
+              <li class={styles.popupSectionLabel}>Tags</li>
+              <For each={filteredTagNames()}>{renderOption}</For>
+            </Show>
+            <Show when={filteredBookTagNames().length}>
+              <li class={styles.popupSectionLabel}>Books</li>
+              <For each={filteredBookTagNames()}>{renderOption}</For>
+            </Show>
+            <Show when={!filteredTagNames().length && !filteredBookTagNames().length}>
+              <li class={styles.popupEmpty}>No matching tags</li>
+            </Show>
           </ul>
         </Show>
       </div>

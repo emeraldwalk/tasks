@@ -46,6 +46,7 @@ App mounts
       → getSettingsData()  loads settings, migrating pre-multi-plan records into a single plan
       → getChapterData()   parses chapters.txt (sync)
       → getTagsData()      parses tags.txt (sync)
+      → getBookTagsData()  synthesizes one pseudo-tag per book from chapterData (sync)
   → ApiProvider wraps AppRouter with resolved Api instance
 ```
 
@@ -56,7 +57,7 @@ App mounts
 Route data computations happen once in `AppRouter`:
 
 - `bookGroups` — `groupByBook(chapters)` — static, computed once
-- `planGroups` — `groupByDay(chapters, tags, perDayTagData, targetDays)` — wrapped in `createMemo`, recomputes when the active plan's `perDayTagData`/`targetDays` change (including when `activePlanId` itself changes, since that swaps which plan's data those getters return)
+- `planGroups` — `groupByDay(chapters, api.getAllTags(), perDayTagData, targetDays)` — wrapped in `createMemo`, recomputes when the active plan's `perDayTagData`/`targetDays` change (including when `activePlanId` itself changes, since that swaps which plan's data those getters return). `getAllTags()` is the merged group-tags ∪ book-pseudo-tags record — see `TagRecord` in `docs/data-model.md` — so a plan group can be built from a curated tag, a single book, or a mix of both.
 
 ## Data Flow: Marking a Chapter Read
 
@@ -74,8 +75,8 @@ User clicks CheckMark in Chapter.tsx
 
 ```
 AppRouter reads api.perDayTagData()
-  → planGroups memo recomputes groupByDay(chapters, tags, perDayTagData)
-      → for each tag (OT, NT): filter chapters by tag membership
+  → planGroups memo recomputes groupByDay(chapters, api.getAllTags(), perDayTagData)
+      → for each tag/book in a group's `tags: Tag[]`: filter chapters by membership in the merged record
       → distribute chapters into day buckets at the configured rate
       → returns Record<"Day N", ChapterData[]>
   → ChapterGroupList renders each day as a ChapterGroup accordion

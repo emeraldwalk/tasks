@@ -96,7 +96,7 @@ Cutoff, Data (export/import), and App sections below are unchanged and remain gl
 
 ### `TagSelector` (`TagSelector.tsx`)
 
-Controlled input for one `PerDayTagData` entry. Shows selected tags as chips; a text input filters available tags from `tagNames` (by name or description) and pops up a selection list — shown on focus so all existing tags are browsable, narrowing as you type. Each popup entry shows the tag's description from `tagDescriptions` (`api.getTagDescriptions()`), and selected chips carry the description as a `title` tooltip. Also contains a number input for chapters-per-day count, wired to `onChange`.
+Controlled input for one `PerDayTagData` entry. Shows selected tags as chips; a text input filters available options (by name or description) and pops up a selection list — shown on focus so everything is browsable, narrowing as you type. The popup has two sections, each with a sticky label: **Tags** (`tagNames` prop, group tags like `OT`/`Pentateuch`) and **Books** (`bookTagNames` prop, one entry per Bible book, e.g. `"Genesis"` — see `Api.getBookTags()` in `docs/data-model.md`), so single books are always listed after and visually separated from the curated tag groups. Both sections share one filter/render path (`filterCandidates`/`renderOption`) and one `tagDescriptions` map. Selected chips carry the description as a `title` tooltip regardless of which section they came from. Also contains a number input for chapters-per-day count, wired to `onChange`.
 
 ### `SearchInput` (`SearchInput.tsx`)
 
