@@ -5,9 +5,11 @@ import type {
   TimeStampMap,
   ChapterData,
   TagRecord,
+  TagDescriptions,
   SettingsData,
   PerDayTagData,
-  Tag,
+  PlanId,
+  ReadingPlan,
   TimeStampData,
 } from './model'
 import {
@@ -19,7 +21,7 @@ import {
   updateSettings,
 } from './indexDb'
 import { createSignal, type Accessor, type Setter } from 'solid-js'
-import { getChapterData, getTagsData, keys } from '../utils/dataUtils'
+import { getChapterData, getTagDescriptions, getTagsData, keys } from '../utils/dataUtils'
 
 export class Api {
   static create = async (): Promise<Api> => {
@@ -28,7 +30,8 @@ export class Api {
     const chapterData = getChapterData()
     const settingsData = await getSettingsData(db)
     const tagsData = getTagsData()
-    return new Api(db, timeStampMap, chapterData, settingsData, tagsData)
+    const tagDescriptions = getTagDescriptions()
+    return new Api(db, timeStampMap, chapterData, settingsData, tagsData, tagDescriptions)
   }
 
   constructor(
@@ -37,23 +40,25 @@ export class Api {
     chapterData: ChapterData[],
     settingsData: SettingsData,
     tagsData: TagRecord,
+    tagDescriptions: TagDescriptions,
   ) {
     this._db = db
     this._chapterData = chapterData
     this._settingsData = settingsData
     this._tagsData = tagsData
+    this._tagDescriptions = tagDescriptions
 
-    // perDayTagData signal
-    const [perDayTagData, setPerDayTagData] = createSignal<PerDayTagData[]>(
-      settingsData.perDayTagData,
+    // plans signal
+    const [plans, setPlans] = createSignal<ReadingPlan[]>(settingsData.plans)
+    this.plans = plans
+    this._setPlans = setPlans
+
+    // activePlanId signal
+    const [activePlanId, setActivePlanId] = createSignal<PlanId>(
+      settingsData.activePlanId,
     )
-    this.perDayTagData = perDayTagData
-    this._setPerDayTagData = setPerDayTagData
-
-    // targetDays signal
-    const [targetDays, setTargetDays] = createSignal(settingsData.targetDays)
-    this.targetDays = targetDays
-    this._setTargetDays = setTargetDays
+    this.activePlanId = activePlanId
+    this._setActivePlanId = setActivePlanId
 
     // cutoffDays signal
     const [cutoffDays, setCutoffDays] = createSignal<number | null>(settingsData.cutoffDays)
@@ -94,16 +99,17 @@ export class Api {
   private readonly _chapterData: ChapterData[]
   private readonly _settingsData: SettingsData
   private readonly _tagsData: TagRecord
+  private readonly _tagDescriptions: TagDescriptions
   private readonly _setShowCompleted: Setter<boolean>
-  private readonly _setTargetDays: Setter<number>
   private readonly _setCutoffDays: Setter<number | null>
   private readonly _setCutoffDate: Setter<string | null>
   private readonly _setShowAllDates: Setter<boolean>
-  private readonly _setPerDayTagData: Setter<PerDayTagData[]>
+  private readonly _setPlans: Setter<ReadingPlan[]>
+  private readonly _setActivePlanId: Setter<PlanId>
   private readonly _setTimeStampMap: Setter<TimeStampMap>
 
-  readonly perDayTagData: Accessor<PerDayTagData[]>
-  readonly targetDays: Accessor<number>
+  readonly plans: Accessor<ReadingPlan[]>
+  readonly activePlanId: Accessor<PlanId>
   readonly cutoffDays: Accessor<number | null>
   readonly cutoffDate: Accessor<string | null>
   readonly showAllDates: Accessor<boolean>
@@ -114,12 +120,22 @@ export class Api {
 
   private currentSettings = (): SettingsData => ({
     showCompleted: this.showCompleted(),
-    targetDays: this.targetDays(),
     cutoffDays: this.cutoffDays(),
     cutoffDate: this.cutoffDate(),
     showAllDates: this.showAllDates(),
-    perDayTagData: this.perDayTagData(),
+    plans: this.plans(),
+    activePlanId: this.activePlanId(),
   })
+
+  /** The plan currently driving the reading list; falls back to the first plan. */
+  activePlan = (): ReadingPlan => {
+    const plans = this.plans()
+    return plans.find((p) => p.id === this.activePlanId()) ?? plans[0]
+  }
+
+  perDayTagData = (): PerDayTagData[] => this.activePlan().perDayTagData
+
+  targetDays = (): number => this.activePlan().targetDays
 
   private effectiveCutoff = (): string | null => {
     const days = this.cutoffDays()
@@ -176,6 +192,10 @@ export class Api {
     return this._tagsData
   }
 
+  getTagDescriptions = (): TagDescriptions => {
+    return this._tagDescriptions
+  }
+
   hasChapterDates = ({
     abbrev,
     number,
@@ -224,15 +244,58 @@ export class Api {
     deleteTimeStamp(this._db, book, chapter, date)
   }
 
+  /** Updates the active plan's tag groups. */
   setPerDayTagData = async (
     valueOrUpdater: PerDayTagData[] | ((prev: PerDayTagData[]) => PerDayTagData[]),
   ) => {
-    this._setPerDayTagData(valueOrUpdater as PerDayTagData[])
+    await this.updatePlan(this.activePlanId(), (plan) => ({
+      ...plan,
+      perDayTagData:
+        typeof valueOrUpdater === 'function'
+          ? valueOrUpdater(plan.perDayTagData)
+          : valueOrUpdater,
+    }))
+  }
+
+  /** Updates the active plan's target day count. */
+  setTargetDays = async (value: number) => {
+    await this.updatePlan(this.activePlanId(), (plan) => ({ ...plan, targetDays: value }))
+  }
+
+  addPlan = async (name: string): Promise<PlanId> => {
+    const id = crypto.randomUUID() as PlanId
+    const plan: ReadingPlan = { id, name, targetDays: 365, perDayTagData: [] }
+    this._setPlans((prev) => [...prev, plan])
+    await updateSettings(this._db, this.currentSettings())
+    return id
+  }
+
+  renamePlan = async (id: PlanId, name: string) => {
+    await this.updatePlan(id, (plan) => ({ ...plan, name }))
+  }
+
+  /** Removes a plan. No-ops if it's the last remaining plan. If the active plan is removed, the first remaining plan becomes active. */
+  removePlan = async (id: PlanId) => {
+    const remaining = this.plans().filter((p) => p.id !== id)
+    if (remaining.length === this.plans().length || remaining.length === 0) return
+
+    this._setPlans(remaining)
+    if (this.activePlanId() === id) {
+      this._setActivePlanId(remaining[0].id)
+    }
     await updateSettings(this._db, this.currentSettings())
   }
 
-  setTargetDays = async (value: number) => {
-    this._setTargetDays(value)
+  setActivePlanId = async (id: PlanId) => {
+    this._setActivePlanId(id)
+    await updateSettings(this._db, this.currentSettings())
+  }
+
+  private updatePlan = async (
+    id: PlanId,
+    updater: (plan: ReadingPlan) => ReadingPlan,
+  ) => {
+    this._setPlans((prev) => prev.map((plan) => (plan.id === id ? updater(plan) : plan)))
     await updateSettings(this._db, this.currentSettings())
   }
 
@@ -260,10 +323,11 @@ export class Api {
     const timestamps = this.getTimeStampData()
     const settings = {
       // showCompleted intentionally omitted — UI preference, not backup data
-      perDayTagData: this.perDayTagData(),
+      plans: this.plans(),
+      activePlanId: this.activePlanId(),
     }
     const output = {
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
       recordCount: timestamps.length,
       settings,
@@ -275,7 +339,9 @@ export class Api {
   importData = async (file: File): Promise<{ imported: number; skipped: number }> => {
     const text = await file.text()
     const data = JSON.parse(text)
-    if (data.version !== 1) throw new Error(`Unknown export version: ${data.version}`)
+    if (data.version !== 1 && data.version !== 2) {
+      throw new Error(`Unknown export version: ${data.version}`)
+    }
 
     let imported = 0, skipped = 0
     for (const { date, book, chapter } of data.timestamps) {
@@ -290,7 +356,18 @@ export class Api {
     if (data.settings) {
       const s = data.settings
       // showCompleted intentionally excluded — persisted UI preference, not backup data
-      if (Array.isArray(s.perDayTagData)) this.setPerDayTagData(s.perDayTagData)
+      if (Array.isArray(s.plans) && s.plans.length > 0) {
+        // v2: full plan list
+        this._setPlans(s.plans)
+        const activeId = s.plans.some((p: ReadingPlan) => p.id === s.activePlanId)
+          ? s.activePlanId
+          : s.plans[0].id
+        this._setActivePlanId(activeId)
+        await updateSettings(this._db, this.currentSettings())
+      } else if (Array.isArray(s.perDayTagData)) {
+        // v1: bare tag groups, folded into the active plan
+        await this.setPerDayTagData(s.perDayTagData)
+      }
     }
 
     return { imported, skipped }

@@ -96,19 +96,43 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   position: absolute;
   margin-top: 0.25rem;
-  width: 200px;
+  width: 260px;
+  max-height: 320px;
+  overflow-y: auto;
   z-index: 5;
-  overflow: hidden;
 
   li {
     display: flex;
-    align-items: center;
-    height: 40px;
-    padding: 0 0.85rem;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.1rem;
+    min-height: 40px;
+    padding: 0.4rem 0.85rem;
     font-size: 0.9rem;
+    cursor: pointer;
 
     &:hover {
       background-color: var(--color-hover);
     }
+  }
+}
+
+.popupTagName {
+  font-weight: 600;
+}
+
+.popupTagDescription {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+  line-height: 1.25;
+}
+
+.popupEmpty {
+  color: var(--color-muted);
+  font-style: italic;
+  cursor: default;
+
+  &:hover {
+    background-color: transparent;
   }
 }

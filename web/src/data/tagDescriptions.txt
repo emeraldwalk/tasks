@@ -1,0 +1,12 @@
+OT,Old Testament — Genesis through Malachi (39 books)
+NT,New Testament — Matthew through Revelation (27 books)
+Gospels,Matthew Mark Luke and John — the life and ministry of Jesus
+Pentateuch,Genesis through Deuteronomy — the five books of Moses (the Law)
+History,Joshua through Esther — Israel's history from conquest to exile
+Wisdom,Job through Song of Solomon — poetry and wisdom literature
+MajorProphets,Isaiah through Daniel — the longer prophetic books
+MinorProphets,Hosea through Malachi — the twelve shorter prophetic books
+Acts,The Acts of the Apostles — the early church's history
+PaulineEpistles,Romans through Philemon — letters attributed to Paul
+GeneralEpistles,Hebrews through Jude — letters to the wider church
+Revelation,The Revelation to John — apocalyptic prophecy

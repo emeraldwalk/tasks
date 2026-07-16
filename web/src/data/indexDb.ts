@@ -3,6 +3,8 @@ import type {
   ChapterID,
   ISODateTimeString,
   PerDayTagData,
+  PlanId,
+  ReadingPlan,
   SettingsData,
   Tag,
   TimeStampMap,
@@ -16,10 +18,14 @@ export type TimeStampKey = `${ISODateTimeString}_${BookAbbrev}_${ChapterID}`
 interface SettingsRecord {
   id: '1'
   showCompleted: boolean
-  targetDays?: number
   cutoffDays?: number | null
   cutoffDate?: string | null
   showAllDates?: boolean
+  plans?: ReadingPlan[]
+  activePlanId?: PlanId
+  /** @deprecated pre-multi-plan field, read for migration only */
+  targetDays?: number
+  /** @deprecated pre-multi-plan field, read for migration only */
   perDayTagData?: PerDayTagData[]
 }
 
@@ -162,16 +168,34 @@ export async function getSettingsData(db: IDBDatabase): Promise<SettingsData> {
 
   request.onsuccess = (event) => {
     const result = (event.target as IDBRequest<SettingsRecord>).result
+
+    // Migrate pre-multi-plan records (bare targetDays/perDayTagData) into a single plan.
+    const plans: ReadingPlan[] = result?.plans?.length
+      ? result.plans
+      : [
+          {
+            id: 'default' as PlanId,
+            name: 'My Plan',
+            targetDays: result?.targetDays ?? 365,
+            perDayTagData: result?.perDayTagData ?? [
+              { tags: ['OT' as Tag], count: 3 },
+              { tags: ['NT' as Tag], count: 2 },
+            ],
+          },
+        ]
+
+    const activePlanId =
+      result?.activePlanId && plans.some((p) => p.id === result.activePlanId)
+        ? result.activePlanId
+        : plans[0].id
+
     resolve({
       showCompleted: result?.showCompleted ?? true,
-      targetDays: result?.targetDays ?? 365,
       cutoffDays: result?.cutoffDays ?? null,
       cutoffDate: result?.cutoffDate ?? null,
       showAllDates: result?.showAllDates ?? false,
-      perDayTagData: result?.perDayTagData ?? [
-        { tags: ['OT' as Tag], count: 3 },
-        { tags: ['NT' as Tag], count: 2 },
-      ],
+      plans,
+      activePlanId,
     })
   }
 

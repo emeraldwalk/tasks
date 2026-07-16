@@ -11,6 +11,7 @@ The codebase uses a `Brand<TID, TBase>` pattern to make primitives type-safe at 
 | `ChapterID` | `number` | Chapter number (1-based) |
 | `ISODateTimeString` | `string` | `new Date().toISOString()` output |
 | `Tag` | `string` | Tag name e.g. `"OT"`, `"NT"` |
+| `PlanId` | `string` | Unique id for a `ReadingPlan` (`crypto.randomUUID()`) |
 | `MMDD` | template | `"MM/DD"` display string |
 | `MMDDYYYY` | template | `"MM/DD/YYYY"` display string |
 
@@ -64,29 +65,70 @@ Maps each tag name to the set of books it covers (used to filter chapters for pl
 Record<Tag, Record<BookAbbrev, boolean>>
 ```
 
-Default tags defined in `tags.txt`: `OT` (39 books) and `NT` (27 books).
+Default tags defined in `tags.txt`; see `web/src/data/tags.txt` below for the full built-in list.
 
 ### `PerDayTagData`
-One row in the Plan Settings — which tags and how many chapters of each to read per day.
+One row within a `ReadingPlan` — which tags and how many chapters of each to read per day.
 
 ```ts
 { tags: Tag[], count: number }
 ```
 
-Default initial value (hardcoded in `Api` constructor):
+### `ReadingPlan`
+A named, self-contained reading configuration. Users can define multiple plans; exactly one is active at a time (`SettingsData.activePlanId`). `Api.perDayTagData()` / `Api.targetDays()` and their setters always read/write the **active** plan.
 
 ```ts
-[
-  { tags: ['OT'], count: 3 },
-  { tags: ['NT'], count: 2 },
-]
+{
+  id: PlanId
+  name: string
+  targetDays: number
+  perDayTagData: PerDayTagData[]
+}
+```
+
+Default plan created on first run (id `'default'`, or migrated from a pre-multi-plan record — see below):
+
+```ts
+{
+  id: 'default',
+  name: 'My Plan',
+  targetDays: 365,
+  perDayTagData: [
+    { tags: ['OT'], count: 3 },
+    { tags: ['NT'], count: 2 },
+  ],
+}
 ```
 
 ### `SettingsData`
 
 ```ts
-{ showCompleted: boolean }
+{
+  showCompleted: boolean
+  cutoffDays: number | null
+  cutoffDate: string | null
+  showAllDates: boolean
+  plans: ReadingPlan[]
+  activePlanId: PlanId
+}
 ```
+
+`cutoffDays`/`cutoffDate`/`showAllDates` are global (not per-plan) — they control how far back completed chapters remain visible, independent of which plan is active.
+
+### `ExportFormat`
+Shape written by `Api.exportData()` / read by `Api.importData()` (Settings → Data → Export/Import).
+
+```ts
+{
+  version: 2
+  exportedAt: ISODateTimeString
+  recordCount: number
+  settings: { plans: ReadingPlan[], activePlanId: PlanId }
+  timestamps: TimeStampData[]
+}
+```
+
+`importData()` also accepts `version: 1` files (pre-multi-plan exports, `settings: { perDayTagData: PerDayTagData[] }`) and folds them into the currently active plan rather than replacing the plan list.
 
 ## IndexedDB Schema
 
@@ -104,13 +146,11 @@ Each record represents one reading event. Multiple records for the same chapter 
 
 ### `settings` object store
 
-Key path: `id` (always `"1"` — singleton row)
+Key path: `id` (always `"1"` — singleton row). Shape mirrors `SettingsData` plus two now-unused legacy fields (`targetDays`, `perDayTagData`) read only for migration — see below.
 
-```ts
-{ id: '1', showCompleted: boolean }
-```
+Defaults when no record exists: `showCompleted = true`, `cutoffDays = null`, `cutoffDate = null`, `showAllDates = false`, a single default `ReadingPlan` (above) as the only entry in `plans`.
 
-Default when no record exists: `showCompleted = true`.
+**Migration from pre-multi-plan records**: `getSettingsData()` in `indexDb.ts` checks for a `plans` array on the stored record. If absent (a record written before the multi-plan feature existed), it synthesizes a single `ReadingPlan` named `"My Plan"` from the record's legacy top-level `targetDays`/`perDayTagData` fields (or the hardcoded defaults if those are also absent) and makes it active. The legacy fields are never written again once the record is next saved.
 
 ## Static Data Files
 
@@ -138,4 +178,16 @@ NT,MAT
 ...
 ```
 
-Parsed by `getTagsData()` into a `TagRecord`. Additional tags beyond `OT`/`NT` can be added here to enable custom plan groupings.
+Parsed by `getTagsData()` into a `TagRecord`. Built-in tags: `OT`, `NT`, `Gospels`, `Pentateuch`, `History`, `Wisdom`, `MajorProphets`, `MinorProphets`, `Acts`, `PaulineEpistles`, `GeneralEpistles`, `Revelation`. Additional tags can be added here to enable custom plan groupings.
+
+### `web/src/data/tagDescriptions.txt`
+
+CSV format: `TAG,Description` (only the first comma is a delimiter — the description may contain further commas).
+
+```
+OT,Old Testament — Genesis through Malachi (39 books)
+NT,New Testament — Matthew through Revelation (27 books)
+...
+```
+
+Parsed by `getTagDescriptions()` into a `TagDescriptions` (`Record<Tag, string>`), surfaced in `TagSelector`'s tag picker so users can see what each tag covers before selecting it. A tag without an entry here simply has no description shown.

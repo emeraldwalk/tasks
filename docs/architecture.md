@@ -31,7 +31,10 @@
 | `timeStampMap` | `Accessor<TimeStampMap>` | Nested map of all read timestamps |
 | `showCompleted` | `Accessor<boolean>` | Whether completed chapters are visible |
 | `searchText` | `Accessor<string>` | Current search filter string |
-| `perDayTagData` | `Accessor<PerDayTagData[]>` | Plan settings: tags + chapters-per-day |
+| `plans` | `Accessor<ReadingPlan[]>` | All configured reading plans |
+| `activePlanId` | `Accessor<PlanId>` | Which plan currently drives the reading list |
+
+`perDayTagData()` and `targetDays()` are plain derived getters (not their own signals) that read from `activePlan()` — the plan whose id matches `activePlanId()`. Their setters (`setPerDayTagData`, `setTargetDays`) likewise only ever mutate the active plan; `addPlan`/`renamePlan`/`removePlan`/`setActivePlanId` manage the `plans` list itself. Only one plan is active at a time, and switching which one is active is what changes what `/plan` shows.
 
 ### Api construction sequence
 
@@ -40,7 +43,7 @@ App mounts
   → Api.create() [async]
       → initDb()           opens IndexedDB BibleReadDB v2
       → getTimeStampMap()  loads all timestamps into memory
-      → getSettingsData()  loads showCompleted setting
+      → getSettingsData()  loads settings, migrating pre-multi-plan records into a single plan
       → getChapterData()   parses chapters.txt (sync)
       → getTagsData()      parses tags.txt (sync)
   → ApiProvider wraps AppRouter with resolved Api instance
@@ -53,7 +56,7 @@ App mounts
 Route data computations happen once in `AppRouter`:
 
 - `bookGroups` — `groupByBook(chapters)` — static, computed once
-- `planGroups` — `groupByDay(chapters, tags, OT_NT)` — wrapped in `createMemo`, recomputes when `perDayTagData` changes
+- `planGroups` — `groupByDay(chapters, tags, perDayTagData, targetDays)` — wrapped in `createMemo`, recomputes when the active plan's `perDayTagData`/`targetDays` change (including when `activePlanId` itself changes, since that swaps which plan's data those getters return)
 
 ## Data Flow: Marking a Chapter Read
 
@@ -85,7 +88,7 @@ All persistence is local to the browser via IndexedDB (`BibleReadDB`, version 2)
 | Object Store | Key format | Content |
 |---|---|---|
 | `timestamps` | `ISO_ABBREV_CHAPTER` | One record per read event |
-| `settings` | `"1"` (singleton) | `{ showCompleted: boolean }` |
+| `settings` | `"1"` (singleton) | `SettingsData` — `showCompleted`, cutoff fields, and `plans`/`activePlanId` (see `docs/data-model.md`) |
 
 The full timestamp map is loaded into memory at startup. Writes go to both the in-memory signal and IndexedDB simultaneously. There is no server, no sync, and no conflict resolution.
 
