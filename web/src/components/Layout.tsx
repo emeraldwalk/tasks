@@ -63,11 +63,11 @@ export function Layout(props: RouteSectionProps) {
       </header>
       <main class={styles.main}>{props.children}</main>
       <footer class={styles.tabBar}>
-        <A href="/" end activeClass={styles.activeTab}>
-          <Icon name="book-outline" size="large" />
-        </A>
         <A href="/plan" activeClass={styles.activeTab}>
           <Icon name="list-outline" size="large" />
+        </A>
+        <A href="/" end activeClass={styles.activeTab}>
+          <Icon name="book-outline" size="large" />
         </A>
         <A href="/history" activeClass={styles.activeTab}>
           <Icon name="time-outline" size="large" />

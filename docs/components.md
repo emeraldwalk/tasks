@@ -17,11 +17,12 @@ App
         │   ├── / → ChapterGroupList (Books view)
         │   │         └── ChapterGroup (one per book)
         │   │               └── Chapter (one per chapter)
-        │   ├── /plan → ChapterGroupList (Plan view)
+        │   ├── /plan → PlanToggle (segmented control, hidden if only one plan)
+        │   │           + ChapterGroupList (Plan view)
         │   │             └── ChapterGroup (one per day)
         │   │                   └── Chapter
         │   └── /history → HistoryList
-        └── footer (tab bar: Books | Plan | History)
+        └── footer (tab bar: Plan | Books | History | Settings)
 ```
 
 ## Component Catalog
@@ -36,6 +37,12 @@ Configures routes. Computes two top-level data structures passed as props:
 
 - `bookGroups: Record<BookName, ChapterData[]>` — computed once via `groupByBook`
 - `planGroups: Accessor<Record<string, ChapterData[]>>` — `createMemo` around `groupByDay`; reactive to `api.perDayTagData()`
+
+The `/plan` route renders `PlanToggle` above `ChapterGroupList`.
+
+### `PlanToggle` (`PlanToggle.tsx`)
+
+iOS-style segmented control for switching `api.activePlanId()` — one segment per `api.plans()` entry, tapping calls `api.setActivePlanId`. Renders nothing (`<Show when={api.plans().length > 1}>`) when there's only one plan, since a toggle with a single, permanently-selected option is pointless. Scrolls away with the page content rather than staying pinned — `ChapterGroup`'s own day headers are already `position: sticky; top: 0` inside the same scroll container (`Layout`'s `<main>`), and that component is shared across the Books/Plan/History routes, so pinning the toggle at the same `top: 0` would fight with — and visually sit on top of — the day headers once they reach the top of the scroll area.
 
 ### `Layout` (`Layout.tsx`)
 
