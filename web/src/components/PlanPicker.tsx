@@ -5,15 +5,16 @@ import type { PlanId } from '../data/model'
 import styles from './PlanPicker.module.css'
 
 /**
- * iOS-style "tap the title to switch context" menu — the pattern Mail uses for
- * its inbox picker and Reminders uses for its list picker. Scales to any
- * number of plans, unlike a segmented control which runs out of width fast.
- * Caller is expected to only render this when there's more than one plan.
+ * Secondary "current plan" chip shown above the day list — tapping it opens a
+ * checkmarked dropdown menu to switch plans. Scales to any number of plans,
+ * unlike a segmented control, while — unlike putting the picker in the page
+ * title — leaving the "Plan" title alone as a distinct, secondary control.
+ * Renders nothing when there's only one plan to switch to.
  */
 export function PlanPicker() {
   const api = useApi()
   const [open, setOpen] = createSignal(false)
-  let ref: HTMLSpanElement | undefined
+  let ref: HTMLDivElement | undefined
 
   const close = () => setOpen(false)
 
@@ -31,34 +32,36 @@ export function PlanPicker() {
   }
 
   return (
-    <span class={styles.PlanPicker} ref={ref}>
-      <button
-        type="button"
-        class={styles.trigger}
-        aria-haspopup="menu"
-        aria-expanded={open()}
-        onClick={() => setOpen((o) => !o)}>
-        <span class={styles.triggerLabel}>{api.activePlan().name}</span>
-        <Icon class={styles.chevron} name="chevron-down-sharp" />
-      </button>
-      <Show when={open()}>
-        <ul class={styles.menu} role="menu">
-          <For each={api.plans()}>
-            {(plan) => (
-              <li
-                role="menuitemradio"
-                aria-checked={plan.id === api.activePlanId()}
-                class={styles.menuItem}
-                onClick={onSelect(plan.id)}>
-                <span class={styles.menuItemName}>{plan.name}</span>
-                <Show when={plan.id === api.activePlanId()}>
-                  <Icon name="checkmark-circle" />
-                </Show>
-              </li>
-            )}
-          </For>
-        </ul>
-      </Show>
-    </span>
+    <Show when={api.plans().length > 1}>
+      <div class={styles.PlanPicker} ref={ref}>
+        <button
+          type="button"
+          class={styles.chip}
+          aria-haspopup="menu"
+          aria-expanded={open()}
+          onClick={() => setOpen((o) => !o)}>
+          <span class={styles.chipLabel}>{api.activePlan().name}</span>
+          <Icon class={styles.chevron} name="chevron-down-sharp" />
+        </button>
+        <Show when={open()}>
+          <ul class={styles.menu} role="menu">
+            <For each={api.plans()}>
+              {(plan) => (
+                <li
+                  role="menuitemradio"
+                  aria-checked={plan.id === api.activePlanId()}
+                  class={styles.menuItem}
+                  onClick={onSelect(plan.id)}>
+                  <span class={styles.menuItemName}>{plan.name}</span>
+                  <Show when={plan.id === api.activePlanId()}>
+                    <Icon name="checkmark-circle" />
+                  </Show>
+                </li>
+              )}
+            </For>
+          </ul>
+        </Show>
+      </div>
+    </Show>
   )
 }
