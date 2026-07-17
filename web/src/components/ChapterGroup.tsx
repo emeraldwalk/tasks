@@ -53,6 +53,19 @@ export function ChapterGroup(props: ChapterGroupProps) {
     setChapters(filteredChapters())
   }
 
+  function onHeaderClick() {
+    if (chapters().length === 0) {
+      return
+    }
+    setIsExpanded((prev) => !prev)
+  }
+
+  createEffect(() => {
+    if (chapters().length === 0) {
+      setIsExpanded(false)
+    }
+  })
+
   return (
     <div
       classList={{
@@ -60,11 +73,7 @@ export function ChapterGroup(props: ChapterGroupProps) {
         [styles.isExpanded]: isExpanded(),
         [accordionStyles.isExpanded]: isExpanded(),
       }}>
-      <span
-        class={styles.header}
-        onClick={() => {
-          setIsExpanded((prev) => !prev)
-        }}>
+      <span class={styles.header} onClick={onHeaderClick}>
         <CheckMark state={completionStatus()} />
         <span class={styles.label}>{props.data.name}</span>
         <Show when={completedCount() > 0}>

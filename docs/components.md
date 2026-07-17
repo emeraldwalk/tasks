@@ -52,6 +52,8 @@ Shell shared by all routes. Contains:
 
 iOS-style "tap the title to switch context" menu, the same pattern Mail uses for its inbox picker and Reminders for its list picker — chosen over a segmented control specifically because a segmented control runs out of horizontal room once there are more than a couple of plans. `Layout` only renders it (in place of the plain `<h1>` title text) when `api.plans().length > 1`; the trigger button shows `api.activePlan().name` plus a chevron and, when tapped, opens an absolutely-positioned menu (closed on outside `pointerdown` or on selecting an item) listing every `api.plans()` entry with a checkmark on the active one. Selecting an entry calls `api.setActivePlanId`.
 
+`Layout`'s `.header` is a `1fr auto` grid (title column, then the Completed-checkbox column) and normally lets `.title` span both columns so short static titles (Books/History/Settings/"Plan") stay dead-centered in the full header width — the checkbox sits in its own column but `.title` freely overlaps that space since centered short text never reaches it. `PlanPicker`'s trigger can be much wider (a plan name plus a chevron), so `Layout` adds `styles.titleConstrained` to the `<h1>` only while the picker is showing, confining it to the `1fr` column instead of overlapping the checkbox's column. This is deliberately conditional — the same confinement applied unconditionally would needlessly truncate even short plan names, since it shrinks the box regardless of whether the content actually needs the room (verified: an earlier symmetric-padding attempt truncated even `"My Plan"`).
+
 ### `ChapterGroupList` (`ChapterGroupList.tsx`)
 
 Renders a list of `ChapterGroup` accordions from a `Record<string, ChapterData[]>`.
@@ -73,6 +75,8 @@ State:
 Displays a `CheckMark` with three states: `complete` (all chapters read), `partial` (some read), `incomplete` (none read).
 
 On `onChange` from a child `Chapter`, re-runs `filteredChapters()` to update the list immediately.
+
+The header is only expandable when `chapters().length > 0` — mirrors the same guard `Chapter.tsx` uses for its own date-history accordion (`onExpanderClick`/`dates().length === 0`). This matters when "Completed" is hidden: a group can have all its chapters filtered out (fully read) while still being listed (`ChapterGroupList`'s own group-visibility filter only checks the search text, not completion), so without the guard its header would toggle open to an empty list. A `createEffect` also force-collapses the group if it's expanded and its filtered count drops to 0 (e.g. toggling "Completed" off while a fully-read group is open).
 
 ### `Chapter` (`Chapter.tsx`)
 

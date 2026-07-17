@@ -9,6 +9,7 @@
     border-bottom: 1px solid var(--color-border);
     align-items: center;
     grid-template-columns: 1fr auto;
+    column-gap: 0.75rem;
     padding: calc(20px + env(safe-area-inset-top)) 1rem 20px;
   }
   .title {
@@ -19,6 +20,15 @@
     line-height: 36px;
     margin: 0;
     text-align: center;
+    min-width: 0;
+  }
+  /* When a control shares row 1 with the title (e.g. the plan picker's chevron
+     needs room next to the Completed checkbox), confine the title to the
+     flexible first column instead of overlapping the checkbox's column — a
+     plain short title (Books/History/Settings) never needs this, so it's only
+     applied where there's an actual competing control. */
+  .titleConstrained {
+    grid-column: 1;
   }
   .showCompleted {
     grid-column: 2;
