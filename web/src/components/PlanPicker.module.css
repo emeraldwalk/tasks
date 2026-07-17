@@ -1,7 +1,7 @@
 .PlanPicker {
   position: relative;
-  background-color: var(--color-page);
-  padding: 0.6rem var(--item-padding-h);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .chip {
@@ -39,7 +39,7 @@
 .menu {
   position: absolute;
   top: 100%;
-  left: var(--item-padding-h);
+  left: 0;
   margin-top: 0.4rem;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);

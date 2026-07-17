@@ -11,14 +11,14 @@ App
         ├── header
         │   ├── title (plain text, always — never replaced by route content)
         │   ├── SearchInput
-        │   ├── show-completed checkbox
         │   └── menu icon → PlanSettings (sidebar)
         │       └── TagSelector (one per PerDayTagData entry)
         ├── main (route outlet)
-        │   ├── / → ChapterGroupList (Books view)
+        │   ├── / → ListToolbar (Completed checkbox only)
+        │   │       + ChapterGroupList (Books view)
         │   │         └── ChapterGroup (one per book)
         │   │               └── Chapter (one per chapter)
-        │   ├── /plan → PlanPicker (chip + dropdown, hidden if only one plan)
+        │   ├── /plan → ListToolbar (Completed checkbox + PlanPicker chip)
         │   │           + ChapterGroupList (Plan view)
         │   │             └── ChapterGroup (one per day)
         │   │                   └── Chapter
@@ -39,27 +39,33 @@ Configures routes. Computes two top-level data structures passed as props:
 - `bookGroups: Record<BookName, ChapterData[]>` — computed once via `groupByBook`
 - `planGroups: Accessor<Record<string, ChapterData[]>>` — `createMemo` around `groupByDay`; reactive to `api.perDayTagData()`
 
-The `/plan` route renders `PlanPicker` above `ChapterGroupList`.
+The `/` and `/plan` routes each render `ListToolbar` above `ChapterGroupList` (`/plan` passes `showPlanPicker`). `/history` doesn't get a toolbar — `HistoryList` never reads `api.showCompleted()`, so there'd be nothing for the checkbox to do there.
 
 ### `Layout` (`Layout.tsx`)
 
 Shell shared by all routes. Contains:
 
-- Page title (derived from current path) — always plain generic text ("Plan", "Books", "History", "Settings"); route content never repurposes it, by design (see `PlanPicker` below)
-- Show Completed checkbox (toggles `api.showCompleted`)
+- Page title (derived from current path) — always plain generic text ("Plan", "Books", "History", "Settings"); route content never repurposes it
 - Search input (writes to `api.setSearchText`)
 - Sidebar toggle (shows/hides `PlanSettings`)
 - Tab bar navigation (Plan, Books, History, Settings)
 
+The Completed checkbox used to live here too, styled to sit at the header's top-right. It's now owned by `ListToolbar` instead — see below.
+
+### `ListToolbar` (`ListToolbar.tsx`)
+
+Secondary bar rendered above a chapter list (`background-color: var(--color-page); padding: 0.6rem var(--item-padding-h);`), holding the Completed checkbox and, on `/plan` only (`showPlanPicker` prop), the `PlanPicker` chip. Both moved here from `Layout`'s header — the checkbox to put it in the same container as the plan picker, and to make it easy to show that same bar on the Books view even though Books has no plan to pick. Layout: `display: flex`, `PlanPicker` (if present) on the left, the checkbox pushed to the far right via `margin-left: auto` on `.showCompleted` — that works whether or not `PlanPicker` is rendered, so the checkbox's position doesn't shift between `/` and `/plan`.
+
 ### `PlanPicker` (`PlanPicker.tsx`)
 
-A secondary "current plan" chip rendered above the day list on `/plan` — tapping it opens a checkmarked dropdown menu listing every `api.plans()` entry; selecting one calls `api.setActivePlanId`. Renders nothing (`<Show when={api.plans().length > 1}>`) when there's only one plan.
+A "current plan" chip — tapping it opens a checkmarked dropdown menu listing every `api.plans()` entry; selecting one calls `api.setActivePlanId`. Renders nothing (`<Show when={api.plans().length > 1}>`) when there's only one plan. Rendered inside `ListToolbar`, not standalone — its own stylesheet only owns the chip and its dropdown menu now, not the bar around it.
 
-This went through two other designs first, both rejected on user feedback after being built and tried:
+This went through three designs, each replaced on user feedback after being built and tried:
 1. A segmented control (one button per plan) — doesn't scale, runs out of horizontal room past a couple of plans.
-2. The chip's current name+chevron content shown *in the page title itself* (replacing "Plan" with e.g. "My Plan ▾") — scaled fine, but the user specifically preferred that a plan switcher read as a distinct secondary control rather than take over the static title. (That version also needed `Layout`'s header grid to reserve space so the picker's trigger wouldn't overlap the Completed checkbox — that grid change is reverted along with it.)
+2. The chip's name+chevron shown *in the page title itself* (replacing "Plan" with e.g. "My Plan ▾") — scaled fine, but read as taking over the static title rather than acting as a distinct secondary control, and needed `Layout`'s header grid to reserve space so the trigger wouldn't overlap the Completed checkbox.
+3. The chip in its own full-width bar (mirroring the segmented control's old wrapper), title left alone — the current design. Landing the checkbox in that same bar (rather than the header) was a follow-up refinement, at which point the bar became `ListToolbar` (shared with the Books view) instead of something `PlanPicker` owned outright.
 
-The current design keeps the title untouched and gives the chip its own full-width bar instead (`padding: 0.6rem var(--item-padding-h); background-color: var(--color-page);`, mirroring the segmented control's old wrapper), which incidentally also gives it much more room than either previous design for long plan names before `text-overflow: ellipsis` kicks in, since it isn't sharing a row with the Completed checkbox at all. It scrolls away with the page content rather than staying pinned, for the same reason the segmented control did: `ChapterGroup`'s own day headers are already `position: sticky; top: 0` inside the same scroll container (`Layout`'s `<main>`), and that component is shared across the Books/Plan/History routes, so pinning the chip bar at the same offset would visually collide with the day headers once you scroll.
+The chip's bar scrolls away with the page content rather than staying pinned, for the same reason the segmented control did: `ChapterGroup`'s own day headers are already `position: sticky; top: 0` inside the same scroll container (`Layout`'s `<main>`), and that component is shared across the Books/Plan/History routes, so pinning the toolbar at the same offset would visually collide with the day headers once you scroll.
 
 ### `ChapterGroupList` (`ChapterGroupList.tsx`)
 
@@ -83,7 +89,7 @@ Displays a `CheckMark` with three states: `complete` (all chapters read), `parti
 
 On `onChange` from a child `Chapter`, re-runs `filteredChapters()` to update the list immediately.
 
-The header is only expandable when `chapters().length > 0` — mirrors the same guard `Chapter.tsx` uses for its own date-history accordion (`onExpanderClick`/`dates().length === 0`). This matters when "Completed" is hidden: a group can have all its chapters filtered out (fully read) while still being listed (`ChapterGroupList`'s own group-visibility filter only checks the search text, not completion), so without the guard its header would toggle open to an empty list. A `createEffect` also force-collapses the group if it's expanded and its filtered count drops to 0 (e.g. toggling "Completed" off while a fully-read group is open).
+The header is only expandable when `chapters().length > 0` — mirrors the same guard `Chapter.tsx` uses for its own date-history accordion (`onExpanderClick`/`dates().length === 0`). This matters when "Completed" is hidden: a group can have all its chapters filtered out (fully read) while still being listed (`ChapterGroupList`'s own group-visibility filter only checks the search text, not completion), so without the guard its header would toggle open to an empty list. A `createEffect` also force-collapses the group if it's expanded and its filtered count drops to 0 (e.g. toggling "Completed" off while a fully-read group is open). The chevron gets `styles.chevronDisabled` (`color: var(--color-muted); opacity: 0.4;`) in that same state, so a non-interactive row also looks non-interactive.
 
 ### `Chapter` (`Chapter.tsx`)
 
