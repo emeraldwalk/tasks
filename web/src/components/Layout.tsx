@@ -50,14 +50,6 @@ export function Layout(props: RouteSectionProps) {
       <header class={styles.header}>
         <h1 class={styles.title}>{title()}</h1>
         <Show when={!isSettingsRoute()}>
-          <label class={styles.showCompleted}>
-            <input
-              type="checkbox"
-              checked={api.showCompleted()}
-              onChange={() => api.toggleShowCompleted()}
-            />
-            Completed
-          </label>
           <SearchInput class={styles.search} onSearch={api.setSearchText} />
         </Show>
       </header>

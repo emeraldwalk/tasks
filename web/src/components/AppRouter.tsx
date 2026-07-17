@@ -3,7 +3,7 @@ import { Layout } from './Layout'
 import { ChapterGroupList } from './ChapterGroupList'
 import { HistoryList } from './HistoryList'
 import { PlanSettings } from './PlanSettings'
-import { PlanPicker } from './PlanPicker'
+import { ListToolbar } from './ListToolbar'
 import { getBookNamesMap, getChapterData } from '../utils/dataUtils'
 import { groupByBook, groupByDay } from '../utils/groupUtils'
 import { useApi } from './ApiContext'
@@ -24,14 +24,17 @@ export function AppRouter() {
       <Route
         path="/"
         component={() => (
-          <ChapterGroupList data={bookGroups} sortProgressToTop />
+          <>
+            <ListToolbar />
+            <ChapterGroupList data={bookGroups} sortProgressToTop />
+          </>
         )}
       />
       <Route
         path="/plan"
         component={() => (
           <>
-            <PlanPicker />
+            <ListToolbar showPlanPicker />
             <ChapterGroupList data={planGroups()} />
           </>
         )}

@@ -80,7 +80,13 @@ export function ChapterGroup(props: ChapterGroupProps) {
           <span class={styles.completedCount}>({completedCount()})</span>
         </Show>
         {chapters().length}
-        <Icon class={accordionStyles.icon} name="chevron-down-sharp" />
+        <Icon
+          class={className(
+            accordionStyles.icon,
+            chapters().length === 0 && styles.chevronDisabled,
+          )}
+          name="chevron-down-sharp"
+        />
       </span>
 
       <ol class={className(styles.chapterList, accordionStyles.content)}>
