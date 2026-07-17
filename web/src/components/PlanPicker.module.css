@@ -1,19 +1,21 @@
 .PlanPicker {
   position: relative;
-  display: inline-block;
-  max-width: 100%;
+  background-color: var(--color-page);
+  padding: 0.6rem var(--item-padding-h);
 }
 
-.trigger {
+.chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.4rem;
   max-width: 100%;
-  background: none;
-  border: none;
-  font: inherit;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 500;
   color: inherit;
-  padding: 0;
   cursor: pointer;
 
   &:active {
@@ -21,7 +23,7 @@
   }
 }
 
-.triggerLabel {
+.chipLabel {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -29,28 +31,26 @@
 
 .chevron {
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
+  color: var(--color-muted);
 }
 
 .menu {
   position: absolute;
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-top: 0.6rem;
+  left: var(--item-padding-h);
+  margin-top: 0.4rem;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 10px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   width: max-content;
   min-width: 180px;
   max-width: min(80vw, 320px);
   max-height: 320px;
   overflow-y: auto;
   z-index: 10;
-  color: #1c1c1e;
-  text-align: left;
 }
 
 .menuItem {

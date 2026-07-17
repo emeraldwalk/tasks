@@ -9,7 +9,7 @@ App
 └── AppRouter
     └── Layout (root for all routes)
         ├── header
-        │   ├── title → PlanPicker on /plan when >1 plan exists, else plain text
+        │   ├── title (plain text, always — never replaced by route content)
         │   ├── SearchInput
         │   ├── show-completed checkbox
         │   └── menu icon → PlanSettings (sidebar)
@@ -18,7 +18,8 @@ App
         │   ├── / → ChapterGroupList (Books view)
         │   │         └── ChapterGroup (one per book)
         │   │               └── Chapter (one per chapter)
-        │   ├── /plan → ChapterGroupList (Plan view)
+        │   ├── /plan → PlanPicker (chip + dropdown, hidden if only one plan)
+        │   │           + ChapterGroupList (Plan view)
         │   │             └── ChapterGroup (one per day)
         │   │                   └── Chapter
         │   └── /history → HistoryList
@@ -38,11 +39,13 @@ Configures routes. Computes two top-level data structures passed as props:
 - `bookGroups: Record<BookName, ChapterData[]>` — computed once via `groupByBook`
 - `planGroups: Accessor<Record<string, ChapterData[]>>` — `createMemo` around `groupByDay`; reactive to `api.perDayTagData()`
 
+The `/plan` route renders `PlanPicker` above `ChapterGroupList`.
+
 ### `Layout` (`Layout.tsx`)
 
 Shell shared by all routes. Contains:
 
-- Page title (derived from current path) — on `/plan`, replaced with `PlanPicker` once there's more than one plan to switch between
+- Page title (derived from current path) — always plain generic text ("Plan", "Books", "History", "Settings"); route content never repurposes it, by design (see `PlanPicker` below)
 - Show Completed checkbox (toggles `api.showCompleted`)
 - Search input (writes to `api.setSearchText`)
 - Sidebar toggle (shows/hides `PlanSettings`)
@@ -50,9 +53,13 @@ Shell shared by all routes. Contains:
 
 ### `PlanPicker` (`PlanPicker.tsx`)
 
-iOS-style "tap the title to switch context" menu, the same pattern Mail uses for its inbox picker and Reminders for its list picker — chosen over a segmented control specifically because a segmented control runs out of horizontal room once there are more than a couple of plans. `Layout` only renders it (in place of the plain `<h1>` title text) when `api.plans().length > 1`; the trigger button shows `api.activePlan().name` plus a chevron and, when tapped, opens an absolutely-positioned menu (closed on outside `pointerdown` or on selecting an item) listing every `api.plans()` entry with a checkmark on the active one. Selecting an entry calls `api.setActivePlanId`.
+A secondary "current plan" chip rendered above the day list on `/plan` — tapping it opens a checkmarked dropdown menu listing every `api.plans()` entry; selecting one calls `api.setActivePlanId`. Renders nothing (`<Show when={api.plans().length > 1}>`) when there's only one plan.
 
-`Layout`'s `.header` is a `1fr auto` grid (title column, then the Completed-checkbox column) and normally lets `.title` span both columns so short static titles (Books/History/Settings/"Plan") stay dead-centered in the full header width — the checkbox sits in its own column but `.title` freely overlaps that space since centered short text never reaches it. `PlanPicker`'s trigger can be much wider (a plan name plus a chevron), so `Layout` adds `styles.titleConstrained` to the `<h1>` only while the picker is showing, confining it to the `1fr` column instead of overlapping the checkbox's column. This is deliberately conditional — the same confinement applied unconditionally would needlessly truncate even short plan names, since it shrinks the box regardless of whether the content actually needs the room (verified: an earlier symmetric-padding attempt truncated even `"My Plan"`).
+This went through two other designs first, both rejected on user feedback after being built and tried:
+1. A segmented control (one button per plan) — doesn't scale, runs out of horizontal room past a couple of plans.
+2. The chip's current name+chevron content shown *in the page title itself* (replacing "Plan" with e.g. "My Plan ▾") — scaled fine, but the user specifically preferred that a plan switcher read as a distinct secondary control rather than take over the static title. (That version also needed `Layout`'s header grid to reserve space so the picker's trigger wouldn't overlap the Completed checkbox — that grid change is reverted along with it.)
+
+The current design keeps the title untouched and gives the chip its own full-width bar instead (`padding: 0.6rem var(--item-padding-h); background-color: var(--color-page);`, mirroring the segmented control's old wrapper), which incidentally also gives it much more room than either previous design for long plan names before `text-overflow: ellipsis` kicks in, since it isn't sharing a row with the Completed checkbox at all. It scrolls away with the page content rather than staying pinned, for the same reason the segmented control did: `ChapterGroup`'s own day headers are already `position: sticky; top: 0` inside the same scroll container (`Layout`'s `<main>`), and that component is shared across the Books/Plan/History routes, so pinning the chip bar at the same offset would visually collide with the day headers once you scroll.
 
 ### `ChapterGroupList` (`ChapterGroupList.tsx`)
 
