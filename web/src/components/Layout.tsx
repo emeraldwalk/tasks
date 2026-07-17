@@ -5,6 +5,7 @@ import styles from './Layout.module.css'
 import { A, type RouteSectionProps } from '@solidjs/router'
 import { Icon } from './Icon'
 import { PlanPicker } from './PlanPicker'
+import { className } from '../utils/cssUtils'
 
 const isIosSafari =
   /iP(hone|ad|od)/.test(navigator.userAgent) &&
@@ -51,7 +52,7 @@ export function Layout(props: RouteSectionProps) {
         </div>
       </Show>
       <header class={styles.header}>
-        <h1 class={styles.title}>
+        <h1 class={className(styles.title, showPlanPicker() && styles.titleConstrained)}>
           <Show when={showPlanPicker()} fallback={title()}>
             <PlanPicker />
           </Show>
